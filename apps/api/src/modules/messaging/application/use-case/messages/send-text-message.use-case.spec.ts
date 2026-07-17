@@ -11,12 +11,16 @@ import {
 } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
+const ACCOUNT_A = "account-a";
+const ACCOUNT_B = "account-b";
+
 const setup = async () => {
   const devices = new InMemoryDevicesRepository();
   const outbox = new InMemoryOutboxRepository();
   const gateway = new FakeWhatsAppGateway();
   const config = mockAppConfig({ OUTBOX_TTL_HOURS: 24 });
   const device: Device = await devices.create({
+    accountId: ACCOUNT_A,
     name: "d",
     webhookUrl: null,
     webhookSecret: "s",
@@ -31,6 +35,7 @@ describe("SendTextMessageUseCase", () => {
     const { sut, device } = await setup();
 
     const out = await sut.execute({
+      accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548999999999",
       text: "oi",
@@ -45,6 +50,7 @@ describe("SendTextMessageUseCase", () => {
     const { sut } = await setup();
     await expect(
       sut.execute({
+        accountId: ACCOUNT_A,
         deviceId: "nope",
         phone: "5548",
         text: "oi",
@@ -53,11 +59,25 @@ describe("SendTextMessageUseCase", () => {
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
+  it("throws DEVICE_NOT_FOUND for a device owned by another account (R3)", async () => {
+    const { sut, device } = await setup();
+    await expect(
+      sut.execute({
+        accountId: ACCOUNT_B,
+        deviceId: device.id,
+        phone: "5548",
+        text: "oi",
+        idempotencyKey: "k",
+      }),
+    ).rejects.toMatchObject({ code: ErrorCodes.DEVICE_NOT_FOUND });
+  });
+
   it("throws DEVICE_OFFLINE when the socket is not connected (no queue)", async () => {
     const { sut, device, gateway } = await setup();
     gateway.setConnected(device.id, false);
 
     const promise = sut.execute({
+      accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548",
       text: "oi",
@@ -72,12 +92,14 @@ describe("SendTextMessageUseCase", () => {
   it("replays the original on same key + same text (idempotent)", async () => {
     const { sut, device } = await setup();
     const first = await sut.execute({
+      accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548",
       text: "oi",
       idempotencyKey: "k",
     });
     const second = await sut.execute({
+      accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548",
       text: "oi",
@@ -90,6 +112,7 @@ describe("SendTextMessageUseCase", () => {
   it("throws IDEMPOTENCY_KEY_CONFLICT on same key + different text", async () => {
     const { sut, device } = await setup();
     await sut.execute({
+      accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548",
       text: "oi",
@@ -97,6 +120,7 @@ describe("SendTextMessageUseCase", () => {
     });
 
     const promise = sut.execute({
+      accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548",
       text: "MUDOU",
@@ -113,6 +137,7 @@ describe("SendTextMessageUseCase", () => {
     gateway.setJid("000", null);
 
     const promise = sut.execute({
+      accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "000",
       text: "oi",
@@ -132,6 +157,7 @@ describe("SendTextMessageUseCase", () => {
 
     await expect(
       sut.execute({
+        accountId: ACCOUNT_A,
         deviceId: device.id,
         phone: "5548",
         text: "oi",

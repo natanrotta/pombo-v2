@@ -21,7 +21,8 @@ export async function getGatewayHealth(): Promise<GatewayHealth | null> {
   const devicesRepository = container.resolve<IDevicesRepository>(
     DI_TOKENS.DevicesRepository,
   );
-  const devices = await devicesRepository.list();
+  // System probe — aggregates devices across every account (not tenant-scoped).
+  const devices = await devicesRepository.listAll();
   const connected = devices.filter(
     (device) => device.status === "CONNECTED",
   ).length;

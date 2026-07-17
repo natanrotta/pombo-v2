@@ -39,6 +39,8 @@ async function main(): Promise<void> {
       status: "ACTIVE",
       email_verified: true,
       language: "pt-BR",
+      // Every user belongs to a tenant account (BASELINE R1). MVP is 1:1.
+      account: { create: { name: "Demo User" } },
     },
   });
 

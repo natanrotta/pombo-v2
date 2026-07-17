@@ -1,16 +1,25 @@
-import { prisma } from "@core/database/prisma/prisma-client";
 import { executeSignUpTransaction } from "./user-signup.transaction";
 import type { SignUpTransactionData } from "@modules/user/domain/repository/user-repository.interface";
 
-vi.mock("@core/database/prisma/prisma-client", () => ({
-  prisma: { user: { create: vi.fn() } },
+// The transaction creates the account and the user atomically. Mock the tx
+// client the `$transaction` callback receives, exposing both create calls.
+const { txMock } = vi.hoisted(() => ({
+  txMock: {
+    account: { create: vi.fn() },
+    user: { create: vi.fn() },
+  },
 }));
 
-const prismaMock = vi.mocked(prisma, true);
+vi.mock("@core/database/prisma/prisma-client", () => ({
+  prisma: {
+    $transaction: vi.fn((cb: (tx: typeof txMock) => unknown) => cb(txMock)),
+  },
+}));
 
 function userRow(over: Record<string, unknown> = {}) {
   return {
     id: "user-1",
+    account_id: "account-1",
     name: "Dra. Ana",
     email: "ana@example.com",
     password: "hashed",
@@ -44,22 +53,39 @@ const data: SignUpTransactionData = {
 describe("executeSignUpTransaction", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("creates only the user row and returns the hydrated entity", async () => {
-    (prismaMock.user.create as ReturnType<typeof vi.fn>).mockResolvedValue(
-      userRow(),
-    );
+  it("creates the account + user in one transaction and returns the hydrated entity", async () => {
+    txMock.account.create.mockResolvedValue({
+      id: "account-1",
+      name: "Dra. Ana",
+    });
+    txMock.user.create.mockResolvedValue(userRow());
 
     const result = await executeSignUpTransaction(data);
 
-    expect(prismaMock.user.create).toHaveBeenCalledTimes(1);
+    expect(txMock.account.create).toHaveBeenCalledTimes(1);
+    expect(txMock.user.create).toHaveBeenCalledTimes(1);
+    // The user row is linked to the account created in the same transaction.
+    expect(txMock.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ account_id: "account-1" }),
+      }),
+    );
     expect(result.user.id).toBe("user-1");
+    expect(result.user.accountId).toBe("account-1");
     expect(result.user.email).toBe("ana@example.com");
   });
 
-  it("maps a create failure (e.g. duplicate email) through mapPrismaError", async () => {
-    (prismaMock.user.create as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error("unique constraint"),
-    );
-    await expect(executeSignUpTransaction(data)).rejects.toBeInstanceOf(Error);
+  it("maps a create failure through mapPrismaError (returns a typed AppError, not the raw error)", async () => {
+    txMock.account.create.mockResolvedValue({
+      id: "account-1",
+      name: "Dra. Ana",
+    });
+    txMock.user.create.mockRejectedValue(new Error("unique constraint"));
+
+    // A raw Error carries no `code`; a mapped AppError does — asserting the
+    // code proves the failure went through mapPrismaError rather than leaking.
+    await expect(executeSignUpTransaction(data)).rejects.toMatchObject({
+      code: expect.any(String),
+    });
   });
 });

@@ -43,11 +43,60 @@ enum message_status {
 }
 
 // ============================================================
+// ACCOUNT (tenancy root — pombo)
+// ============================================================
+
+/// The tenant boundary. One account owns N users, N devices and its API
+/// tokens; every owned table scopes by `account_id` (BASELINE R1). MVP: signup
+/// creates one account per user (1:1), but the model already supports many
+/// users per account — team management is a future evolution.
+model account {
+  id         String    @id @default(uuid())
+  name       String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  users      user[]
+  devices    device[]
+  api_tokens api_token[]
+
+  @@map("account")
+}
+
+// ============================================================
+// API TOKEN (public API credential — pombo)
+// ============================================================
+
+/// A long-lived credential for the public `/api/v1` surface, distinct from the
+/// login JWT. Only the SHA-256 `token_hash` is stored — the raw `pmb_…` token
+/// is shown exactly once at generation. Invariant: at most one active
+/// (`revoked_at IS NULL`) token per account; generating a new one revokes the
+/// previous in the same transaction. `token_prefix` is the display-safe
+/// fragment (`pmb_…` + last chars), never the secret.
+model api_token {
+  id                 String    @id @default(uuid())
+  account_id         String
+  token_hash         String    @unique
+  token_prefix       String
+  created_by_user_id String
+  last_used_at       DateTime?
+  revoked_at         DateTime?
+  created_at         DateTime  @default(now())
+
+  account account @relation(fields: [account_id], references: [id], onDelete: Cascade)
+
+  @@index([account_id])
+  @@map("api_token")
+}
+
+// ============================================================
 // USER
 // ============================================================
 
 model user {
   id                       String      @id @default(uuid())
+  account_id               String
   name                     String
   email                    String      @unique
   /// Nullable: Google-only users authenticate via `google_id` and never set
@@ -69,9 +118,11 @@ model user {
   updated_at               DateTime    @updatedAt
   deleted_at               DateTime?
 
+  account                 account                  @relation(fields: [account_id], references: [id], onDelete: Cascade)
   password_reset_tokens   password_reset_token[]
   email_verification_pins email_verification_pin[]
 
+  @@index([account_id])
   @@map("user")
 }
 
@@ -121,13 +172,14 @@ model email_verification_pin {
 // DEVICE (WhatsApp Gateway)
 // ============================================================
 
-/// A registered WhatsApp device (single-operator admin surface — JWT-gated,
-/// not per-user owner-scoped). `identifier` (the paired WhatsApp number) is
-/// null until pairing — WhatsApp is the source of truth for it. The
-/// `webhook_secret` is generated at registration and returned exactly once.
+/// A registered WhatsApp device, scoped to its owning `account` (BASELINE R1).
+/// `identifier` (the paired WhatsApp number) is null until pairing — WhatsApp
+/// is the source of truth for it. The `webhook_secret` is generated at
+/// registration and returned exactly once.
 model device {
   id                String        @id @default(uuid())
-  name              String        @unique
+  account_id        String
+  name              String
   identifier        String?
   status            device_status @default(DISCONNECTED)
   webhook_url       String?
@@ -136,9 +188,13 @@ model device {
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
-  auth_keys        auth_key[]
-  outbox_messages  outbox_message[]
+  account         account          @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  auth_keys       auth_key[]
+  outbox_messages outbox_message[]
 
+  // Device names are unique per account, not globally (multi-tenancy).
+  @@unique([account_id, name])
+  @@index([account_id])
   @@index([status])
   @@map("device")
 }

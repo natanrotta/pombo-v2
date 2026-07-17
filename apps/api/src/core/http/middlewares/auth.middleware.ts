@@ -84,6 +84,7 @@ export function authMiddleware(options: { allowScopes?: string[] } = {}) {
 
       req.auth = {
         userId: payload.userId,
+        accountId: user.accountId,
         language: user.language,
         scope: payload.scope,
       };

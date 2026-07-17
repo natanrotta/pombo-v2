@@ -15,6 +15,7 @@ function mockReqRes(overrides: Partial<Request> = {}) {
     body: {},
     params: {},
     headers: {},
+    auth: { userId: "u-1", accountId: "acc-1", language: "pt-BR" },
     ...overrides,
   } as unknown as Request;
   const json = vi.fn();
@@ -61,7 +62,7 @@ describe("DeviceController", () => {
 
     await controller.getById(req, res);
 
-    expect(mockExecute).toHaveBeenCalledWith("d1");
+    expect(mockExecute).toHaveBeenCalledWith("acc-1", "d1");
     expect(status).toHaveBeenCalledWith(200);
   });
 
@@ -84,7 +85,7 @@ describe("DeviceController", () => {
 
     await controller.remove(req, res);
 
-    expect(mockExecute).toHaveBeenCalledWith("d1");
+    expect(mockExecute).toHaveBeenCalledWith("acc-1", "d1");
     expect(status).toHaveBeenCalledWith(204);
     expect(send).toHaveBeenCalled();
   });

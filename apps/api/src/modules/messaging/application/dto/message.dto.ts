@@ -17,9 +17,11 @@ export type SendMessageDTO = z.infer<typeof SendMessageDTOSchema>;
 export type SendMessageParam = z.infer<typeof SendMessageParamSchema>;
 export type MessageIdParam = z.infer<typeof MessageIdParamSchema>;
 
-/** Input carried into the send use case (device id + idempotency key added by
- *  the controller from the route + header). */
+/** Input carried into the send use case. `accountId` (tenant scope) + device id
+ *  + idempotency key are added by the controller from `req.auth`, the route and
+ *  the header. */
 export interface SendTextInput {
+  accountId: string;
   deviceId: string;
   phone: string;
   text: string;

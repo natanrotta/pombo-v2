@@ -128,6 +128,8 @@
   "IDEMPOTENCY_KEY_CONFLICT": "This Idempotency-Key was already used with a different payload",
   "NUMBER_NOT_ON_WHATSAPP": "This number is not on WhatsApp",
   "WA_GATEWAY_DISABLED": "The WhatsApp integration is disabled in this environment",
+  "API_TOKEN_MISSING": "Missing API token",
+  "API_TOKEN_INVALID": "Invalid API token",
   "TRANSCRIPTION_SESSION_NOT_FOUND": "Transcription session not found",
   "TRANSCRIPTION_SESSION_ACTIVE": "An active transcription session already exists for this consultation",
   "TRANSCRIPTION_SESSION_NOT_RECORDING": "Transcription session is not accepting new chunks",

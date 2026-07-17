@@ -128,6 +128,8 @@
   "IDEMPOTENCY_KEY_CONFLICT": "Esta Idempotency-Key ya fue usada con un contenido diferente",
   "NUMBER_NOT_ON_WHATSAPP": "Este número no tiene WhatsApp",
   "WA_GATEWAY_DISABLED": "La integración con WhatsApp está desactivada en este entorno",
+  "API_TOKEN_MISSING": "Falta el token de API",
+  "API_TOKEN_INVALID": "Token de API inválido",
   "TRANSCRIPTION_SESSION_NOT_FOUND": "Sesión de transcripción no encontrada",
   "TRANSCRIPTION_SESSION_ACTIVE": "Ya existe una sesión de transcripción activa para esta consulta",
   "TRANSCRIPTION_SESSION_NOT_RECORDING": "La sesión de transcripción no está aceptando nuevos fragmentos",

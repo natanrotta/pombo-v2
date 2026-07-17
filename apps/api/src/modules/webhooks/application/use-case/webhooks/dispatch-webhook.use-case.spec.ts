@@ -6,6 +6,7 @@ describe("DispatchWebhookUseCase", () => {
   it("is a no-op when the device has no webhookUrl (webhooks are opt-in)", async () => {
     const devices = new InMemoryDevicesRepository();
     const device = await devices.create({
+      accountId: "account-a",
       name: "d",
       webhookUrl: null,
       webhookSecret: "s",
@@ -37,6 +38,7 @@ describe("DispatchWebhookUseCase", () => {
   it("sends with the device url + per-device secret and stamps eventId/timestamp", async () => {
     const devices = new InMemoryDevicesRepository();
     const device = await devices.create({
+      accountId: "account-a",
       name: "d",
       webhookUrl: "http://hook",
       webhookSecret: "sekret",

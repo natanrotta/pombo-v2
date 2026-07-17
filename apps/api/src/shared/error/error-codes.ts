@@ -328,6 +328,13 @@ export const ErrorCodes = {
    *  disabled at boot, so there is no socket to open. */
   WA_GATEWAY_DISABLED: "WA_GATEWAY_DISABLED",
 
+  // WhatsApp Gateway (pombo) — public API auth (Authorization: Bearer pmb_…)
+  /** No `Authorization: Bearer` API token on a public `/api/v1` route. */
+  API_TOKEN_MISSING: "API_TOKEN_MISSING",
+  /** The presented API token is unknown OR revoked — the two are intentionally
+   *  indistinguishable to the caller. */
+  API_TOKEN_INVALID: "API_TOKEN_INVALID",
+
   // Mail
   MAIL_SEND_FAILED: "MAIL_SEND_FAILED",
 

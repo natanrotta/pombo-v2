@@ -15,6 +15,9 @@ export const DI_TOKENS = {
   PasswordResetTokenRepository: "PasswordResetTokenRepository",
   EmailVerificationPinRepository: "EmailVerificationPinRepository",
 
+  // Account (tenancy + public-API credential)
+  ApiTokenRepository: "ApiTokenRepository",
+
   // WhatsApp Gateway (pombo)
   DevicesRepository: "DevicesRepository",
   AuthStateRepository: "AuthStateRepository",

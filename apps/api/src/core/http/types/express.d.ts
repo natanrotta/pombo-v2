@@ -6,11 +6,12 @@ declare global {
       log: Logger;
       locale: string;
       /**
-       * Session auth context, set by `authMiddleware()`. Single-user
-       * pombo: bound to a `userId` only.
+       * Session auth context, set by `authMiddleware()`. Carries the user and
+       * the tenant (`accountId`) every owned-resource query scopes by (R1).
        */
       auth: {
         userId: string;
+        accountId: string;
         language: string;
         /**
          * Capability scope when the request was authenticated with a

@@ -38,7 +38,10 @@ export class SendTextMessageUseCase {
   ) {}
 
   async execute(input: SendTextInput): Promise<SendTextOutput> {
-    const device = await this.devicesRepository.findById(input.deviceId);
+    const device = await this.devicesRepository.findById(
+      input.accountId,
+      input.deviceId,
+    );
     if (!device) {
       throw new NotFoundError(
         "Device not found",

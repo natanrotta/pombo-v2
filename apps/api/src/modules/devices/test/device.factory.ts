@@ -9,6 +9,7 @@ export function makeDevice(overrides: Partial<DeviceProps> = {}): Device {
   seq++;
   return new Device({
     id: `device-${seq}`,
+    accountId: `account-${seq}`,
     name: `device-${seq}`,
     identifier: null,
     status: "DISCONNECTED",

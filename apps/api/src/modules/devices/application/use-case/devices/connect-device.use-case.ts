@@ -27,8 +27,8 @@ export class ConnectDeviceUseCase {
     private readonly gateway: IWhatsAppGateway,
   ) {}
 
-  async execute(id: string): Promise<ConnectDeviceResponse> {
-    const device = await this.devicesRepository.findById(id);
+  async execute(accountId: string, id: string): Promise<ConnectDeviceResponse> {
+    const device = await this.devicesRepository.findById(accountId, id);
     if (!device) {
       throw new NotFoundError(
         "Device not found",

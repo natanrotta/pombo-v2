@@ -2,6 +2,8 @@ import { type UserStatusType } from "@shared/type/enums";
 
 export interface UserProps {
   id: string;
+  /** The tenant this user belongs to (BASELINE R1). Set at signup. */
+  accountId: string;
   name: string;
   email: string;
   /** Nullable for Google-only users, who authenticate via `googleId`. */
@@ -34,6 +36,10 @@ export class User {
 
   get id(): string {
     return this.props.id;
+  }
+
+  get accountId(): string {
+    return this.props.accountId;
   }
 
   get name(): string {

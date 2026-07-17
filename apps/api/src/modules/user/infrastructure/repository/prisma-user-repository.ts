@@ -10,7 +10,10 @@ import {
 } from "@modules/user/domain/repository/user-repository.interface";
 import { prisma } from "@core/database/prisma/prisma-client";
 import { mapPrismaError } from "@core/database/prisma/prisma-error-mapper";
-import { executeSignUpTransaction } from "./user-signup.transaction";
+import {
+  executeSignUpTransaction,
+  provisionAccountForUser,
+} from "./user-signup.transaction";
 import { user as PrismaUser } from "@generated/prisma/client";
 import type { UserStatusType } from "@shared/type/enums";
 
@@ -19,6 +22,7 @@ export class PrismaUserRepository implements IUserRepository {
   private toEntity(data: PrismaUser): User {
     return new User({
       id: data.id,
+      accountId: data.account_id,
       name: data.name,
       email: data.email,
       password: data.password,
@@ -100,13 +104,19 @@ export class PrismaUserRepository implements IUserRepository {
 
   async create(data: CreateUserData): Promise<User> {
     try {
-      const user = await prisma.user.create({
-        data: {
-          name: data.name,
-          email: data.email,
-          password: data.password ?? null,
-          status: data.status as "ACTIVE" | "PENDING" | undefined,
-        },
+      // Every user belongs to an account (BASELINE R1). MVP is 1:1 — this
+      // admin-create path shares the account provisioning with signup.
+      const user = await prisma.$transaction(async (tx) => {
+        const accountId = await provisionAccountForUser(tx, data.name);
+        return tx.user.create({
+          data: {
+            account_id: accountId,
+            name: data.name,
+            email: data.email,
+            password: data.password ?? null,
+            status: data.status as "ACTIVE" | "PENDING" | undefined,
+          },
+        });
       });
       return this.toEntity(user);
     } catch (error) {

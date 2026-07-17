@@ -2,6 +2,8 @@ import { type DeviceStatus } from "../value-object/device-status";
 
 export interface DeviceProps {
   id: string;
+  /** The tenant that owns this device (BASELINE R1). */
+  accountId: string;
   name: string;
   /** null until pairing — WhatsApp is the source of truth for it. */
   identifier: string | null;
@@ -23,6 +25,10 @@ export class Device {
 
   get id(): string {
     return this.props.id;
+  }
+
+  get accountId(): string {
+    return this.props.accountId;
   }
 
   get name(): string {

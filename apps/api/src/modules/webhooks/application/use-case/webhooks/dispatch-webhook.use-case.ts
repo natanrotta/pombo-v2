@@ -25,8 +25,14 @@ export class DispatchWebhookUseCase {
   ) {}
 
   async execute(payload: WebhookPayload): Promise<void> {
-    const device = await this.devicesRepository.findById(payload.deviceId);
+    // Event-driven (session / message-status), so there is no requesting
+    // account — resolve the device by id through the internal lookup.
+    const device = await this.devicesRepository.findByIdInternal(
+      payload.deviceId,
+    );
     // No endpoint (or no secret to sign with) — nothing to deliver.
+    // TODO(PR2): resolve the URL per event type from the five per-event columns
+    // (PLANO-DISPOSITIVOS-API.md §7.4) instead of the single webhookUrl.
     if (!device?.webhookUrl || !device.webhookSecret) return;
 
     const event: WebhookEvent = {

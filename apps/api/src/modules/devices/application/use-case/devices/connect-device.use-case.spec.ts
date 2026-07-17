@@ -5,6 +5,9 @@ import { FakeWhatsAppGateway } from "@modules/devices/test/fake-whatsapp.gateway
 import { ConflictError, NotFoundError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
+const ACCOUNT_A = "account-a";
+const ACCOUNT_B = "account-b";
+
 describe("ConnectDeviceUseCase", () => {
   let devices: InMemoryDevicesRepository;
   let gateway: FakeWhatsAppGateway;
@@ -15,12 +18,15 @@ describe("ConnectDeviceUseCase", () => {
   });
 
   const register = (name = "phone") =>
-    new RegisterDeviceUseCase(devices).execute({ name });
+    new RegisterDeviceUseCase(devices).execute(ACCOUNT_A, { name });
 
   it("starts a connection and marks the device CONNECTING", async () => {
     const { id } = await register();
 
-    const out = await new ConnectDeviceUseCase(devices, gateway).execute(id);
+    const out = await new ConnectDeviceUseCase(devices, gateway).execute(
+      ACCOUNT_A,
+      id,
+    );
 
     expect(out.status).toBe("CONNECTING");
     expect(gateway.connectCalls).toContain(id);
@@ -28,10 +34,22 @@ describe("ConnectDeviceUseCase", () => {
 
   it("throws DEVICE_NOT_FOUND for an unknown device", async () => {
     const sut = new ConnectDeviceUseCase(devices, gateway);
-    await expect(sut.execute("nope")).rejects.toBeInstanceOf(NotFoundError);
-    await expect(sut.execute("nope")).rejects.toMatchObject({
+    await expect(sut.execute(ACCOUNT_A, "nope")).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
+    await expect(sut.execute(ACCOUNT_A, "nope")).rejects.toMatchObject({
       code: ErrorCodes.DEVICE_NOT_FOUND,
     });
+  });
+
+  it("throws DEVICE_NOT_FOUND for a device owned by another account (R3)", async () => {
+    const { id } = await register();
+    const sut = new ConnectDeviceUseCase(devices, gateway);
+
+    await expect(sut.execute(ACCOUNT_B, id)).rejects.toMatchObject({
+      code: ErrorCodes.DEVICE_NOT_FOUND,
+    });
+    expect(gateway.connectCalls).not.toContain(id);
   });
 
   it("throws WA_GATEWAY_DISABLED when the gateway is disabled", async () => {
@@ -39,8 +57,10 @@ describe("ConnectDeviceUseCase", () => {
     gateway.setEnabled(false);
     const sut = new ConnectDeviceUseCase(devices, gateway);
 
-    await expect(sut.execute(id)).rejects.toBeInstanceOf(ConflictError);
-    await expect(sut.execute(id)).rejects.toMatchObject({
+    await expect(sut.execute(ACCOUNT_A, id)).rejects.toBeInstanceOf(
+      ConflictError,
+    );
+    await expect(sut.execute(ACCOUNT_A, id)).rejects.toMatchObject({
       code: ErrorCodes.WA_GATEWAY_DISABLED,
     });
     expect(gateway.connectCalls).not.toContain(id);
@@ -51,8 +71,10 @@ describe("ConnectDeviceUseCase", () => {
     gateway.setConnected(id, true);
     const sut = new ConnectDeviceUseCase(devices, gateway);
 
-    await expect(sut.execute(id)).rejects.toBeInstanceOf(ConflictError);
-    await expect(sut.execute(id)).rejects.toMatchObject({
+    await expect(sut.execute(ACCOUNT_A, id)).rejects.toBeInstanceOf(
+      ConflictError,
+    );
+    await expect(sut.execute(ACCOUNT_A, id)).rejects.toMatchObject({
       code: ErrorCodes.DEVICE_ALREADY_CONNECTED,
     });
   });
@@ -62,7 +84,7 @@ describe("ConnectDeviceUseCase", () => {
     await devices.updateStatus(id, "CONNECTED");
     const sut = new ConnectDeviceUseCase(devices, gateway);
 
-    await expect(sut.execute(id)).rejects.toMatchObject({
+    await expect(sut.execute(ACCOUNT_A, id)).rejects.toMatchObject({
       code: ErrorCodes.DEVICE_ALREADY_CONNECTED,
     });
   });

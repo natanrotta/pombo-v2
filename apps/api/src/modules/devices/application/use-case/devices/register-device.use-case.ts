@@ -21,8 +21,14 @@ export class RegisterDeviceUseCase {
     private readonly devicesRepository: IDevicesRepository,
   ) {}
 
-  async execute(data: RegisterDeviceDTO): Promise<RegisterDeviceResponseDTO> {
-    const existing = await this.devicesRepository.findByName(data.name);
+  async execute(
+    accountId: string,
+    data: RegisterDeviceDTO,
+  ): Promise<RegisterDeviceResponseDTO> {
+    const existing = await this.devicesRepository.findByName(
+      accountId,
+      data.name,
+    );
     if (existing) {
       throw new ConflictError(
         "A device with this name already exists",
@@ -33,6 +39,7 @@ export class RegisterDeviceUseCase {
 
     const webhookSecret = randomBytes(32).toString("hex");
     const device = await this.devicesRepository.create({
+      accountId,
       name: data.name,
       webhookUrl: data.webhookUrl ?? null,
       webhookSecret,

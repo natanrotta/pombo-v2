@@ -26,6 +26,7 @@ export class MessageController {
 
     const useCase = container.resolve(SendTextMessageUseCase);
     const result = await useCase.execute({
+      accountId: req.auth.accountId,
       deviceId: id,
       phone: req.body.phone,
       text: req.body.text,
@@ -37,7 +38,7 @@ export class MessageController {
   async getStatus(req: Request, res: Response): Promise<Response> {
     const { id } = req.params as { id: string };
     const useCase = container.resolve(GetMessageStatusUseCase);
-    const result = await useCase.execute(id);
+    const result = await useCase.execute(req.auth.accountId, id);
     return res.status(200).json({ ok: true, data: result });
   }
 }

@@ -1,0 +1,48 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2022",
+    "lib": ["ES2022"],
+
+    /* Modules */
+    "module": "node16",
+    "moduleResolution": "node16",
+    "rootDir": "./src",
+    "paths": {
+      "@modules/*": ["./src/modules/*"],
+      "@core/*": ["./src/core/*"],
+      "@test/*": ["./src/test/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@generated/*": ["./src/generated/*"]
+    },
+
+    /* Emit */
+    "outDir": "./dist",
+    "sourceMap": true,
+    "removeComments": true,
+
+    /* Interop Constraints */
+    "allowSyntheticDefaultImports": true,
+
+    /* Type Checking */
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    /* Decorators - Required for tsyringe DI */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Completeness */
+    "declaration": true,
+
+    /* Test types */
+    "types": ["vitest/globals"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

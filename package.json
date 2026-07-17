@@ -1,0 +1,67 @@
+{
+  "name": "boilerplate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Boilerplate - Monorepo",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "workspaces": {
+    "packages": [
+      "apps/api",
+      "apps/web",
+      "packages/*"
+    ],
+    "nohoist": [
+      "@boilerplate/api/@prisma/**",
+      "@boilerplate/api/@prisma/**/**",
+      "@boilerplate/api/prisma",
+      "@boilerplate/api/prisma/**"
+    ]
+  },
+  "scripts": {
+    "services:up": "docker-compose -f docker-compose.local.yml up -d db redis",
+    "backend:up": "yarn services:up && turbo run dev --filter=@boilerplate/api",
+    "backend:up-d": "yarn services:up && (kill -9 $(lsof -ti tcp:3333) 2>/dev/null || true) && (turbo run dev --filter=@boilerplate/api > /tmp/boilerplate-api.log 2>&1 &) && echo 'backend detached on :3333 — logs: tail -f /tmp/boilerplate-api.log · stop: yarn backend:down'",
+    "backend:down": "(kill -9 $(lsof -ti tcp:3333) 2>/dev/null || true) && (pkill -f 'tsx watch src/main.ts' 2>/dev/null || true) && docker compose -f docker-compose.local.yml down",
+    "backend:prisma:migrate": "yarn workspace @boilerplate/api prisma migrate dev",
+    "backend:prisma:reset": "yarn workspace @boilerplate/api prisma migrate reset",
+    "web:up": "turbo run dev --filter=@boilerplate/web",
+    "site:up": "cd apps/site && yarn dev",
+    "dev": "for p in 3000 3001; do kill -9 $(lsof -ti tcp:$p) 2>/dev/null || true; done && yarn backend:up-d && concurrently --kill-others-on-fail -n web,site -c green,magenta \"yarn web:up\" \"yarn site:up\"",
+    "build": "turbo run build",
+    "build:api": "turbo run build --filter=@boilerplate/api",
+    "build:web": "turbo run build --filter=@boilerplate/web && node scripts/gen-web-version.mjs apps/web/dist",
+    "site:install": "cd apps/site && yarn install",
+    "site:build": "cd apps/site && yarn build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"apps/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "turbo run clean",
+    "drop:all": "bash scripts/docker-drop-all.sh",
+    "docker:up": "docker compose up db redis -d",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v",
+    "db:deploy": "yarn workspace @boilerplate/api prisma:deploy",
+    "db:migrate": "yarn workspace @boilerplate/api prisma:migrate",
+    "db:generate": "yarn workspace @boilerplate/api prisma:generate",
+    "db:studio": "yarn workspace @boilerplate/api prisma:studio",
+    "db:reset": "yarn workspace @boilerplate/api prisma migrate reset",
+    "db:seed": "yarn workspace @boilerplate/api seed",
+    "db:reset-seed": "yarn workspace @boilerplate/api db:reset-seed",
+    "make-tag": "node scripts/make-tag.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "rollback": "node scripts/rollback.mjs",
+    "monitor-status": "node scripts/monitor-status.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.9.5",
+    "turbo": "^2.5.0",
+    "wait-on": "^9.0.10"
+  }
+}

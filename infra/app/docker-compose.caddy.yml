@@ -1,0 +1,33 @@
+# infra/app/docker-compose.caddy.yml — reverse proxy + TLS da VPS-APP
+#
+# Caddy como container em host network: enxerga a API em localhost:3333 e
+# publica 80/443 no host (atrás do Cloudflare proxied/laranja). TLS via
+# Cloudflare Origin Certificate, montado de /etc/caddy/certs. Config no
+# infra/app/Caddyfile ({$API_DOMAIN} → :3333, raw body Stripe, SSE).
+#
+# Pré-requisitos na VPS-APP (antes do `up`):
+#   - domínio Active no Cloudflare + DNS `api` A → IP da VPS (Proxied)
+#   - /etc/caddy/certs/origin.crt + origin.key  (Cloudflare → SSL/TLS → Origin Server)
+#   - Cloudflare SSL/TLS no modo "Full (strict)"
+#
+# Subir:   docker compose -f docker-compose.caddy.yml up -d
+# Validar: curl -s https://{$API_DOMAIN}/healthz
+name: boilerplate-caddy
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: boilerplate-caddy
+    restart: unless-stopped
+    # host network: necessário p/ bind 80/443 no host E alcançar o
+    # 127.0.0.1:3333 onde a API (boilerplate-api) publica.
+    network_mode: host
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /etc/caddy/certs:/etc/caddy/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

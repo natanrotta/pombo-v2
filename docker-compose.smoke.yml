@@ -1,0 +1,72 @@
+# docker-compose.smoke.yml — BOOT SMOKE-TEST of the API production image.
+#
+# Boots the SAME image that ships to production (${API_IMAGE}) against an
+# ephemeral Postgres + Redis, runs the `prisma migrate deploy` from the
+# Dockerfile.prod CMD and waits for /healthz to answer.
+#
+# WHY: unit tests never import the real DI container (it resolves eagerly on
+# boot), so a wiring/DI error, a missing required env var or a broken migration
+# would only surface at boot IN PRODUCTION. This smoke closes that gap: a real
+# boot, with a real database, before the image is published.
+#
+# USAGE:
+#   CI: builds the image with `load`, sets API_IMAGE=<temp tag> and runs
+#     `docker compose -f docker-compose.smoke.yml up --wait` BEFORE the push.
+#   Local: `make smoke` (tests :latest) · `make smoke TAG=vX.Y`.
+#
+# PASS/FAIL = the `api` service healthcheck. `up --wait` exits 0 when it turns
+# healthy; non-zero if the container crashes/exits or never gets healthy within
+# start_period. No `restart:` on purpose: a bad boot EXITS (fail fast).
+
+name: boilerplate-smoke
+
+services:
+  postgres-smoke:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: boilerplate_smoke
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: smoke
+    # In-RAM DB: boots fast and vanishes on stop.
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d boilerplate_smoke"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  redis-smoke:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  api:
+    # The image UNDER TEST. CI sets API_IMAGE=<freshly built, not-yet-published
+    # temp tag>; local uses the requested tag.
+    image: ${API_IMAGE:?set API_IMAGE to your published API image}
+    depends_on:
+      postgres-smoke:
+        condition: service_healthy
+      redis-smoke:
+        condition: service_healthy
+    environment:
+      # NODE_ENV=production exercises the production boot path. Every value below
+      # is DISPOSABLE (exists only so the boot passes) — never a real secret.
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:smoke@postgres-smoke:5432/boilerplate_smoke?schema=public
+      REDIS_HOST: redis-smoke
+      REDIS_PORT: "6379"
+      JWT_SECRET: smoke-only-jwt-secret-not-a-real-secret-32c
+    # /healthz is plain text and does NOT touch the DB. start_period covers
+    # `prisma migrate deploy` + the container boot.
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3333/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 90s

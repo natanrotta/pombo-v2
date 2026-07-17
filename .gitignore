@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.turbo/
+*.tsbuildinfo
+
+# Prisma generated client
+apps/api/src/generated/
+
+# Env files (keep *.example)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage/
+playwright-report/
+test-results/
+apps/web/e2e/.auth/
+e2e/.auth/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Claude local artifacts
+.claude/specs/*
+!.claude/specs/.gitkeep
+.claude/plans/*
+!.claude/plans/.gitkeep
+.claude/.secrets/*
+!.claude/.secrets/.gitkeep
+!.claude/.secrets/*.example

@@ -1,0 +1,16 @@
+# Cloudflare Pages aplica estes headers às respostas servidas. Substitui o antigo
+# public/customHttp.yml (formato AWS Amplify, que o Cloudflare Pages IGNORA — por
+# isso os security headers ficaram fora do ar na migração Amplify → Pages).
+# Doc do formato: https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# Bundles com hash no nome (Vite emite em /assets/*) — cache eterno.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,20 @@
+{
+  "required": "Campo obligatorio",
+  "invalidType": "Tipo inválido: se esperaba {{expected}}, se recibió {{received}}",
+  "string": {
+    "tooSmall": "Debe tener al menos {{minimum}} caracteres",
+    "tooBig": "Debe tener como máximo {{maximum}} caracteres",
+    "email": "Formato de correo electrónico inválido",
+    "uuid": "Formato de ID inválido",
+    "url": "Formato de URL inválido",
+    "invalid": "Formato inválido"
+  },
+  "number": {
+    "tooSmall": "Debe ser al menos {{minimum}}",
+    "tooBig": "Debe ser como máximo {{maximum}}"
+  },
+  "array": {
+    "tooSmall": "Debe tener al menos {{minimum}} elementos"
+  },
+  "invalidEnum": "Valor inválido. Opciones válidas: {{options}}"
+}

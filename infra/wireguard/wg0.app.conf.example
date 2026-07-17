@@ -1,0 +1,30 @@
+# infra/wireguard/wg0.app.conf.example — VPS-APP (10.8.0.1)
+#
+# Copie para /etc/wireguard/wg0.conf na VPS-APP, preencha os placeholders e:
+#   sudo wg-quick up wg0 && sudo systemctl enable wg-quick@wg0
+#
+# Validar o túnel (da VPS-APP):
+#   wg show                                   # deve mostrar handshake
+#   psql postgresql://boilerplate@10.8.0.2:5432/boilerplate   # conecta pelo túnel
+# Da internet pública o banco deve estar FECHADO:
+#   nc -vz <DATA_PUBLIC_IP> 5432              # deve FALHAR
+#
+# ufw na VPS-APP:
+#   sudo ufw default deny incoming
+#   sudo ufw allow 80,443/tcp                 # Caddy (HTTP/HTTPS)
+#   sudo ufw allow 51820/udp                  # WireGuard
+#   sudo ufw allow from <SEU_IP> to any port 22 proto tcp   # SSH restrito
+#   sudo ufw enable
+
+[Interface]
+Address = 10.8.0.1/24
+PrivateKey = <APP_PRIVATE_KEY>
+ListenPort = 51820
+
+[Peer]
+# VPS-DATA (10.8.0.2)
+PublicKey = <DATA_PUBLIC_KEY>
+Endpoint = <DATA_PUBLIC_IP>:51820
+AllowedIPs = 10.8.0.2/32
+# Mantém o túnel vivo atrás de NAT (lado que inicia a conexão).
+PersistentKeepalive = 25

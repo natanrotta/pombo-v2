@@ -1,0 +1,20 @@
+{
+  "required": "This field is required",
+  "invalidType": "Invalid type: expected {{expected}}, received {{received}}",
+  "string": {
+    "tooSmall": "Must be at least {{minimum}} characters",
+    "tooBig": "Must be at most {{maximum}} characters",
+    "email": "Invalid email format",
+    "uuid": "Invalid ID format",
+    "url": "Invalid URL format",
+    "invalid": "Invalid format"
+  },
+  "number": {
+    "tooSmall": "Must be at least {{minimum}}",
+    "tooBig": "Must be at most {{maximum}}"
+  },
+  "array": {
+    "tooSmall": "Must have at least {{minimum}} items"
+  },
+  "invalidEnum": "Invalid value. Valid options: {{options}}"
+}

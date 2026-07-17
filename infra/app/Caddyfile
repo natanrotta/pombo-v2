@@ -1,0 +1,42 @@
+# infra/app/Caddyfile — reverse proxy + TLS da VPS-APP
+#
+# {$API_DOMAIN} → container da API (localhost:3333). Ver Step 5 do plano.
+#
+# ── Streaming / raw-body notes ───────────────────────────────────────────────
+# `flush_interval -1` disables response buffering, so any Server-Sent Events /
+# text/event-stream endpoint is delivered chunk by chunk. Harmless for the rest
+# of the API. If you add a webhook that verifies a RAW request body (e.g. a
+# payment-provider signature), keep the reverse_proxy as-is — Caddy forwards the
+# body byte-for-byte; do NOT add `request_body`/`encode` directives that alter it.
+#
+# ── TLS atrás do Cloudflare (proxy laranja) ──────────────────────────────────
+# Com o proxy do Cloudflare ON, o desafio HTTP-01 do Let's Encrypt pode falhar
+# (o 80/443 chega no Cloudflare, não na origem). Três saídas — escolha UMA:
+#   (a) DNS-01 com o plugin Cloudflare do Caddy (recomendado). Requer um build
+#       do Caddy com o módulo e um token de API. Descomente o bloco `tls` abaixo.
+#   (b) Cloudflare Origin Certificate instalado na origem + SSL "Full (strict)".
+#   (c) Deixar o registro como "DNS only" (cinza) só durante a 1ª emissão, e
+#       religar o proxy laranja depois.
+# Ver infra/README.md › "TLS + Cloudflare".
+
+{$API_DOMAIN} {
+	reverse_proxy localhost:3333 {
+		# Disable buffering so SSE / streaming endpoints flush chunk by chunk.
+		flush_interval -1
+
+		# Repassa o IP real do cliente vindo do Cloudflare.
+		header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+		header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+	}
+
+	# TLS = Cloudflare Origin Certificate (decisão B7: api proxied/laranja +
+	# SSL "Full (strict)"). Gere o cert em SSL/TLS → Origin Server no Cloudflare
+	# e coloque os 2 arquivos em /etc/caddy/certs/ na VPS-APP (chmod 600 na key).
+	# Montados no container Caddy via docker-compose.caddy.yml. 15 anos, sem ACME.
+	tls /etc/caddy/certs/origin.crt /etc/caddy/certs/origin.key
+
+	log {
+		output file /var/log/caddy/caddy-api.log
+		format json
+	}
+}

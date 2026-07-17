@@ -1,0 +1,113 @@
+# infra/data/docker-compose.data.yml — STACK DE DADOS (VPS-DATA)
+#
+# Postgres+pgvector + Redis. Esta VPS NÃO é pública. Ver .claude/knowledge/devops.md › VPS-DATA.
+#
+# Regra de ouro: o banco NUNCA é exposto na internet. O isolamento vem do
+# bind de porta no IP do túnel WireGuard (10.8.0.2) — quem fala com o banco
+# é só a VPS-APP pelo túnel.
+#
+# Antes do túnel (Step 2) existir, troque "10.8.0.2" por "127.0.0.1" nas duas
+# portas para testar localmente, e religue em 10.8.0.2 depois que o WireGuard
+# subir.
+#
+# Subir:   docker compose -f docker-compose.data.yml up -d
+# Validar: docker exec boilerplate-db psql -U boilerplate -c '\dx'   # deve listar 'vector'
+#
+# Segredos (NÃO versionados — criar na VPS):
+#   - infra/data/secrets/db_password.txt   (senha do Postgres)
+#   - REDIS_PASSWORD                        (via env / arquivo .env ao lado)
+
+name: boilerplate-data
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: boilerplate-db
+    restart: unless-stopped
+    # listen_addresses=* DENTRO do container (o processo não enxerga o IP do
+    # túnel do host); o isolamento real é o bind "10.8.0.2:5432:5432" abaixo.
+    command:
+      - "postgres"
+      - "-c"
+      - "listen_addresses=*"
+      - "-c"
+      - "max_connections=200"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-boilerplate}
+      POSTGRES_USER: ${POSTGRES_USER:-boilerplate}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    ports:
+      - "10.8.0.2:5432:5432"   # bind SÓ no IP do túnel WireGuard
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-boilerplate} -d ${POSTGRES_DB:-boilerplate}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # docker compose v2 honra deploy.resources.limits sem swarm.
+    deploy:
+      resources:
+        limits:
+          memory: 3g
+
+  redis:
+    image: redis:7-alpine
+    container_name: boilerplate-redis
+    restart: unless-stopped
+    environment:
+      # Disponibiliza a senha DENTRO do container para o healthcheck abaixo
+      # resolver $REDIS_PASSWORD. O --requirepass é interpolado pelo compose no
+      # HOST e não vira env do container; sem este bloco o healthcheck autentica
+      # vazio e o container aparece "unhealthy" mesmo com o Redis 100% OK.
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?defina REDIS_PASSWORD}
+    # AOF ligado (durabilidade dos jobs BullMQ) + senha obrigatória.
+    command:
+      - "redis-server"
+      - "--appendonly"
+      - "yes"
+      - "--requirepass"
+      - "${REDIS_PASSWORD:?defina REDIS_PASSWORD}"
+    ports:
+      - "10.8.0.2:6379:6379"   # bind SÓ no IP do túnel WireGuard
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  # node_exporter — host metrics (CPU/RAM/disk/load). Runs in network_mode: host
+  # + pid: host to read the real host's /proc and /sys; bound ONLY to the
+  # WireGuard tunnel IP (10.8.0.2:9100), never exposed to the internet. The API
+  # (VPS-APP) scrapes it across the tunnel via METRICS_DATA_URL.
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: boilerplate-node-exporter
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--web.listen-address=10.8.0.2:9100"
+
+volumes:
+  pgdata:
+  redisdata:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt

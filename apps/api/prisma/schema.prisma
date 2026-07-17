@@ -1,0 +1,96 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  // O projeto roda em CommonJS (node dist/main.js). Sem isto, o gerador novo
+  // do Prisma 7 emite o client em ESM e ele quebra em runtime no Node CJS
+  // ("exports is not defined in ES module scope"). Em dev o tsx tolera.
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum user_status {
+  ACTIVE
+  PENDING
+}
+
+// ============================================================
+// USER
+// ============================================================
+
+model user {
+  id                       String      @id @default(uuid())
+  name                     String
+  email                    String      @unique
+  /// Nullable: Google-only users authenticate via `google_id` and never set
+  /// a local password.
+  password                 String?
+  google_id                String?     @unique
+  status                   user_status @default(ACTIVE)
+  /// Whether the user proved control of `email`. Email+password self-signups
+  /// start `false` and must confirm a 6-digit PIN; Google sign-in starts
+  /// `true` (the provider already vouches for the address).
+  email_verified           Boolean     @default(false)
+  avatar_url               String?
+  language                 String      @default("pt-BR")
+  token_version            Int         @default(0)
+  token_expires_at         DateTime?
+  refresh_token_hash       String?     @unique
+  refresh_token_expires_at DateTime?
+  created_at               DateTime    @default(now())
+  updated_at               DateTime    @updatedAt
+  deleted_at               DateTime?
+
+  password_reset_tokens   password_reset_token[]
+  email_verification_pins email_verification_pin[]
+
+  @@map("user")
+}
+
+// ============================================================
+// PASSWORD RESET TOKEN
+// ============================================================
+
+model password_reset_token {
+  id         String    @id @default(uuid())
+  user_id    String
+  token_hash String    @unique
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("password_reset_token")
+}
+
+// ============================================================
+// EMAIL VERIFICATION PIN
+// ============================================================
+
+/// Short-lived 6-digit PIN emailed to a freshly-registered (email+password)
+/// user. The DB stores only the SHA-256 hash of the PIN — a leak never
+/// reveals a usable code. `attempts` powers the brute-force lockout; the row
+/// is hard-deleted on resend (only the latest PIN is ever valid), mirroring
+/// `password_reset_token.deleteUnusedForUser`.
+model email_verification_pin {
+  id         String    @id @default(uuid())
+  user_id    String
+  pin_hash   String
+  expires_at DateTime
+  attempts   Int       @default(0)
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("email_verification_pin")
+}

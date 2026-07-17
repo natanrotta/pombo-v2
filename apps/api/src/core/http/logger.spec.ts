@@ -46,7 +46,7 @@ describe("logger redact paths", () => {
         url: "/patients",
         headers: {
           authorization: "Bearer super-secret-jwt",
-          cookie: "boilerplate_rt=abc",
+          cookie: "pombo_rt=abc",
         },
         body: {
           summary: "patient PHI summary",

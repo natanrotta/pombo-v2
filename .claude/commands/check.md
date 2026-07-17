@@ -2,7 +2,7 @@
 description: Run all monorepo quality validations and automatically fix any issues found.
 ---
 
-# Quality Check — Boilerplate
+# Quality Check — Pombo
 
 Run all monorepo quality validations and automatically fix any issues found.
 
@@ -15,8 +15,8 @@ This skill is invoked by `/finish-task` after `/code-review` to confirm the code
 ## Workspace Layout
 
 - Root scripts use Turborepo to fan out into both apps (`apps/api`, `apps/web`)
-- API tests = Vitest (`yarn workspace @boilerplate/api test`)
-- Web tests = Playwright (`yarn workspace @boilerplate/web test:e2e`)
+- API tests = Vitest (`yarn workspace @pombo/api test`)
+- Web tests = Playwright (`yarn workspace @pombo/web test:e2e`)
 - API lint auto-fixes (`--fix` flag); web lint does NOT auto-fix
 
 ---
@@ -63,7 +63,7 @@ Then re-run `yarn format:check` to confirm.
 ### 4. Backend tests (Vitest)
 
 ```
-yarn workspace @boilerplate/api test
+yarn workspace @pombo/api test
 ```
 
 If it fails: analyze the failing test, identify root cause, fix the **code** (not the test, unless the test is genuinely outdated). Re-run. **Never** disable a test or weaken assertions to make it pass.
@@ -71,7 +71,7 @@ If it fails: analyze the failing test, identify root cause, fix the **code** (no
 ### 5. E2E tests (Playwright) — only if frontend files changed
 
 ```
-yarn workspace @boilerplate/web test:e2e
+yarn workspace @pombo/web test:e2e
 ```
 
 When to run: any change under `apps/web/**`. Backend-only PRs can skip e2e for speed.

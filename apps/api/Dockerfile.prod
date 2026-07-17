@@ -1,9 +1,9 @@
-# Dockerfile.prod — imagem de produção da API (@boilerplate/api).
+# Dockerfile.prod — imagem de produção da API (@pombo/api).
 #
-# A API depende de @boilerplate/shared-types (pacote do workspace), consumido como
+# A API depende de @pombo/shared-types (pacote do workspace), consumido como
 # dist/ (main: ./dist/index.js). Por isso o build precisa, nesta ordem:
 #   1) instalar o workspace COM o package.json do shared-types presente
-#      (senão o yarn não resolve @boilerplate/shared-types);
+#      (senão o yarn não resolve @pombo/shared-types);
 #   2) BUILDAR o shared-types (a API importa o dist/ dele);
 #   3) gerar o Prisma client e buildar a API.
 # O Dockerfile anterior copiava só apps/api/package.json e quebrava no
@@ -25,7 +25,7 @@ RUN yarn install --frozen-lockfile
 
 # shared-types é consumido como dist/ → buildar antes da API.
 COPY packages/shared-types ./packages/shared-types
-RUN yarn workspace @boilerplate/shared-types build
+RUN yarn workspace @pombo/shared-types build
 
 # Prisma client (DATABASE_URL dummy só para `prisma generate` no build) +
 # build da API. O schema (output ../src/generated/prisma) vem com o COPY abaixo.
@@ -50,7 +50,7 @@ ARG APP_VERSION=unknown
 ENV APP_VERSION=${APP_VERSION}
 
 # Copia o workspace inteiro já buildado, preservando os symlinks do yarn
-# (node_modules/@boilerplate/shared-types → packages/shared-types), o que garante a
+# (node_modules/@pombo/shared-types → packages/shared-types), o que garante a
 # resolução de módulos do workspace em runtime. Imagem maior porém robusta;
 # enxugar (prune de devDeps) fica como follow-up.
 COPY --from=build /usr/src/app ./

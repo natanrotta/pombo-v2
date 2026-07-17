@@ -12,3 +12,6 @@ The ledger feeds the **recurring-violations surfacing** pass: codes that appear 
 
 | Date | Code | Fixed-by | Context |
 | ---- | ---- | -------- | ------- |
+| 2026-07-17 | B-H-reconnect-unref | finish-task /code-review | session-manager reconnect setTimeout not unref'd — up to RECONNECT_MAX_DELAY_MS SIGTERM shutdown delay when gateway enabled; fixed with .unref(). |
+| 2026-07-17 | F-C3 | finish-task /code-review | Unused amber palette exported from web theme colors.ts — latent yellow/amber supply-side surface; removed. |
+| 2026-07-17 | B-C8 | accepted | GET /api/health returns {ok,version,uptimeSeconds} not {ok,data} — pre-existing monitoring-probe shape read via .ok; accepted, follow-up if web consumes it. |

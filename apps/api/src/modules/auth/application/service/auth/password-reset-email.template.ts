@@ -1,6 +1,6 @@
 /**
  * Renders the HTML + plain-text bodies for the password-reset e-mail.
- * Locale-aware (pt-BR / en / es) and branded as Boilerplate, matching
+ * Locale-aware (pt-BR / en / es) and branded as Pombo, matching
  * the invite-email + patient-document-email templates.
  *
  * Locale comes from the user's `user.language` (we already loaded the
@@ -16,6 +16,9 @@ export interface PasswordResetEmailVars {
   resetUrl: string;
   /** Token TTL in minutes — surfaced in the copy so users know the window. */
   ttlMinutes: number;
+  /** Absolute URL to the Pombo logo (e.g. `${FRONTEND_URL}/pombo-icon.png`).
+   *  Must be absolute — e-mail clients can't resolve app-relative paths. */
+  logoUrl: string;
   /** Defaults to pt-BR when omitted or unknown. */
   locale?: string;
 }
@@ -40,10 +43,10 @@ interface CopyBundle {
 
 const COPY: Record<PasswordResetEmailLocale, CopyBundle> = {
   "pt-BR": {
-    subject: "Redefinição de senha — Boilerplate",
-    preheader: "Crie uma nova senha para acessar sua conta na Boilerplate.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · Pra quem boilerplate de vidas",
+    subject: "Redefinição de senha — Pombo",
+    preheader: "Crie uma nova senha para acessar sua conta na Pombo.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Seu gateway de mensagens",
     headline: (name) => `Olá, ${name}`,
     bodyIntro: (ttl) =>
       `Recebemos uma solicitação para redefinir a senha da sua conta. Clique no botão abaixo para criar uma nova senha — o link expira em <strong style="color:#0f172a;">${ttl} minutos</strong> e só pode ser usado uma vez.`,
@@ -54,10 +57,10 @@ const COPY: Record<PasswordResetEmailLocale, CopyBundle> = {
       "Se você não solicitou essa redefinição, pode ignorar este e-mail com segurança.",
   },
   en: {
-    subject: "Reset your password — Boilerplate",
-    preheader: "Create a new password to access your Boilerplate account.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · For those who care for lives",
+    subject: "Reset your password — Pombo",
+    preheader: "Create a new password to access your Pombo account.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Your messaging gateway",
     headline: (name) => `Hi ${name},`,
     bodyIntro: (ttl) =>
       `We received a request to reset your account password. Click the button below to set a new one — the link expires in <strong style="color:#0f172a;">${ttl} minutes</strong> and can only be used once.`,
@@ -68,11 +71,10 @@ const COPY: Record<PasswordResetEmailLocale, CopyBundle> = {
       "If you didn't request this reset, you can safely ignore this email.",
   },
   es: {
-    subject: "Restablecer contraseña — Boilerplate",
-    preheader:
-      "Crea una nueva contraseña para acceder a tu cuenta de Boilerplate.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · Para quienes cuidan vidas",
+    subject: "Restablecer contraseña — Pombo",
+    preheader: "Crea una nueva contraseña para acceder a tu cuenta de Pombo.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Tu gateway de mensajería",
     headline: (name) => `Hola, ${name}`,
     bodyIntro: (ttl) =>
       `Recibimos una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón para crear una nueva — el enlace expira en <strong style="color:#0f172a;">${ttl} minutos</strong> y solo se puede usar una vez.`,
@@ -112,6 +114,7 @@ export function renderPasswordResetEmail(
   const copy = COPY[locale];
 
   const resetUrlSafe = escapeHtml(vars.resetUrl);
+  const logoUrlSafe = escapeHtml(vars.logoUrl);
 
   const subject = copy.subject;
 
@@ -135,7 +138,7 @@ export function renderPasswordResetEmail(
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#22d3a8 0%,#3b82f6 100%);display:inline-block;line-height:40px;text-align:center;color:#ffffff;font-weight:700;font-size:18px;letter-spacing:-0.02em;">C</div>
+                      <img src="${logoUrlSafe}" width="40" height="40" alt="${escapeHtml(copy.brand)}" style="display:block;width:40px;height:40px;border-radius:11px;border:0;outline:none;text-decoration:none;" />
                     </td>
                     <td style="vertical-align:middle;padding-left:12px;">
                       <div style="font-size:16px;font-weight:600;color:#0f172a;letter-spacing:-0.01em;">${escapeHtml(copy.brand)}</div>

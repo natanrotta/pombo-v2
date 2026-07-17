@@ -165,7 +165,7 @@ async function main() {
   // era flaky por conflito de porta — foi o que causou o bypass do incidente.)
   // Opcionalmente o operador pode re-rodar o smoke local do artefato exato.
   const owner = repo.split("/")[0];
-  const image = `ghcr.io/${owner}/boilerplate-api:${tag}`;
+  const image = `ghcr.io/${owner}/pombo-api:${tag}`;
   hr();
   info(
     `A imagem ${c.cyan(image)} já foi boot-verificada no build. O deploy re-verifica ` +

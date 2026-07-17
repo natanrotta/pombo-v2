@@ -143,7 +143,7 @@ export function requireGh() {
   try {
     return capture("gh", ["repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]);
   } catch {
-    fail("Não consegui detectar o repositório GitHub. Rode o comando de dentro do repo do Boilerplate.");
+    fail("Não consegui detectar o repositório GitHub. Rode o comando de dentro do repo do Pombo.");
   }
 }
 

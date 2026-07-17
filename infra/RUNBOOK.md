@@ -48,19 +48,19 @@ in `infra/backup/README.md`.
    age-keygen -o backup-age.key    # on YOUR machine; "Public key: age1..." → AGE_RECIPIENT
    ```
    Store `backup-age.key` in a vault (1Password/etc). **Losing it = permanent data loss.**
-2. **Object storage:** create the `boilerplate-backups` bucket + an API token scoped to it with
+2. **Object storage:** create the `pombo-backups` bucket + an API token scoped to it with
    **Object Read & Write** → generates an **Access Key ID + Secret Access Key + endpoint**.
    On the DATA host, `rclone config` (or write `/root/.config/rclone/rclone.conf` as **root**):
    type=s3, the access/secret, the endpoint, and **`no_check_bucket = true`**.
    - ⚠️ **`no_check_bucket = true` is required** for a bucket-scoped token — without it rclone tries to
      check/create the bucket and gets a **403**.
-   - ✅ Validate with `rclone lsf <remote>:boilerplate-backups/` (inside the bucket) — **not** `rclone lsd`
+   - ✅ Validate with `rclone lsf <remote>:pombo-backups/` (inside the bucket) — **not** `rclone lsd`
      (lists the whole account → 403 on a scoped token).
    - Confirm **egress** from the DATA host to the storage endpoint (if `ufw` is `deny outgoing`, the upload
      fails silently — only the dead-man switch catches it).
 3. **Dead-man switch:** create a check at healthchecks.io → copy the ping URL. Set the check period to match
    the schedule + grace.
-4. **`/etc/boilerplate/backup.env`** (on the DATA host): copy from `infra/backup/backup.env.example`, fill in
+4. **`/etc/pombo/backup.env`** (on the DATA host): copy from `infra/backup/backup.env.example`, fill in
    `AGE_RECIPIENT` · `HC_PING_URL` · `RCLONE_*` (optional `DAILY_RETENTION_COUNT`), then `chmod 600`.
 5. **Activate (from your machine):**
    ```sh

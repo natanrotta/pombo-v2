@@ -8,7 +8,7 @@ const envSchema = z.object({
     .default("local"),
   API_PORT: z.coerce.number().default(3333),
   ALLOWED_ORIGIN: z.string().default("*"),
-  PROJECT_NAME: z.string().default("boilerplate-rest-api"),
+  PROJECT_NAME: z.string().default("pombo-rest-api"),
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
     .default("info"),

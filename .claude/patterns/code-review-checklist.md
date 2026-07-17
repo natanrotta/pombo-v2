@@ -247,7 +247,7 @@ Canonical doc: `patterns/e2e.md`. Same rubric as the **F-** family — Critical 
 
 ## Spec Compliance & Scope (`SC-*`)
 
-This project follows Spec-Driven Development (`patterns/spec.md`): every non-trivial task has a Task Spec in `.claude/specs/<slug>.md`. The reviewer receives the spec path and judges the diff **against the contract**. When no spec file exists (trivial task), evaluate these codes against the user's request as stated in the conversation. (Prefix is `SC-*`, not `S-*` — the `S-*` namespace is already used by proposed apps/site codes in the violations ledger.)
+This project follows Spec-Driven Development (`patterns/spec.md`): every non-trivial task has a Task Spec in `.claude/specs/<slug>.md`. The reviewer receives the spec path and judges the diff **against the contract**. When no spec file exists (trivial task), evaluate these codes against the user's request as stated in the conversation. (Prefix is `SC-*`, not `S-*` — the bare `S-*` namespace is reserved and must not be minted here.)
 
 ### Critical
 

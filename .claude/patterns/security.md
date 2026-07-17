@@ -1,6 +1,6 @@
 # Security — App Security Model & Anti-Patterns (Authority)
 
-**This document is the authoritative security reference for the Boilerplate.** It describes the security model of the starter application (auth, resource ownership, endpoints, integrations, deploy) and a `SEC-*` anti-pattern catalog. Generic OWASP checklists complement it but never replace it. As you build real features on top of the boilerplate, keep this file in sync with your actual surfaces.
+**This document is the authoritative security reference for the Pombo.** It describes the security model of the starter application (auth, resource ownership, endpoints, integrations, deploy) and a `SEC-*` anti-pattern catalog. Generic OWASP checklists complement it but never replace it. As you build real features on top of the boilerplate, keep this file in sync with your actual surfaces.
 
 It is consumed by:
 - the **`/security`** skill (`.claude/commands/security.md`) — consultant + implementer,
@@ -9,7 +9,7 @@ It is consumed by:
 
 It **defers** to: `BASELINE.md` (R1–R28), `code-review-checklist.md` (B-/F-/X-/SC- codes — many are already security codes), `/devops` + `.claude/knowledge/devops.md` (infra). It cross-references those codes instead of duplicating them.
 
-> **Namespace:** security codes are **`SEC-*`**. `S-*` is reserved for apps/site. Never mint an `S-*` security code.
+> **Namespace:** security codes are **`SEC-*`**. The bare `S-*` prefix is reserved — never mint an `S-*` security code.
 >
 > **Anchors drift.** Any `file:line` below is a hint, not a fact. Re-grep the symbol by name before quoting it — files move, line numbers rot.
 

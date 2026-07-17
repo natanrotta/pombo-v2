@@ -20,6 +20,28 @@ enum user_status {
   PENDING
 }
 
+// ── WhatsApp Gateway (pombo) enums ──────────────────────────────────────────
+
+/// Lifecycle of a WhatsApp device socket. A device is only "live" when
+/// CONNECTED; every other status means /health reports degraded.
+enum device_status {
+  DISCONNECTED
+  CONNECTING
+  QR_PENDING
+  CONNECTED
+  LOGGED_OUT
+}
+
+/// Delivery status of an outbox message. Monotonic:
+/// PENDING → SERVER_ACK → DELIVERY_ACK → READ; FAILED from anything except READ.
+enum message_status {
+  PENDING
+  SERVER_ACK
+  DELIVERY_ACK
+  READ
+  FAILED
+}
+
 // ============================================================
 // USER
 // ============================================================
@@ -93,4 +115,80 @@ model email_verification_pin {
 
   @@index([user_id])
   @@map("email_verification_pin")
+}
+
+// ============================================================
+// DEVICE (WhatsApp Gateway)
+// ============================================================
+
+/// A registered WhatsApp device (single-operator admin surface — JWT-gated,
+/// not per-user owner-scoped). `identifier` (the paired WhatsApp number) is
+/// null until pairing — WhatsApp is the source of truth for it. The
+/// `webhook_secret` is generated at registration and returned exactly once.
+model device {
+  id                String        @id @default(uuid())
+  name              String        @unique
+  identifier        String?
+  status            device_status @default(DISCONNECTED)
+  webhook_url       String?
+  webhook_secret    String?
+  last_connected_at DateTime?
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+
+  auth_keys        auth_key[]
+  outbox_messages  outbox_message[]
+
+  @@index([status])
+  @@map("device")
+}
+
+// ============================================================
+// AUTH KEY (Baileys authState — Signal Protocol crypto state)
+// ============================================================
+
+/// The Baileys authState (ADR-003). NOT a token — Signal Protocol crypto state
+/// that mutates every message. Serialized with BufferJSON (preserves Buffer /
+/// Uint8Array). Composite PK (device_id, key); cascades when the device is
+/// deleted. No timestamps: this is write-through protocol state, not a business
+/// entity — the composite PK is upserted in place.
+model auth_key {
+  device_id String
+  key       String
+  value     Json
+
+  device device @relation(fields: [device_id], references: [id], onDelete: Cascade)
+
+  @@id([device_id, key])
+  @@map("auth_key")
+}
+
+// ============================================================
+// OUTBOX MESSAGE (protocol, not history — ADR-006)
+// ============================================================
+
+/// The outbox is PROTOCOL, not history. It exists for two reasons:
+/// (1) getMessage — when the recipient fails to decrypt, WhatsApp asks for a
+/// resend and Baileys needs the original text. (2) idempotency — the DB unique
+/// (device_id, idempotency_key) is the real guard against a consumer-side
+/// timeout sending twice. Pruned by TTL (`expires_at`).
+model outbox_message {
+  id              String         @id @default(uuid())
+  device_id       String
+  idempotency_key String
+  to_jid          String
+  text            String
+  wa_message_id   String?        @unique
+  status          message_status @default(PENDING)
+  failure_reason  String?
+  expires_at      DateTime
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  device device @relation(fields: [device_id], references: [id], onDelete: Cascade)
+
+  @@unique([device_id, idempotency_key])
+  @@index([device_id])
+  @@index([expires_at])
+  @@map("outbox_message")
 }

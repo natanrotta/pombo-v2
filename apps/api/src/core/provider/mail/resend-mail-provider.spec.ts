@@ -8,7 +8,7 @@ vi.mock("@core/config", () => ({
   env: {
     NODE_ENV: "test",
     RESEND_API_KEY: "re_test",
-    MAIL_FROM: "no-reply@boilerplate.com",
+    MAIL_FROM: "no-reply@pombo.com",
     MAIL_DEV_REDIRECT_TO: "",
   },
 }));
@@ -68,7 +68,7 @@ describe("ResendMailProvider", () => {
 
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        from: "no-reply@boilerplate.com",
+        from: "no-reply@pombo.com",
         to: "user@example.com",
         subject: "Olá",
       }),
@@ -77,7 +77,7 @@ describe("ResendMailProvider", () => {
   });
 
   it("reroutes to the dev redirect address and warns when configured outside production", async () => {
-    mutableEnv.MAIL_DEV_REDIRECT_TO = "dev@boilerplate.com";
+    mutableEnv.MAIL_DEV_REDIRECT_TO = "dev@pombo.com";
     sendMock.mockResolvedValue({ data: { id: "msg-1" }, error: null });
     const logger = makeLogger();
 
@@ -85,7 +85,7 @@ describe("ResendMailProvider", () => {
 
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        to: "dev@boilerplate.com",
+        to: "dev@pombo.com",
         subject: "[DEV → user@example.com] Olá",
       }),
     );

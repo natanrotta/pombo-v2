@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { UserResponseDTO } from "@boilerplate/shared-types";
+import type { UserResponseDTO } from "@pombo/shared-types";
 
 export type { UserResponseDTO };
 

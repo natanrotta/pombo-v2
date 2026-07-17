@@ -3,12 +3,12 @@
 #
 # Responde "subiu? qual versão? tá saudável?" numa tela só. Read-only.
 # Uso (da sua máquina):  make app-status
-#      (na VPS-APP):     bash /opt/boilerplate/app/infra/status-app.sh
+#      (na VPS-APP):     bash /opt/pombo/app/infra/status-app.sh
 #
 # Par do infra/status.sh (que cobre a VPS-DATA: Postgres/Redis/backup).
 set -uo pipefail
 
-APP_DIR="${APP_DIR:-/opt/boilerplate/app/infra/app}"
+APP_DIR="${APP_DIR:-/opt/pombo/app/infra/app}"
 API_LOCAL="${API_LOCAL:-http://127.0.0.1:3333}"
 API_PUBLIC="${API_PUBLIC:-https://api.your-domain.tld}"
 
@@ -17,15 +17,15 @@ c_no() { printf '  \033[31m✗\033[0m %s\n' "$1"; }
 c_wn() { printf '  \033[33m!\033[0m %s\n' "$1"; }
 jget() { sed -n "s/.*\"$1\":\"\([^\"]*\)\".*/\1/p"; }   # extrai "campo":"valor" de JSON simples
 
-echo "================ BOILERPLATE · STATUS APP · $(date '+%F %T %Z') ================"
+echo "================ POMBO · STATUS APP · $(date '+%F %T %Z') ================"
 
 echo; echo "## Containers"
-docker ps --filter "name=boilerplate-" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null \
+docker ps --filter "name=pombo-" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null \
   || c_no "docker indisponível"
 
 echo; echo "## Imagem da API"
-IMG=$(docker inspect --format '{{.Config.Image}}' boilerplate-api 2>/dev/null)
-[ -n "$IMG" ] && c_ok "imagem: $IMG" || c_no "container boilerplate-api não encontrado"
+IMG=$(docker inspect --format '{{.Config.Image}}' pombo-api 2>/dev/null)
+[ -n "$IMG" ] && c_ok "imagem: $IMG" || c_no "container pombo-api não encontrado"
 
 echo; echo "## API (local — 127.0.0.1:3333)"
 HZ=$(curl -fsS --max-time 5 "$API_LOCAL/healthz" 2>/dev/null | tr -d '\r\n')

@@ -6,8 +6,8 @@
  * mirror cost beats importing across the api/web boundary in test code).
  */
 
-export const CSRF_TOKEN_COOKIE = "boilerplate_csrf";
-export const ACCESS_TOKEN_COOKIE = "boilerplate_at";
+export const CSRF_TOKEN_COOKIE = "pombo_csrf";
+export const ACCESS_TOKEN_COOKIE = "pombo_at";
 
 /**
  * Seed credentials created by `apps/api/prisma/seed.ts`. Single-user boilerplate —

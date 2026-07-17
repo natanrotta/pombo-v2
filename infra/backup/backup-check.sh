@@ -15,21 +15,21 @@
 # switch (healthchecks.io) — não é reimplementado aqui.
 #
 # Uso na VPS-DATA (via systemd EnvironmentFile ou . backup.env):
-#   . /etc/boilerplate/backup.env && /opt/boilerplate/backup-check.sh
+#   . /etc/pombo/backup.env && /opt/pombo/backup-check.sh
 # Saída != 0 em ERRO (serve de gate p/ automação).
 
 set -euo pipefail
 
 : "${RCLONE_REMOTE:=r2}"
-: "${RCLONE_BUCKET:=boilerplate-backups}"
+: "${RCLONE_BUCKET:=pombo-backups}"
 : "${DAILY_RETENTION_COUNT:=5}"
 case "${DAILY_RETENTION_COUNT}" in ''|*[!0-9]*) echo "[backup-check] ERRO: DAILY_RETENTION_COUNT='${DAILY_RETENTION_COUNT}' não é inteiro."; exit 2 ;; esac
 [ "${DAILY_RETENTION_COUNT}" -ge 1 ] || { echo "[backup-check] ERRO: DAILY_RETENTION_COUNT deve ser >= 1."; exit 2; }
 
 command -v rclone >/dev/null 2>&1 || { echo "[backup-check] ERRO: rclone não instalado."; exit 2; }
 
-# Conta só os NOSSOS dumps (boilerplate-YYYYMMDD-HHMM.dump.age) — ignora objeto de nome inesperado.
-LIST="$(rclone lsf "${RCLONE_REMOTE}:${RCLONE_BUCKET}/daily/" --files-only 2>/dev/null | grep -E '^boilerplate-[0-9]{8}-[0-9]{4}\.dump\.age$' | sort || true)"
+# Conta só os NOSSOS dumps (pombo-YYYYMMDD-HHMM.dump.age) — ignora objeto de nome inesperado.
+LIST="$(rclone lsf "${RCLONE_REMOTE}:${RCLONE_BUCKET}/daily/" --files-only 2>/dev/null | grep -E '^pombo-[0-9]{8}-[0-9]{4}\.dump\.age$' | sort || true)"
 if [ -n "${LIST}" ]; then
   COUNT="$(printf '%s\n' "${LIST}" | grep -c . || true)"
 else

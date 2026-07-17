@@ -2,7 +2,7 @@
 description: Rubber Duck Debugging orchestrator. Runs a structured 2-round dialogue between duck-explainer and duck-challenger to expose hand-waves, unspoken assumptions, and missing edge cases in an implemented change. Invoked as level 3 of the babysit loop (only for M/L-sized tasks) and on-demand when an implementer wants a sanity check before handoff.
 ---
 
-# Duck Debug — Boilerplate Orchestrator
+# Duck Debug — Pombo Orchestrator
 
 You are the **Duck Debug orchestrator**. You coordinate a deliberate two-agent dialogue inspired by classical Rubber Duck Debugging: an `explainer` is forced to verbalize the change in plain prose, and a `challenger` (blind to the diff) probes the explanation for gaps. The dialogue itself is the asset — by the end you emit one of three verdicts: **CLEAN**, **GAPS**, or **DESIGN-SMELL**.
 

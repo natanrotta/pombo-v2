@@ -1,6 +1,6 @@
-# Boilerplate Monorepo
+# Pombo Monorepo
 
-> A production-ready TypeScript monorepo starter: a single-user **auth API**, a **web app** with a sidebar dashboard, and a **marketing site** — wired with Turborepo, Prisma, Docker, and a full Claude Code agent/skill setup.
+> A production-ready TypeScript monorepo starter: a single-user **auth API** and a **web app** with a sidebar dashboard — wired with Turborepo, Prisma, Docker, and a full Claude Code agent/skill setup.
 
 Everything you need to build and ship — clone it, rename it, start shipping.
 
@@ -12,10 +12,9 @@ Everything you need to build and ship — clone it, rename it, start shipping.
 |---|---|---|---|
 | **API** | `apps/api` | Node.js · Express 4 · Prisma 7 (Postgres) · tsyringe DI · Zod · Vitest | `3333` |
 | **Web** | `apps/web` | React 18 · Vite 5 · Chakra UI 2 · TanStack Query 5 · react-i18next · Vitest + Playwright | `3000` |
-| **Site** | `apps/site` | React 18 · Vite 5 · Chakra UI 2 · GSAP · i18n (en/pt/es) | `3001` |
-| **Shared types** | `packages/shared-types` | `@boilerplate/shared-types` — DTOs shared by API + web | — |
+| **Shared types** | `packages/shared-types` | `@pombo/shared-types` — DTOs shared by API + web | — |
 
-`apps/api` and `apps/web` are Turborepo/yarn workspaces; **`apps/site` is a standalone yarn project** (its own `yarn.lock`), run via `yarn site:*`.
+`apps/api` and `apps/web` are Turborepo/yarn workspaces.
 
 ## Requirements
 
@@ -27,7 +26,6 @@ Everything you need to build and ship — clone it, rename it, start shipping.
 
 ```bash
 yarn install                      # install API + web + shared-types
-yarn site:install                 # install the standalone site
 cp apps/api/.env.example apps/api/.env
 # (optional) cp apps/web/.env.example apps/web/.env
 
@@ -35,7 +33,7 @@ yarn services:up                  # Postgres + Redis in Docker
 yarn backend:prisma:migrate       # create the database schema
 yarn db:seed                      # seed the demo user
 
-yarn dev                          # backend (detached) + web + site
+yarn dev                          # backend (detached) + web
 ```
 
 Then open **http://localhost:3000** and sign in with the demo user:
@@ -51,12 +49,11 @@ password: Demo1234!
 
 | Command | What it does |
 |---|---|
-| `yarn dev` | Postgres+Redis + API (detached) + web (`:3000`) + site (`:3001`), all with hot reload |
+| `yarn dev` | Postgres+Redis + API (detached) + web (`:3000`), all with hot reload |
 | `yarn backend:up` | Postgres+Redis + API in the **foreground** (you see the API logs) |
-| `yarn backend:up-d` | Postgres+Redis + API **detached** (logs → `/tmp/boilerplate-api.log`) |
+| `yarn backend:up-d` | Postgres+Redis + API **detached** (logs → `/tmp/pombo-api.log`) |
 | `yarn backend:down` | Stop the API and `docker compose down` |
 | `yarn web:up` | Web dev server on `:3000` |
-| `yarn site:up` | Site dev server on `:3001` |
 | `yarn services:up` | Postgres + Redis only (Docker) |
 
 ### Database (Prisma)
@@ -74,7 +71,6 @@ password: Demo1234!
 | Command | What it does |
 |---|---|
 | `yarn build` | Build API + web + shared-types (Turborepo) |
-| `yarn site:build` | Build the site |
 | `yarn test` | Unit tests (API + web, Vitest) |
 | `yarn type-check` | `tsc --noEmit` across all packages |
 | `yarn lint` | Lint API + web |
@@ -88,7 +84,6 @@ password: Demo1234!
 
 - **API — module-first Clean Architecture.** `apps/api/src/modules/<domain>/{domain,application,infrastructure}` with a tsyringe DI container in `core/`. Two modules ship: **`auth`** (sign-in/up, tokens, password reset, e-mail verification) and **`user`** (the identity core + user CRUD). Single-user by design — no multi-tenant accounts. Prisma schema has 3 models (`user`, `password_reset_token`, `email_verification_pin`). See [`apps/api/readme.md`](./apps/api/readme.md).
 - **Web — feature modules + sidebar shell.** `apps/web/src/modules/{auth,dashboard,settings}` over a shared `AppShell` (sidebar layout), data via TanStack Query + DI repositories, i18n in en/pt-BR/es. See [`apps/web/README.md`](./apps/web/README.md).
-- **Site — a tech landing.** Sections-driven marketing page with GSAP animations and 3-locale copy. See [`apps/site/README.md`](./apps/site/README.md).
 
 ## Docker
 

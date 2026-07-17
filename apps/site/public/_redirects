@@ -1,4 +1,0 @@
-# Cloudflare Pages SPA fallback — serve index.html for client-side routes
-# (o site usa react-router: /, /privacidade, /termos). Sem isso, refresh em
-# /privacidade ou /termos dá 404.
-/*    /index.html   200

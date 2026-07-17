@@ -16,16 +16,17 @@ export const Button = defineStyleConfig({
     solid: {
       bg: "bg.brand.solid",
       color: "text.onBrand",
-      boxShadow: "0 1px 2px rgba(47, 128, 237, 0.20)",
+      // Neutral graphite shadow to match the grayscale brand (was a blue glow).
+      boxShadow: "0 1px 2px rgba(20, 22, 25, 0.24)",
       _hover: {
         bg: "bg.brand.solid-hover",
         transform: "translateY(-1px)",
-        boxShadow: "0 4px 12px rgba(47, 128, 237, 0.30)",
+        boxShadow: "0 4px 12px rgba(20, 22, 25, 0.32)",
       },
       _active: {
         bg: "bg.brand.solid-active",
         transform: "translateY(0)",
-        boxShadow: "0 1px 2px rgba(47, 128, 237, 0.20)",
+        boxShadow: "0 1px 2px rgba(20, 22, 25, 0.24)",
       },
     },
     subtle: {
@@ -68,7 +69,10 @@ export const Button = defineStyleConfig({
     },
     danger: {
       bg: "red.500",
-      color: "text.onBrand",
+      // White in both modes — the danger button is always red (not brand),
+      // so it must NOT follow the grayscale `text.onBrand` (which is
+      // near-black in dark and would fail contrast on red).
+      color: "#ffffff",
       boxShadow: "0 1px 2px rgba(239, 68, 68, 0.20)",
       _hover: {
         bg: "red.600",

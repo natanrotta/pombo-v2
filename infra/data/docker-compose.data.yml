@@ -11,18 +11,18 @@
 # subir.
 #
 # Subir:   docker compose -f docker-compose.data.yml up -d
-# Validar: docker exec boilerplate-db psql -U boilerplate -c '\dx'   # deve listar 'vector'
+# Validar: docker exec pombo-db psql -U pombo -c '\dx'   # deve listar 'vector'
 #
 # Segredos (NÃO versionados — criar na VPS):
 #   - infra/data/secrets/db_password.txt   (senha do Postgres)
 #   - REDIS_PASSWORD                        (via env / arquivo .env ao lado)
 
-name: boilerplate-data
+name: pombo-data
 
 services:
   db:
     image: postgres:15-alpine
-    container_name: boilerplate-db
+    container_name: pombo-db
     restart: unless-stopped
     # listen_addresses=* DENTRO do container (o processo não enxerga o IP do
     # túnel do host); o isolamento real é o bind "10.8.0.2:5432:5432" abaixo.
@@ -33,8 +33,8 @@ services:
       - "-c"
       - "max_connections=200"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-boilerplate}
-      POSTGRES_USER: ${POSTGRES_USER:-boilerplate}
+      POSTGRES_DB: ${POSTGRES_DB:-pombo}
+      POSTGRES_USER: ${POSTGRES_USER:-pombo}
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     secrets:
       - db_password
@@ -43,7 +43,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-boilerplate} -d ${POSTGRES_DB:-boilerplate}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pombo} -d ${POSTGRES_DB:-pombo}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,7 +55,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: boilerplate-redis
+    container_name: pombo-redis
     restart: unless-stopped
     environment:
       # Disponibiliza a senha DENTRO do container para o healthcheck abaixo
@@ -90,7 +90,7 @@ services:
   # (VPS-APP) scrapes it across the tunnel via METRICS_DATA_URL.
   node-exporter:
     image: prom/node-exporter:latest
-    container_name: boilerplate-node-exporter
+    container_name: pombo-node-exporter
     restart: unless-stopped
     network_mode: host
     pid: host

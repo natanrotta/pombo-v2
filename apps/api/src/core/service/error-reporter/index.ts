@@ -17,7 +17,7 @@ let started = false;
  * Initializes Bugsnag error reporting for the API. Fail-open: no-ops when
  * BUGSNAG_API_KEY is unset so the service never crashes for lack of the
  * backend. The missing key is logged at WARN in a deployed stage
- * (production / staging) — the silent gap that left BOILERPLATE API PROD empty —
+ * (production / staging) — the silent gap that left POMBO API PROD empty —
  * and at INFO in local / test / development, where no key is expected.
  */
 export function initErrorReporter(): void {
@@ -29,7 +29,7 @@ export function initErrorReporter(): void {
 
   if (!apiKey) {
     // Fail-open: a missing key disables reporting rather than crashing the app.
-    // But in a DEPLOYED stage that silence is the bug that left BOILERPLATE API PROD
+    // But in a DEPLOYED stage that silence is the bug that left POMBO API PROD
     // empty — the prod VPS wasn't injecting BUGSNAG_API_KEY. Surface it at WARN
     // (visible in pino / the admin status panel) for production/staging, while
     // local/dev/test stay quiet (no key there is expected).

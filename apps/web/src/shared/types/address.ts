@@ -1,6 +1,6 @@
 /**
  * Wire-format `address` shape — mirrors `AddressResponseDTO` from
- * `@boilerplate/shared-types` 1:1. Dates are ISO strings; every field
+ * `@pombo/shared-types` 1:1. Dates are ISO strings; every field
  * is nullable because the user can save partial info at any time.
  */
 export interface Address {

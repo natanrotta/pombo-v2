@@ -2,7 +2,7 @@
 description: Code review skill. Thin wrapper that delegates to the `code-reviewer` subagent so the review runs in an isolated context and never pollutes the orchestrator's window. Anchored on the project anti-pattern checklist; produces a structured severity-grouped report with actionable suggestions.
 ---
 
-# /code-review — Boilerplate
+# /code-review — Pombo
 
 This skill is a **thin orchestrator**. The actual review is performed by the `code-reviewer` subagent (`.claude/agents/code-reviewer.md`), which loads the patterns docs once in an isolated context window. Your job here is to (1) figure out the scope, (2) invoke the subagent with that scope, (3) relay its report back, and (4) ensure telemetry is written.
 

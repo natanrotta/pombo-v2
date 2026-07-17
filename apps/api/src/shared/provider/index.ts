@@ -32,6 +32,12 @@ export {
 export { IMailProvider, SendMailInput } from "./mail-provider.interface";
 export { IEventBus, EventBusSubscription } from "./event-bus.interface";
 export {
+  IDomainEventBus,
+  DomainEvent,
+  DomainEventType,
+  DomainMessageStatus,
+} from "./domain-event-bus.interface";
+export {
   IFlowProducer,
   FlowSpec,
   FlowChildSpec,

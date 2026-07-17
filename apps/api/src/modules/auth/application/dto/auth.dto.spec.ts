@@ -138,7 +138,7 @@ describe("RefreshTokenDTOSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should pass with an EMPTY body — the web client sends the token via the boilerplate_rt cookie", () => {
+  it("should pass with an EMPTY body — the web client sends the token via the pombo_rt cookie", () => {
     // Regression guard: a required field here would 400 every cookie-only
     // refresh before the controller's cookie-first read runs.
     const result = RefreshTokenDTOSchema.safeParse({});

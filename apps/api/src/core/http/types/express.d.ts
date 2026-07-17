@@ -7,7 +7,7 @@ declare global {
       locale: string;
       /**
        * Session auth context, set by `authMiddleware()`. Single-user
-       * boilerplate: bound to a `userId` only.
+       * pombo: bound to a `userId` only.
        */
       auth: {
         userId: string;

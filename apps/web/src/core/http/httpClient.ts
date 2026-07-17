@@ -17,7 +17,7 @@ declare module "axios" {
   }
 }
 
-const CSRF_COOKIE = "boilerplate_csrf";
+const CSRF_COOKIE = "pombo_csrf";
 
 /** Double-submit CSRF cookie reader — exported for the one non-axios
  *  transport (the copilot SSE fetch in HttpCopilotRepository). */
@@ -34,7 +34,7 @@ export const httpClient = axios.create({
 });
 
 httpClient.interceptors.request.use((config) => {
-  // The session JWT rides the httpOnly `boilerplate_at` cookie (sent automatically
+  // The session JWT rides the httpOnly `pombo_at` cookie (sent automatically
   // because `withCredentials` is true) — it is never read from JS. The only
   // Bearer we still attach is the scoped `email:verify` token during signup,
   // and ONLY on its own routes, so it can't shadow the session cookie elsewhere
@@ -65,7 +65,7 @@ let isRefreshing = false;
 let failedQueue: { resolve: () => void; reject: (err: unknown) => void }[] = [];
 
 // With cookie-based auth there is no token to hand back to queued requests —
-// the refreshed `boilerplate_at` cookie is already on the browser, so each queued
+// the refreshed `pombo_at` cookie is already on the browser, so each queued
 // request just retries. Resolve on success, reject (the original error) on a
 // failed refresh.
 function processQueue(error: unknown) {
@@ -211,7 +211,7 @@ httpClient.interceptors.response.use(
 
       try {
         // Refresh token rides the httpOnly cookie; the backend sets a fresh
-        // `boilerplate_at` cookie on success. We don't touch the token in JS —
+        // `pombo_at` cookie on success. We don't touch the token in JS —
         // replay the queued + original requests with the new cookie attached.
         await axios.post(
           `${httpClient.defaults.baseURL}/auth/refresh`,

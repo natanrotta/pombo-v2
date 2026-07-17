@@ -3,14 +3,15 @@ import { renderPasswordResetEmail } from "./password-reset-email.template";
 describe("renderPasswordResetEmail", () => {
   const baseVars = {
     userName: "Dra. Marina",
-    resetUrl: "https://app.boilerplate.com/reset/TOKEN123",
+    resetUrl: "https://app.pombo.com/reset/TOKEN123",
     ttlMinutes: 30,
+    logoUrl: "https://app.pombo.com/pombo-icon.png",
   };
 
   describe("locale resolution", () => {
     it("defaults to pt-BR when locale is omitted", () => {
       const { subject } = renderPasswordResetEmail(baseVars);
-      expect(subject).toBe("Redefinição de senha — Boilerplate");
+      expect(subject).toBe("Redefinição de senha — Pombo");
     });
 
     it("renders English when locale is 'en'", () => {
@@ -18,7 +19,7 @@ describe("renderPasswordResetEmail", () => {
         ...baseVars,
         locale: "en",
       });
-      expect(subject).toBe("Reset your password — Boilerplate");
+      expect(subject).toBe("Reset your password — Pombo");
       expect(html).toContain('lang="en"');
       expect(html).toContain("Reset password");
     });
@@ -28,7 +29,7 @@ describe("renderPasswordResetEmail", () => {
         ...baseVars,
         locale: "es",
       });
-      expect(subject).toBe("Restablecer contraseña — Boilerplate");
+      expect(subject).toBe("Restablecer contraseña — Pombo");
       expect(html).toContain('lang="es"');
     });
 
@@ -37,7 +38,7 @@ describe("renderPasswordResetEmail", () => {
         ...baseVars,
         locale: "en-US",
       });
-      expect(subject).toBe("Reset your password — Boilerplate");
+      expect(subject).toBe("Reset your password — Pombo");
     });
 
     it("falls back to pt-BR for unknown locales", () => {
@@ -45,7 +46,7 @@ describe("renderPasswordResetEmail", () => {
         ...baseVars,
         locale: "xx-YY",
       });
-      expect(subject).toBe("Redefinição de senha — Boilerplate");
+      expect(subject).toBe("Redefinição de senha — Pombo");
     });
   });
 
@@ -53,7 +54,7 @@ describe("renderPasswordResetEmail", () => {
     it("includes the user name, reset URL and TTL", () => {
       const { html } = renderPasswordResetEmail(baseVars);
       expect(html).toContain("Dra. Marina");
-      expect(html).toContain("https://app.boilerplate.com/reset/TOKEN123");
+      expect(html).toContain("https://app.pombo.com/reset/TOKEN123");
       expect(html).toContain("30 minutos");
     });
 
@@ -62,6 +63,14 @@ describe("renderPasswordResetEmail", () => {
       expect(result).toHaveProperty("subject");
       expect(result.html).toMatch(/^<!doctype html>/);
       expect(result.text).toContain("Dra. Marina");
+    });
+
+    it("renders the Pombo logo image with the absolute URL", () => {
+      const { html } = renderPasswordResetEmail(baseVars);
+      expect(html).toContain(
+        'src="https://app.pombo.com/pombo-icon.png"',
+      );
+      expect(html).toContain('alt="Pombo"');
     });
   });
 

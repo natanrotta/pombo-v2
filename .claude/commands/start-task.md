@@ -2,7 +2,7 @@
 description: Starts a new task by creating a git worktree + branch from develop, then immediately continues the work in the SAME Claude Code session (no new editor window). Invoked ONLY when the user explicitly asks for a worktree (e.g. "crie um worktree", "nova worktree", "abre uma branch nova", "/start-task"). Without an explicit request, the assistant stays on the current branch in inline mode.
 ---
 
-# Start Task — Boilerplate Orchestrator
+# Start Task — Pombo Orchestrator
 
 You start a new task in **worktree mode**. Your job is **Phase 0** of the task lifecycle: create an isolated git worktree + branch from `develop`, prepare it for work (env files + deps), and then **continue the entire task in the current Claude Code session** with the worktree as the working directory. Do NOT open a new editor window. Do NOT write a handoff file. There is no handoff — it's the same conversation from `/start-task` all the way to the PR.
 

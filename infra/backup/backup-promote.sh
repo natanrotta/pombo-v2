@@ -6,13 +6,13 @@
 # próprio backup-db.sh.
 #
 # Crons sugeridos (VPS-DATA):
-#   semanal:  0 4 * * 0  . /etc/boilerplate/backup.env && /opt/boilerplate/backup-promote.sh weekly  >> /var/log/boilerplate-backup.log 2>&1
-#   mensal:   0 5 1 * *  . /etc/boilerplate/backup.env && /opt/boilerplate/backup-promote.sh monthly >> /var/log/boilerplate-backup.log 2>&1
+#   semanal:  0 4 * * 0  . /etc/pombo/backup.env && /opt/pombo/backup-promote.sh weekly  >> /var/log/pombo-backup.log 2>&1
+#   mensal:   0 5 1 * *  . /etc/pombo/backup.env && /opt/pombo/backup-promote.sh monthly >> /var/log/pombo-backup.log 2>&1
 
 set -euo pipefail
 
 : "${RCLONE_REMOTE:=r2}"
-: "${RCLONE_BUCKET:=boilerplate-backups}"
+: "${RCLONE_BUCKET:=pombo-backups}"
 TIER="${1:?uso: backup-promote.sh <weekly|monthly>}"
 
 case "${TIER}" in
@@ -21,7 +21,7 @@ case "${TIER}" in
   *) echo "tier invalido: ${TIER} (use weekly|monthly)"; exit 1 ;;
 esac
 
-# Dump diário mais recente (nomes são ordenáveis: boilerplate-YYYYMMDD-HHMM.dump.age).
+# Dump diário mais recente (nomes são ordenáveis: pombo-YYYYMMDD-HHMM.dump.age).
 LATEST="$(rclone lsf "${RCLONE_REMOTE}:${RCLONE_BUCKET}/daily/" --files-only | sort | tail -1)"
 [ -n "${LATEST}" ] || { echo "nenhum dump em daily/ para promover"; exit 1; }
 

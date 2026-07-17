@@ -15,15 +15,36 @@ import type { IEventBus } from "@shared/provider/event-bus.interface";
 import type { IFlowProducer } from "@shared/provider/flow-producer.interface";
 import type { IQueueProvider } from "@shared/provider/queue-provider.interface";
 import { shutdownRateLimitStore } from "@core/http/middlewares/rate-limit-store";
+import { startWhatsAppGateway } from "@core/service/whatsapp/gateway-boot";
 
 const server = http.createServer(app);
 
-server.listen(env.API_PORT, () => {
-  logger.info(
-    { port: env.API_PORT, environment: env.NODE_ENV },
-    "Server started",
-  );
-});
+// WhatsApp gateway boot (pombo). Only runs when WHATSAPP_ENABLED=true: acquires
+// the single-replica advisory lock, wires the bus listeners, rehydrates
+// CONNECTED devices from authState, and starts the outbox-prune interval.
+// Returns a shutdown that closes sockets WITHOUT logging out + releases the
+// lock. When disabled (default), NONE of this runs and Baileys is never
+// imported — the API still boots and every HTTP endpoint responds.
+let stopWhatsAppGateway: (() => Promise<void>) | null = null;
+
+const start = async (): Promise<void> => {
+  if (env.WHATSAPP_ENABLED) {
+    stopWhatsAppGateway = await startWhatsAppGateway();
+  }
+
+  server.listen(env.API_PORT, () => {
+    logger.info(
+      {
+        port: env.API_PORT,
+        environment: env.NODE_ENV,
+        whatsappEnabled: env.WHATSAPP_ENABLED,
+      },
+      "Server started",
+    );
+  });
+};
+
+void start();
 
 const gracefulShutdown = async (signal: string) => {
   logger.info({ signal }, "Shutting down gracefully");
@@ -35,6 +56,16 @@ const gracefulShutdown = async (signal: string) => {
   const cacheProvider = container.resolve<ICacheProvider>(
     DI_TOKENS.CacheProvider,
   );
+  // Close WhatsApp sockets (close(), NEVER logout()) + release the advisory
+  // lock before the rest of the teardown. No-op when the gateway is disabled.
+  if (stopWhatsAppGateway) {
+    await stopWhatsAppGateway().catch((error: unknown) =>
+      logger.error(
+        { message: error instanceof Error ? error.message : String(error) },
+        "WhatsApp gateway shutdown failed",
+      ),
+    );
+  }
   await Promise.all([
     queueProvider.shutdown(),
     eventBus.shutdown(),

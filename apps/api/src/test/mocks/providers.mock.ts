@@ -123,6 +123,17 @@ export function mockAppConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     FRONTEND_URL: "http://localhost:3000",
     PASSWORD_RESET_TOKEN_TTL_MINUTES: 60,
     EMAIL_VERIFICATION_PIN_TTL_MINUTES: 15,
+    // WhatsApp Gateway (pombo) defaults — mirror the env defaults.
+    WHATSAPP_ENABLED: false,
+    DISCONNECT_DEBOUNCE_MS: 30000,
+    RECONNECT_BASE_DELAY_MS: 3000,
+    RECONNECT_MAX_DELAY_MS: 300000,
+    OUTBOX_TTL_HOURS: 24,
+    OUTBOX_PRUNE_INTERVAL_MS: 3600000,
+    WEBHOOK_TIMEOUT_MS: 5000,
+    WEBHOOK_MAX_ATTEMPTS: 4,
+    WEBHOOK_RETRY_BASE_DELAY_MS: 1000,
+    ADVISORY_LOCK_HEARTBEAT_MS: 30000,
     ...overrides,
   };
 }

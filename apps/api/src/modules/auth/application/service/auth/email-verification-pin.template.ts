@@ -18,6 +18,9 @@ export interface EmailVerificationPinVars {
   pin: string;
   /** PIN TTL in minutes — surfaced in the copy so users know the window. */
   ttlMinutes: number;
+  /** Absolute URL to the Pombo logo (e.g. `${FRONTEND_URL}/pombo-icon.png`).
+   *  Must be absolute — e-mail clients can't resolve app-relative paths. */
+  logoUrl: string;
   /** Defaults to pt-BR when omitted or unknown. */
   locale?: string;
 }
@@ -115,6 +118,7 @@ export function renderEmailVerificationPinEmail(
   // Render each digit with letter-spacing for legibility; escape defensively
   // even though the PIN is digits-only.
   const pinSafe = escapeHtml(vars.pin);
+  const logoUrlSafe = escapeHtml(vars.logoUrl);
 
   const subject = copy.subject;
 
@@ -138,7 +142,7 @@ export function renderEmailVerificationPinEmail(
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#22d3a8 0%,#3b82f6 100%);display:inline-block;line-height:40px;text-align:center;color:#ffffff;font-weight:700;font-size:18px;letter-spacing:-0.02em;">C</div>
+                      <img src="${logoUrlSafe}" width="40" height="40" alt="${escapeHtml(copy.brand)}" style="display:block;width:40px;height:40px;border-radius:11px;border:0;outline:none;text-decoration:none;" />
                     </td>
                     <td style="vertical-align:middle;padding-left:12px;">
                       <div style="font-size:16px;font-weight:600;color:#0f172a;letter-spacing:-0.01em;">${escapeHtml(copy.brand)}</div>

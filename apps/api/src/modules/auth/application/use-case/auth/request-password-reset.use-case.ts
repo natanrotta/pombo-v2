@@ -65,12 +65,14 @@ export class RequestPasswordResetUseCase {
       expiresAt,
     });
 
-    const resetUrl = `${this.config.FRONTEND_URL.replace(/\/$/, "")}/reset-password?token=${rawToken}`;
+    const frontendBaseUrl = this.config.FRONTEND_URL.replace(/\/$/, "");
+    const resetUrl = `${frontendBaseUrl}/reset-password?token=${rawToken}`;
 
     const { subject, html, text } = renderPasswordResetEmail({
       userName: user.name,
       resetUrl,
       ttlMinutes: this.config.PASSWORD_RESET_TOKEN_TTL_MINUTES,
+      logoUrl: `${frontendBaseUrl}/pombo-icon.png`,
       locale: user.language,
     });
 

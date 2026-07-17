@@ -24,4 +24,8 @@ export interface AppConfig {
   WEBHOOK_MAX_ATTEMPTS: number;
   WEBHOOK_RETRY_BASE_DELAY_MS: number;
   ADVISORY_LOCK_HEARTBEAT_MS: number;
+
+  // ── Redis read-aside caches ───────────────────────────────────────────────
+  CACHE_ENTITY_TTL_SECONDS: number;
+  CACHE_API_TOKEN_TTL_SECONDS: number;
 }

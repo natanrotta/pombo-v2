@@ -126,6 +126,22 @@ const envSchema = z.object({
   WEBHOOK_RETRY_BASE_DELAY_MS: z.coerce.number().int().positive().default(1000),
   // How often the advisory-lock connection heartbeats (single-replica guard).
   ADVISORY_LOCK_HEARTBEAT_MS: z.coerce.number().int().positive().default(30000),
+
+  // ── Redis read-aside caches (pure optimization; fail-open) ────────────────
+  // TTL of the device + user entity caches (hot-read paths). A backstop only —
+  // writes invalidate the key immediately, so freshness does not depend on it.
+  CACHE_ENTITY_TTL_SECONDS: z.coerce.number().int().positive().default(60),
+  // TTL of the public-API token lookup cache. This is the REVOCATION-PROPAGATION
+  // window: `rotate` can't invalidate the old hash, so a revoked token keeps
+  // working for at most this long. The `.max(300)` MACHINE-ENFORCES the "keep
+  // small" invariant — ops can't accidentally stretch the revocation window to
+  // hours.
+  CACHE_API_TOKEN_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(300)
+    .default(60),
 });
 
 const parsed = envSchema.safeParse(process.env);

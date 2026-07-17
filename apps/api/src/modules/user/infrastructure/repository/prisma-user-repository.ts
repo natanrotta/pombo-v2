@@ -43,7 +43,11 @@ export class PrismaUserRepository implements IUserRepository {
 
   async findById(id: string): Promise<User | null> {
     try {
-      const user = await prisma.user.findUnique({ where: { id } });
+      // Soft delete is the default (R2): a soft-deleted user is not found. This
+      // also keeps the read-aside cache from ever holding a deleted user.
+      const user = await prisma.user.findFirst({
+        where: { id, deleted_at: null },
+      });
       return user ? this.toEntity(user) : null;
     } catch (error) {
       throw mapPrismaError(error);

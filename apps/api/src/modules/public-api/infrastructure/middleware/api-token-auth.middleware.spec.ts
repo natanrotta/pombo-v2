@@ -2,13 +2,20 @@ import { createHash } from "node:crypto";
 import { Request, Response } from "express";
 import { apiTokenAuthMiddleware } from "./api-token-auth.middleware";
 import { InMemoryApiTokenRepository } from "@modules/account/test/in-memory-api-token.repository";
+import { InMemoryCacheProvider } from "@test/mocks/in-memory-cache.provider";
+import { mockAppConfig } from "@test/mocks";
 import { generateApiToken } from "@modules/account/application/service/api-token.generator";
 import { UnauthorizedError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
-// The middleware resolves the api-token repo + the logger from the container.
+// The middleware resolves the api-token repo, the cache, the config and the
+// logger from the container.
 const { holder } = vi.hoisted(() => ({
-  holder: { repo: null as unknown as InMemoryApiTokenRepository },
+  holder: {
+    repo: null as unknown as InMemoryApiTokenRepository,
+    cache: null as unknown as InMemoryCacheProvider,
+    config: null as unknown as ReturnType<typeof mockAppConfig>,
+  },
 }));
 
 vi.mock("tsyringe", async (importOriginal) => ({
@@ -16,6 +23,8 @@ vi.mock("tsyringe", async (importOriginal) => ({
   container: {
     resolve: vi.fn((token: string) => {
       if (token === "ApiTokenRepository") return holder.repo;
+      if (token === "CacheProvider") return holder.cache;
+      if (token === "AppConfig") return holder.config;
       // LoggerProvider
       return { warn: vi.fn(), error: vi.fn(), info: vi.fn() };
     }),
@@ -50,6 +59,8 @@ const seedToken = async (accountId = "acc-1") => {
 describe("apiTokenAuthMiddleware", () => {
   beforeEach(() => {
     holder.repo = new InMemoryApiTokenRepository();
+    holder.cache = new InMemoryCacheProvider();
+    holder.config = mockAppConfig({ CACHE_API_TOKEN_TTL_SECONDS: 60 });
     vi.clearAllMocks();
   });
 
@@ -99,5 +110,33 @@ describe("apiTokenAuthMiddleware", () => {
     const hash = createHash("sha256").update(token).digest("hex");
     const active = await holder.repo.findActiveByHash(hash);
     expect(active?.lastUsedAt).toBeInstanceOf(Date);
+  });
+
+  it("caches the resolution on a miss and serves the next request from cache (no DB lookup)", async () => {
+    const { token, tokenId } = await seedToken("acc-1");
+    const hash = createHash("sha256").update(token).digest("hex");
+    const findSpy = vi.spyOn(holder.repo, "findActiveByHash");
+
+    // First request → miss → DB lookup + cache back-fill.
+    const first = await run(`Bearer ${token}`);
+    expect(first.req.apiAuth).toEqual({ accountId: "acc-1", tokenId });
+    expect(findSpy).toHaveBeenCalledTimes(1);
+    expect(holder.cache.has(`apitoken:${hash}`)).toBe(true);
+
+    // Second request → hit → NO DB lookup, apiAuth from cache.
+    const second = await run(`Bearer ${token}`);
+    expect(second.req.apiAuth).toEqual({ accountId: "acc-1", tokenId });
+    expect(findSpy).toHaveBeenCalledTimes(1); // still 1 — served from cache
+  });
+
+  it("does not stamp last_used on a cache hit (only on the DB miss)", async () => {
+    const { token } = await seedToken("acc-1");
+    const touchSpy = vi.spyOn(holder.repo, "touchLastUsed");
+
+    await run(`Bearer ${token}`); // miss → 1 touch
+    await run(`Bearer ${token}`); // hit → no touch
+    await Promise.resolve();
+
+    expect(touchSpy).toHaveBeenCalledTimes(1);
   });
 });

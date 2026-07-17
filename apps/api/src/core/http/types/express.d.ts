@@ -27,6 +27,16 @@ declare global {
       emailVerifyAuth?: {
         userId: string;
       };
+      /**
+       * Public-API auth context, set by `apiTokenAuthMiddleware()` on the
+       * `/api/v1/*` routes. Carries the account the `pmb_` token belongs to
+       * (every query scopes by it) and the token id (rate-limit key + last-used
+       * stamp). Present ONLY on the public surface.
+       */
+      apiAuth?: {
+        accountId: string;
+        tokenId: string;
+      };
     }
   }
 }

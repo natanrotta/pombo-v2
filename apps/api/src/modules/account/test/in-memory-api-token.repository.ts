@@ -5,6 +5,13 @@ import {
   CreateApiTokenData,
 } from "@modules/account/domain/repository/api-token-repository.interface";
 
+interface StoredToken {
+  entity: ApiToken;
+  /** Kept alongside the entity because the domain entity deliberately never
+   *  exposes the hash — the middleware looks it up by hash. */
+  tokenHash: string;
+}
+
 /**
  * In-memory `IApiTokenRepository` for specs — mocks at the repository boundary
  * (R25). Enforces the same invariant the DB rotation does: `rotate` revokes the
@@ -12,32 +19,69 @@ import {
  * than one active token per account.
  */
 export class InMemoryApiTokenRepository implements IApiTokenRepository {
-  private readonly tokens = new Map<string, ApiToken>();
+  private readonly tokens = new Map<string, StoredToken>();
+
+  private revoke(stored: StoredToken): StoredToken {
+    const t = stored.entity;
+    return {
+      tokenHash: stored.tokenHash,
+      entity: new ApiToken({
+        id: t.id,
+        accountId: t.accountId,
+        tokenHash: "",
+        tokenPrefix: t.tokenPrefix,
+        createdByUserId: "",
+        lastUsedAt: t.lastUsedAt,
+        revokedAt: new Date(),
+        createdAt: t.createdAt,
+      }),
+    };
+  }
 
   async findActiveByAccount(accountId: string): Promise<ApiToken | null> {
     const active = [...this.tokens.values()]
+      .map((s) => s.entity)
       .filter((t) => t.accountId === accountId && t.revokedAt === null)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     return active[0] ?? null;
   }
 
+  async findActiveByHash(tokenHash: string): Promise<ApiToken | null> {
+    for (const stored of this.tokens.values()) {
+      if (stored.tokenHash === tokenHash && stored.entity.revokedAt === null) {
+        return stored.entity;
+      }
+    }
+    return null;
+  }
+
+  async touchLastUsed(tokenId: string): Promise<void> {
+    const stored = this.tokens.get(tokenId);
+    if (!stored) return;
+    const t = stored.entity;
+    this.tokens.set(tokenId, {
+      tokenHash: stored.tokenHash,
+      entity: new ApiToken({
+        id: t.id,
+        accountId: t.accountId,
+        tokenHash: stored.tokenHash,
+        tokenPrefix: t.tokenPrefix,
+        createdByUserId: "",
+        lastUsedAt: new Date(),
+        revokedAt: t.revokedAt,
+        createdAt: t.createdAt,
+      }),
+    });
+  }
+
   async rotate(data: CreateApiTokenData): Promise<ApiToken> {
     // Revoke every currently-active token for the account.
-    for (const [id, token] of this.tokens.entries()) {
-      if (token.accountId === data.accountId && token.revokedAt === null) {
-        this.tokens.set(
-          id,
-          new ApiToken({
-            id: token.id,
-            accountId: token.accountId,
-            tokenHash: "",
-            tokenPrefix: token.tokenPrefix,
-            createdByUserId: "",
-            lastUsedAt: token.lastUsedAt,
-            revokedAt: new Date(),
-            createdAt: token.createdAt,
-          }),
-        );
+    for (const [id, stored] of this.tokens.entries()) {
+      if (
+        stored.entity.accountId === data.accountId &&
+        stored.entity.revokedAt === null
+      ) {
+        this.tokens.set(id, this.revoke(stored));
       }
     }
 
@@ -51,13 +95,17 @@ export class InMemoryApiTokenRepository implements IApiTokenRepository {
       revokedAt: null,
       createdAt: new Date(),
     });
-    this.tokens.set(created.id, created);
+    this.tokens.set(created.id, {
+      entity: created,
+      tokenHash: data.tokenHash,
+    });
     return created;
   }
 
   /** Test helper: total rows (active + revoked) for an account. */
   countForAccount(accountId: string): number {
-    return [...this.tokens.values()].filter((t) => t.accountId === accountId)
-      .length;
+    return [...this.tokens.values()].filter(
+      (s) => s.entity.accountId === accountId,
+    ).length;
   }
 }

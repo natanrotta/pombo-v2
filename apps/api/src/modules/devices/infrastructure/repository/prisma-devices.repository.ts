@@ -3,6 +3,7 @@ import { Device } from "@modules/devices/domain/entity/device.entity";
 import {
   IDevicesRepository,
   CreateDeviceData,
+  UpdateDeviceWebhooksData,
 } from "@modules/devices/domain/repository/devices-repository.interface";
 import { type DeviceStatus } from "@modules/devices/domain/value-object/device-status";
 import { prisma } from "@core/database/prisma/prisma-client";
@@ -21,8 +22,14 @@ export class PrismaDevicesRepository implements IDevicesRepository {
       name: data.name,
       identifier: data.identifier,
       status: data.status as DeviceStatus,
-      webhookUrl: data.webhook_url,
       webhookSecret: data.webhook_secret,
+      webhooks: {
+        onConnect: data.webhook_on_connect_url,
+        onDisconnect: data.webhook_on_disconnect_url,
+        onReceive: data.webhook_on_receive_url,
+        onMessageStatus: data.webhook_on_message_status_url,
+        onSend: data.webhook_on_send_url,
+      },
       lastConnectedAt: data.last_connected_at,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
@@ -102,7 +109,6 @@ export class PrismaDevicesRepository implements IDevicesRepository {
         data: {
           account_id: data.accountId,
           name: data.name,
-          webhook_url: data.webhookUrl,
           webhook_secret: data.webhookSecret,
         },
       });
@@ -116,6 +122,52 @@ export class PrismaDevicesRepository implements IDevicesRepository {
           ErrorCodes.DEVICE_NAME_TAKEN,
         );
       }
+      throw mapPrismaError(error);
+    }
+  }
+
+  async updateWebhooks(
+    accountId: string,
+    id: string,
+    webhooks: UpdateDeviceWebhooksData,
+  ): Promise<Device> {
+    try {
+      // Scoped write (R1) in a SINGLE atomic statement: updateManyAndReturn
+      // filters by account_id and returns the updated row in one round-trip —
+      // no updateMany→findFirst TOCTOU (a concurrent delete can't surface a
+      // false 404). Only the keys the caller supplied are written (undefined =
+      // leave unchanged; null clears).
+      const rows = await prisma.device.updateManyAndReturn({
+        where: { id, account_id: accountId },
+        data: {
+          ...(webhooks.onConnect !== undefined && {
+            webhook_on_connect_url: webhooks.onConnect,
+          }),
+          ...(webhooks.onDisconnect !== undefined && {
+            webhook_on_disconnect_url: webhooks.onDisconnect,
+          }),
+          ...(webhooks.onReceive !== undefined && {
+            webhook_on_receive_url: webhooks.onReceive,
+          }),
+          ...(webhooks.onMessageStatus !== undefined && {
+            webhook_on_message_status_url: webhooks.onMessageStatus,
+          }),
+          ...(webhooks.onSend !== undefined && {
+            webhook_on_send_url: webhooks.onSend,
+          }),
+        },
+      });
+      const [row] = rows;
+      if (!row) {
+        throw new NotFoundError(
+          "Device not found",
+          undefined,
+          ErrorCodes.DEVICE_NOT_FOUND,
+        );
+      }
+      return this.toEntity(row);
+    } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw mapPrismaError(error);
     }
   }

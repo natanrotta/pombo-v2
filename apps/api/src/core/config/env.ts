@@ -98,6 +98,13 @@ const envSchema = z.object({
     .min(1)
     .default(15 * 60 * 1000),
   RATE_LIMIT_PUBLIC_MAX: z.coerce.number().min(1).default(30),
+  // Per-token limiter for the public `/api/v1` surface (keyed by api_token id,
+  // not IP), layered on top of the global limiter.
+  RATE_LIMIT_API_WINDOW_MS: z.coerce
+    .number()
+    .min(1)
+    .default(60 * 1000),
+  RATE_LIMIT_API_MAX: z.coerce.number().min(1).default(120),
 
   // ── WhatsApp Gateway (pombo) ──────────────────────────────────────────────
   // Master flag. When false (default), the app boots with NO Baileys import,

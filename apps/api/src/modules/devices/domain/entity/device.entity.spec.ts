@@ -14,13 +14,22 @@ describe("Device entity", () => {
     expect(device.identifier).toBe("5599");
   });
 
-  it("toJSON never leaks the webhookSecret and ISO-formats dates", () => {
+  it("toJSON never leaks the webhookSecret, exposes the webhook URLs, and ISO-formats dates", () => {
     const device = makeDevice({
       webhookSecret: "top-secret",
+      webhooks: {
+        onConnect: "https://hook/connect",
+        onDisconnect: null,
+        onReceive: null,
+        onMessageStatus: null,
+        onSend: "https://hook/send",
+      },
       lastConnectedAt: new Date("2025-02-02T00:00:00.000Z"),
     });
     const json = device.toJSON();
     expect(json).not.toHaveProperty("webhookSecret");
+    expect(json.webhooks.onConnect).toBe("https://hook/connect");
+    expect(json.webhooks.onSend).toBe("https://hook/send");
     expect(json.createdAt).toBe("2025-01-01T00:00:00.000Z");
     expect(json.lastConnectedAt).toBe("2025-02-02T00:00:00.000Z");
   });

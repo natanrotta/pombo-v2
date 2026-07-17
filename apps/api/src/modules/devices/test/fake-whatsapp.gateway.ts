@@ -16,6 +16,7 @@ export class FakeWhatsAppGateway implements IWhatsAppGateway {
 
   private connected = new Set<string>();
   private jidByPhone = new Map<string, string | null>();
+  private qrByDevice = new Map<string, string>();
   private nextWaMessageId = 0;
   private enabled = true;
 
@@ -27,6 +28,11 @@ export class FakeWhatsAppGateway implements IWhatsAppGateway {
 
   setJid(phone: string, jid: string | null): void {
     this.jidByPhone.set(phone, jid);
+  }
+
+  setQr(deviceId: string, qr: string | null): void {
+    if (qr === null) this.qrByDevice.delete(deviceId);
+    else this.qrByDevice.set(deviceId, qr);
   }
 
   setEnabled(value: boolean): void {
@@ -53,6 +59,10 @@ export class FakeWhatsAppGateway implements IWhatsAppGateway {
 
   isConnected(deviceId: string): boolean {
     return this.connected.has(deviceId);
+  }
+
+  getCurrentQr(deviceId: string): string | null {
+    return this.qrByDevice.get(deviceId) ?? null;
   }
 
   async resolveJid(_deviceId: string, phone: string): Promise<string | null> {

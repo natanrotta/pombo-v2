@@ -13,7 +13,6 @@ const setup = async () => {
   const device = await devices.create({
     accountId: ACCOUNT_A,
     name: "d",
-    webhookUrl: null,
     webhookSecret: "s",
   });
   const created = await outbox.create({

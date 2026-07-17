@@ -33,6 +33,7 @@ export interface SessionManager {
   disconnect(deviceId: string): Promise<void>;
   logout(deviceId: string): Promise<void>;
   isConnected(deviceId: string): boolean;
+  getCurrentQr(deviceId: string): string | null;
   resolveJid(deviceId: string, phone: string): Promise<string | null>;
   sendText(
     deviceId: string,
@@ -77,6 +78,9 @@ export const makeSessionManager = (
   const sockets = new Map<string, WASocket>();
   const openDevices = new Set<string>();
   const pending = new Set<string>();
+  // Last QR string emitted per device, for the GET /devices/:id/qr poll. Set on
+  // a `qr` update, cleared once the socket opens / closes / logs out.
+  const lastQr = new Map<string, string>();
   let shuttingDown = false;
 
   let cachedVersion:
@@ -150,10 +154,14 @@ export const makeSessionManager = (
         }) => {
           const { connection, lastDisconnect, qr } = update;
 
-          if (qr) deps.bus.publish({ type: "session.qr", deviceId, qr });
+          if (qr) {
+            lastQr.set(deviceId, qr);
+            deps.bus.publish({ type: "session.qr", deviceId, qr });
+          }
 
           if (connection === "open") {
             openDevices.add(deviceId);
+            lastQr.delete(deviceId);
             const identifier = sock.user?.id
               ? (jidDecode(sock.user.id)?.user ?? "")
               : "";
@@ -167,6 +175,7 @@ export const makeSessionManager = (
           if (connection === "close") {
             openDevices.delete(deviceId);
             sockets.delete(deviceId);
+            lastQr.delete(deviceId);
 
             if (shuttingDown) return;
 
@@ -210,6 +219,7 @@ export const makeSessionManager = (
 
     async disconnect(deviceId) {
       openDevices.delete(deviceId);
+      lastQr.delete(deviceId);
       const sock = sockets.get(deviceId);
       sockets.delete(deviceId);
       sock?.end(undefined); // close, not logout
@@ -217,12 +227,15 @@ export const makeSessionManager = (
 
     async logout(deviceId) {
       openDevices.delete(deviceId);
+      lastQr.delete(deviceId);
       const sock = sockets.get(deviceId);
       sockets.delete(deviceId);
       if (sock) await sock.logout(); // unpair (DELETE /devices/:id semantics)
     },
 
     isConnected: (deviceId) => openDevices.has(deviceId),
+
+    getCurrentQr: (deviceId) => lastQr.get(deviceId) ?? null,
 
     async resolveJid(deviceId, phone) {
       const sock = sockets.get(deviceId);
@@ -262,6 +275,7 @@ export const makeSessionManager = (
       for (const sock of sockets.values()) sock.end(undefined);
       sockets.clear();
       openDevices.clear();
+      lastQr.clear();
     },
   };
 };

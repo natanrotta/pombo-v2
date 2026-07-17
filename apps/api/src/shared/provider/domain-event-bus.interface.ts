@@ -35,6 +35,15 @@ export type DomainEvent =
       deviceId: string;
       messageId: string;
       status: DomainMessageStatus;
+    }
+  | {
+      // Published by `messaging` right after the gateway accepts an outbound
+      // send, consumed by `webhooks`. Carries NO message text (privacy — the
+      // webhook only signals that a send happened, not what was sent).
+      type: "message.sent";
+      deviceId: string;
+      messageId: string;
+      phone: string;
     };
 
 export type DomainEventType = DomainEvent["type"];

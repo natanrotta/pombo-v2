@@ -177,16 +177,23 @@ model email_verification_pin {
 /// is the source of truth for it. The `webhook_secret` is generated at
 /// registration and returned exactly once.
 model device {
-  id                String        @id @default(uuid())
-  account_id        String
-  name              String
-  identifier        String?
-  status            device_status @default(DISCONNECTED)
-  webhook_url       String?
-  webhook_secret    String?
-  last_connected_at DateTime?
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
+  id                            String        @id @default(uuid())
+  account_id                    String
+  name                          String
+  identifier                    String?
+  status                        device_status @default(DISCONNECTED)
+  /// One HMAC secret signs every webhook event; generated at registration,
+  /// returned exactly once. The per-event delivery URLs below are configured
+  /// separately via PATCH /devices/:id/webhooks.
+  webhook_secret                String?
+  webhook_on_connect_url        String?
+  webhook_on_disconnect_url     String?
+  webhook_on_receive_url        String?
+  webhook_on_message_status_url String?
+  webhook_on_send_url           String?
+  last_connected_at             DateTime?
+  created_at                    DateTime      @default(now())
+  updated_at                    DateTime      @updatedAt
 
   account         account          @relation(fields: [account_id], references: [id], onDelete: Cascade)
   auth_keys       auth_key[]

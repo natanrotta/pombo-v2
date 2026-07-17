@@ -1,31 +1,61 @@
-import { RegisterDeviceDTOSchema, DeviceIdParamSchema } from "./device.dto";
+import {
+  RegisterDeviceDTOSchema,
+  DeviceIdParamSchema,
+  UpdateDeviceWebhooksDTOSchema,
+} from "./device.dto";
 
 describe("device DTOs", () => {
   describe("RegisterDeviceDTOSchema", () => {
-    it("accepts a name and optional webhookUrl", () => {
-      const parsed = RegisterDeviceDTOSchema.parse({
-        name: "  my-phone  ",
-        webhookUrl: "https://hook.example.com",
-      });
-      expect(parsed.name).toBe("my-phone"); // trimmed
-      expect(parsed.webhookUrl).toBe("https://hook.example.com");
-    });
-
-    it("accepts a name with no webhookUrl", () => {
-      const parsed = RegisterDeviceDTOSchema.parse({ name: "phone" });
-      expect(parsed.webhookUrl).toBeUndefined();
+    it("accepts and trims a name", () => {
+      const parsed = RegisterDeviceDTOSchema.parse({ name: "  my-phone  " });
+      expect(parsed.name).toBe("my-phone");
     });
 
     it("rejects an empty name", () => {
       expect(() => RegisterDeviceDTOSchema.parse({ name: "" })).toThrow();
     });
 
-    it("rejects a non-url webhookUrl", () => {
+    it("ignores a webhookUrl (registration is name-only now)", () => {
+      const parsed = RegisterDeviceDTOSchema.parse({
+        name: "phone",
+        webhookUrl: "https://hook.example.com",
+      });
+      expect(parsed).toEqual({ name: "phone" });
+      expect(parsed).not.toHaveProperty("webhookUrl");
+    });
+  });
+
+  describe("UpdateDeviceWebhooksDTOSchema", () => {
+    it("accepts http(s) URLs for any of the five hooks", () => {
+      const parsed = UpdateDeviceWebhooksDTOSchema.parse({
+        onConnect: "https://hook/connect",
+        onSend: "http://hook/send",
+      });
+      expect(parsed.onConnect).toBe("https://hook/connect");
+      expect(parsed.onSend).toBe("http://hook/send");
+    });
+
+    it("accepts null to clear a hook and an empty object", () => {
+      expect(UpdateDeviceWebhooksDTOSchema.parse({ onReceive: null })).toEqual({
+        onReceive: null,
+      });
+      expect(UpdateDeviceWebhooksDTOSchema.parse({})).toEqual({});
+    });
+
+    it("rejects a non-url and a non-http(s) scheme", () => {
       expect(() =>
-        RegisterDeviceDTOSchema.parse({
-          name: "phone",
-          webhookUrl: "not-a-url",
+        UpdateDeviceWebhooksDTOSchema.parse({ onConnect: "not-a-url" }),
+      ).toThrow();
+      expect(() =>
+        UpdateDeviceWebhooksDTOSchema.parse({
+          onConnect: "ftp://hook/connect",
         }),
+      ).toThrow();
+    });
+
+    it("rejects unknown keys (strict)", () => {
+      expect(() =>
+        UpdateDeviceWebhooksDTOSchema.parse({ onWhatever: "https://x" }),
       ).toThrow();
     });
   });

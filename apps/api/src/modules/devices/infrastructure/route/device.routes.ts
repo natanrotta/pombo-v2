@@ -9,6 +9,7 @@ import {
 import {
   RegisterDeviceDTOSchema,
   DeviceIdParamSchema,
+  UpdateDeviceWebhooksDTOSchema,
 } from "@modules/devices/application/dto/device.dto";
 
 const deviceRoutes = Router();
@@ -32,6 +33,21 @@ deviceRoutes.get(
   "/:id",
   validateRequest({ params: DeviceIdParamSchema }),
   asyncHandler(deviceController.getById.bind(deviceController)),
+);
+
+deviceRoutes.get(
+  "/:id/qr",
+  validateRequest({ params: DeviceIdParamSchema }),
+  asyncHandler(deviceController.getQr.bind(deviceController)),
+);
+
+deviceRoutes.patch(
+  "/:id/webhooks",
+  validateRequest({
+    params: DeviceIdParamSchema,
+    body: UpdateDeviceWebhooksDTOSchema,
+  }),
+  asyncHandler(deviceController.updateWebhooks.bind(deviceController)),
 );
 
 deviceRoutes.post(

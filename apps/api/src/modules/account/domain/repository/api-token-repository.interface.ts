@@ -16,6 +16,12 @@ export interface CreateApiTokenData {
 export interface IApiTokenRepository {
   /** The account's current non-revoked token, or null if none. */
   findActiveByAccount(accountId: string): Promise<ApiToken | null>;
+  /** Lookup for the public-API auth middleware: the active (non-revoked) token
+   *  whose stored hash matches, or null (unknown OR revoked — indistinguishable
+   *  to the caller). */
+  findActiveByHash(tokenHash: string): Promise<ApiToken | null>;
+  /** Fire-and-forget stamp of `last_used_at` after a successful auth. */
+  touchLastUsed(tokenId: string): Promise<void>;
   /** Atomically revoke the account's active token (if any) and create a new
    *  one. Returns the newly created token. */
   rotate(data: CreateApiTokenData): Promise<ApiToken>;

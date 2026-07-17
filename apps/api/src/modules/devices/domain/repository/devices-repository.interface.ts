@@ -1,12 +1,15 @@
-import { Device } from "../entity/device.entity";
+import { Device, type DeviceWebhooks } from "../entity/device.entity";
 import { type DeviceStatus } from "../value-object/device-status";
 
 export interface CreateDeviceData {
   accountId: string;
   name: string;
-  webhookUrl: string | null;
   webhookSecret: string;
 }
+
+/** Partial per-event webhook update: only the provided keys are written
+ *  (`null` clears a URL, an absent key leaves it unchanged). */
+export type UpdateDeviceWebhooksData = Partial<DeviceWebhooks>;
 
 /**
  * The port the application depends on.
@@ -34,6 +37,11 @@ export interface IDevicesRepository {
   findByName(accountId: string, name: string): Promise<Device | null>;
   list(accountId: string): Promise<Device[]>;
   create(data: CreateDeviceData): Promise<Device>;
+  updateWebhooks(
+    accountId: string,
+    id: string,
+    webhooks: UpdateDeviceWebhooksData,
+  ): Promise<Device>;
   delete(accountId: string, id: string): Promise<void>;
 
   // ── System-triggered (no tenant scope; keyed by device PK) ───────────────

@@ -1,5 +1,19 @@
 import { type DeviceStatus } from "../value-object/device-status";
 
+/**
+ * Per-event webhook delivery URLs. One HMAC `webhookSecret` (on the device)
+ * signs every event; each URL is where that event type is POSTed. A null URL
+ * means "don't deliver this event". `onReceive` is persisted but dormant in
+ * this version (inbound messages are not processed — see PLANO §4).
+ */
+export interface DeviceWebhooks {
+  onConnect: string | null;
+  onDisconnect: string | null;
+  onReceive: string | null;
+  onMessageStatus: string | null;
+  onSend: string | null;
+}
+
 export interface DeviceProps {
   id: string;
   /** The tenant that owns this device (BASELINE R1). */
@@ -8,9 +22,9 @@ export interface DeviceProps {
   /** null until pairing — WhatsApp is the source of truth for it. */
   identifier: string | null;
   status: DeviceStatus;
-  webhookUrl: string | null;
   /** Generated at registration, returned exactly once; never re-exposed. */
   webhookSecret: string | null;
+  webhooks: DeviceWebhooks;
   lastConnectedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -43,12 +57,12 @@ export class Device {
     return this.props.status;
   }
 
-  get webhookUrl(): string | null {
-    return this.props.webhookUrl;
-  }
-
   get webhookSecret(): string | null {
     return this.props.webhookSecret;
+  }
+
+  get webhooks(): DeviceWebhooks {
+    return this.props.webhooks;
   }
 
   get lastConnectedAt(): Date | null {
@@ -65,7 +79,8 @@ export class Device {
 
   /**
    * Public wire projection returned by GET endpoints. NEVER leaks
-   * `webhookSecret` (shown exactly once, at registration).
+   * `webhookSecret` (shown exactly once, at registration). The per-event
+   * webhook URLs ARE exposed so the settings screen can populate the form.
    */
   public toJSON() {
     return {
@@ -73,7 +88,7 @@ export class Device {
       name: this.name,
       identifier: this.identifier,
       status: this.status,
-      webhookUrl: this.webhookUrl,
+      webhooks: this.webhooks,
       lastConnectedAt: this.lastConnectedAt
         ? this.lastConnectedAt.toISOString()
         : null,

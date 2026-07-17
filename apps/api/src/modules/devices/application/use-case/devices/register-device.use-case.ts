@@ -41,7 +41,6 @@ export class RegisterDeviceUseCase {
     const device = await this.devicesRepository.create({
       accountId,
       name: data.name,
-      webhookUrl: data.webhookUrl ?? null,
       webhookSecret,
     });
 

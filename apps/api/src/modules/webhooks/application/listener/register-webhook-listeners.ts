@@ -76,4 +76,12 @@ export function registerWebhookListeners(): void {
       data: { messageId: event.messageId, status: event.status },
     });
   });
+
+  bus.subscribe("message.sent", async (event) => {
+    await dispatch({
+      type: "message.sent",
+      deviceId: event.deviceId,
+      data: { messageId: event.messageId, phone: event.phone },
+    });
+  });
 }

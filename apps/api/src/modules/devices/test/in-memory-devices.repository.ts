@@ -3,6 +3,7 @@ import { Device } from "@modules/devices/domain/entity/device.entity";
 import {
   IDevicesRepository,
   CreateDeviceData,
+  UpdateDeviceWebhooksData,
 } from "@modules/devices/domain/repository/devices-repository.interface";
 import { type DeviceStatus } from "@modules/devices/domain/value-object/device-status";
 import { ConflictError, NotFoundError } from "@shared/error";
@@ -60,14 +61,71 @@ export class InMemoryDevicesRepository implements IDevicesRepository {
       name: data.name,
       identifier: null,
       status: "DISCONNECTED",
-      webhookUrl: data.webhookUrl,
       webhookSecret: data.webhookSecret,
+      webhooks: {
+        onConnect: null,
+        onDisconnect: null,
+        onReceive: null,
+        onMessageStatus: null,
+        onSend: null,
+      },
       lastConnectedAt: null,
       createdAt: now,
       updatedAt: now,
     });
     this.devices.set(device.id, device);
     return device;
+  }
+
+  async updateWebhooks(
+    accountId: string,
+    id: string,
+    webhooks: UpdateDeviceWebhooksData,
+  ): Promise<Device> {
+    const existing = this.devices.get(id);
+    if (!existing || existing.accountId !== accountId) {
+      throw new NotFoundError(
+        "Device not found",
+        undefined,
+        ErrorCodes.DEVICE_NOT_FOUND,
+      );
+    }
+    const updated = new Device({
+      id: existing.id,
+      accountId: existing.accountId,
+      name: existing.name,
+      identifier: existing.identifier,
+      status: existing.status,
+      webhookSecret: existing.webhookSecret,
+      webhooks: {
+        // undefined = leave unchanged; null = clear the URL.
+        onConnect:
+          webhooks.onConnect !== undefined
+            ? webhooks.onConnect
+            : existing.webhooks.onConnect,
+        onDisconnect:
+          webhooks.onDisconnect !== undefined
+            ? webhooks.onDisconnect
+            : existing.webhooks.onDisconnect,
+        onReceive:
+          webhooks.onReceive !== undefined
+            ? webhooks.onReceive
+            : existing.webhooks.onReceive,
+        onMessageStatus:
+          webhooks.onMessageStatus !== undefined
+            ? webhooks.onMessageStatus
+            : existing.webhooks.onMessageStatus,
+        onSend:
+          webhooks.onSend !== undefined
+            ? webhooks.onSend
+            : existing.webhooks.onSend,
+      },
+      lastConnectedAt: existing.lastConnectedAt,
+      createdAt: existing.createdAt,
+      updatedAt: new Date(),
+    });
+    this.devices.set(id, updated);
+    return updated;
   }
 
   async updateStatus(
@@ -89,8 +147,8 @@ export class InMemoryDevicesRepository implements IDevicesRepository {
       name: existing.name,
       identifier: identifier === undefined ? existing.identifier : identifier,
       status,
-      webhookUrl: existing.webhookUrl,
       webhookSecret: existing.webhookSecret,
+      webhooks: existing.webhooks,
       lastConnectedAt:
         status === "CONNECTED" ? new Date() : existing.lastConnectedAt,
       createdAt: existing.createdAt,

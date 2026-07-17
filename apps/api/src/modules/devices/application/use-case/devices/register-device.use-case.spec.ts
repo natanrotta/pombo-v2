@@ -28,13 +28,16 @@ describe("RegisterDeviceUseCase", () => {
     expect(stored?.identifier).toBeNull();
   });
 
-  it("stores the webhookUrl when provided", async () => {
-    const out = await sut.execute(ACCOUNT_A, {
-      name: "phone",
-      webhookUrl: "https://hook",
-    });
+  it("creates the device with no webhooks configured (set later via PATCH)", async () => {
+    const out = await sut.execute(ACCOUNT_A, { name: "phone" });
     const stored = await devices.findById(ACCOUNT_A, out.id);
-    expect(stored?.webhookUrl).toBe("https://hook");
+    expect(stored?.webhooks).toEqual({
+      onConnect: null,
+      onDisconnect: null,
+      onReceive: null,
+      onMessageStatus: null,
+      onSend: null,
+    });
   });
 
   it("rejects a duplicate name within the same account", async () => {

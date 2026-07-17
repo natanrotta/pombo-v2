@@ -35,6 +35,30 @@ export class PrismaApiTokenRepository implements IApiTokenRepository {
     }
   }
 
+  async findActiveByHash(tokenHash: string): Promise<ApiToken | null> {
+    try {
+      // token_hash is @unique; the extra revoked_at guard makes a revoked token
+      // resolve to null (indistinguishable from unknown to the caller).
+      const row = await prisma.api_token.findFirst({
+        where: { token_hash: tokenHash, revoked_at: null },
+      });
+      return row ? this.toEntity(row) : null;
+    } catch (error) {
+      throw mapPrismaError(error);
+    }
+  }
+
+  async touchLastUsed(tokenId: string): Promise<void> {
+    try {
+      await prisma.api_token.update({
+        where: { id: tokenId },
+        data: { last_used_at: new Date() },
+      });
+    } catch (error) {
+      throw mapPrismaError(error);
+    }
+  }
+
   async rotate(data: CreateApiTokenData): Promise<ApiToken> {
     try {
       // Atomic rotation: revoke every active token for the account, then create

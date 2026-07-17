@@ -5,6 +5,7 @@ import { IWhatsAppGateway } from "@modules/devices/domain/provider/whatsapp-gate
 import { IOutboxRepository } from "@modules/messaging/domain/repository/outbox-repository.interface";
 import { type MessageStatus } from "@modules/messaging/domain/value-object/message-status";
 import { AppConfig } from "@shared/provider/app-config.interface";
+import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
 import {
   ConflictError,
   NotFoundError,
@@ -35,6 +36,8 @@ export class SendTextMessageUseCase {
     private readonly gateway: IWhatsAppGateway,
     @inject(DI_TOKENS.AppConfig)
     private readonly config: AppConfig,
+    @inject(DI_TOKENS.DomainEventBus)
+    private readonly bus: IDomainEventBus,
   ) {}
 
   async execute(input: SendTextInput): Promise<SendTextOutput> {
@@ -113,18 +116,18 @@ export class SendTextMessageUseCase {
       throw error;
     }
 
+    let waMessageId: string;
     try {
-      const { waMessageId } = await this.gateway.sendText(
+      ({ waMessageId } = await this.gateway.sendText(
         device.id,
         jid,
         input.text,
-      );
-      await this.outboxRepository.setWaMessageId(message.id, waMessageId);
-      return { messageId: message.id, status: "PENDING" };
+      ));
     } catch (error) {
       // The socket died between the isConnected check and the send, or Baileys
-      // rejected it. Mark FAILED so the consumer sees it via GET. Best-effort:
-      // if marking FAILED also fails, surface the ORIGINAL send error.
+      // rejected it — the message did NOT go out. Mark FAILED so the consumer
+      // sees it via GET. Best-effort: if marking FAILED also fails, surface the
+      // ORIGINAL send error.
       try {
         await this.outboxRepository.updateStatus(
           message.id,
@@ -136,5 +139,26 @@ export class SendTextMessageUseCase {
       }
       throw error;
     }
+
+    // The gateway ACCEPTED the send — the message went out (spec §7.2: publish
+    // "após aceite do gateway"). Signal it (webhooks → on_send; no text, only
+    // messageId + phone — decisão #6) BEFORE the waMessageId stamp, so a stamp
+    // failure can't suppress the event or flip a delivered message to FAILED.
+    this.bus.publish({
+      type: "message.sent",
+      deviceId: device.id,
+      messageId: message.id,
+      phone: input.phone,
+    });
+    // Stamp the waMessageId (bookkeeping for a getMessage resend). Best-effort:
+    // the message already delivered, so a stamp failure must NOT turn the
+    // caller's 202 into a 500 — swallow it. The row stays PENDING (truthful);
+    // only a future resend lookup for this waMessageId degrades.
+    try {
+      await this.outboxRepository.setWaMessageId(message.id, waMessageId);
+    } catch {
+      // swallow — the send already succeeded; never fail the caller on the stamp
+    }
+    return { messageId: message.id, status: "PENDING" };
   }
 }

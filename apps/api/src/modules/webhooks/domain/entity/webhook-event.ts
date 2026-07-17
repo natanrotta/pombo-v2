@@ -4,7 +4,8 @@ export type WebhookType =
   | "device.connected"
   | "device.disconnected"
   | "device.logged_out"
-  | "message.status";
+  | "message.status"
+  | "message.sent";
 
 /**
  * The semantic payload, discriminated by type. `dispatch-webhook` turns a
@@ -30,11 +31,16 @@ export type WebhookPayload =
       type: "message.status";
       deviceId: string;
       data: { messageId: string; status: DomainMessageStatus };
+    }
+  | {
+      type: "message.sent";
+      deviceId: string;
+      data: { messageId: string; phone: string };
     };
 
 /**
- * The envelope delivered to the consumer's webhookUrl. `eventId` enables the
- * consumer to deduplicate (at-least-once); `timestamp` is ISO 8601.
+ * The envelope delivered to the consumer's per-event webhook URL. `eventId`
+ * enables the consumer to deduplicate (at-least-once); `timestamp` is ISO 8601.
  */
 export type WebhookEvent = WebhookPayload & {
   eventId: string;

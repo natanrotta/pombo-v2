@@ -102,7 +102,7 @@ describe("auth-cookies helpers", () => {
   });
 
   describe("setAccessTokenCookie", () => {
-    it("sets boilerplate_at as an httpOnly, path-/ cookie (JS can't read it)", () => {
+    it("sets pombo_at as an httpOnly, path-/ cookie (JS can't read it)", () => {
       const { cookie, res } = mockRes();
 
       setAccessTokenCookie(res, "jwt-access");

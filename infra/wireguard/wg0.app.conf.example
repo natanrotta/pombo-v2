@@ -5,7 +5,7 @@
 #
 # Validar o túnel (da VPS-APP):
 #   wg show                                   # deve mostrar handshake
-#   psql postgresql://boilerplate@10.8.0.2:5432/boilerplate   # conecta pelo túnel
+#   psql postgresql://pombo@10.8.0.2:5432/pombo   # conecta pelo túnel
 # Da internet pública o banco deve estar FECHADO:
 #   nc -vz <DATA_PUBLIC_IP> 5432              # deve FALHAR
 #

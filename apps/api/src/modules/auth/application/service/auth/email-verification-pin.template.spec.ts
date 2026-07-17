@@ -10,7 +10,7 @@ describe("renderEmailVerificationPinEmail", () => {
   describe("locale resolution", () => {
     it("defaults to pt-BR when locale is omitted", () => {
       expect(renderEmailVerificationPinEmail(baseVars).subject).toBe(
-        "Seu código de confirmação — Boilerplate",
+        "Seu código de confirmação — Pombo",
       );
     });
 
@@ -19,27 +19,27 @@ describe("renderEmailVerificationPinEmail", () => {
         ...baseVars,
         locale: "en",
       });
-      expect(subject).toBe("Your confirmation code — Boilerplate");
+      expect(subject).toBe("Your confirmation code — Pombo");
       expect(html).toContain('lang="en"');
     });
 
     it("renders Spanish when locale is 'es'", () => {
       expect(
         renderEmailVerificationPinEmail({ ...baseVars, locale: "es" }).subject,
-      ).toBe("Tu código de confirmación — Boilerplate");
+      ).toBe("Tu código de confirmación — Pombo");
     });
 
     it("matches base language for regional tags (es-AR → es)", () => {
       expect(
         renderEmailVerificationPinEmail({ ...baseVars, locale: "es-AR" })
           .subject,
-      ).toBe("Tu código de confirmación — Boilerplate");
+      ).toBe("Tu código de confirmación — Pombo");
     });
 
     it("falls back to pt-BR for unknown locales", () => {
       expect(
         renderEmailVerificationPinEmail({ ...baseVars, locale: "de" }).subject,
-      ).toBe("Seu código de confirmação — Boilerplate");
+      ).toBe("Seu código de confirmação — Pombo");
     });
   });
 

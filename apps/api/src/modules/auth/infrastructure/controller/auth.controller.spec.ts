@@ -30,9 +30,9 @@ vi.mock("@core/http/helpers/auth-cookies", () => ({
   setAccessTokenCookie: vi.fn(),
   clearAuthCookies: vi.fn(),
   setCsrfCookie: vi.fn(),
-  REFRESH_TOKEN_COOKIE: "boilerplate_rt",
-  CSRF_TOKEN_COOKIE: "boilerplate_csrf",
-  ACCESS_TOKEN_COOKIE: "boilerplate_at",
+  REFRESH_TOKEN_COOKIE: "pombo_rt",
+  CSRF_TOKEN_COOKIE: "pombo_csrf",
+  ACCESS_TOKEN_COOKIE: "pombo_at",
 }));
 
 vi.mock("tsyringe", async (importOriginal) => ({
@@ -186,11 +186,11 @@ describe("AuthController", () => {
     expect(status).toHaveBeenCalledWith(200);
   });
 
-  it("refresh reads the token from the boilerplate_rt cookie when the body is empty (canonical web path)", async () => {
+  it("refresh reads the token from the pombo_rt cookie when the body is empty (canonical web path)", async () => {
     mockExecute.mockResolvedValue({ token: "t", refreshToken: "rt" });
     const { req, res, status } = mockReqRes({
       body: {},
-      cookies: { boilerplate_rt: "cookie-rt" },
+      cookies: { pombo_rt: "cookie-rt" },
     });
 
     await sut.refresh(req, res);

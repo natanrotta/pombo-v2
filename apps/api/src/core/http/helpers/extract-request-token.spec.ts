@@ -33,7 +33,7 @@ describe("extractRequestToken", () => {
     ).toBe("abc.def.ghi");
   });
 
-  it("falls back to the boilerplate_at cookie when there is no header", () => {
+  it("falls back to the pombo_at cookie when there is no header", () => {
     expect(
       extractRequestToken(
         mockReq({ cookies: { [ACCESS_TOKEN_COOKIE]: "cookie.jwt" } }),

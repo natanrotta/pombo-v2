@@ -1,15 +1,18 @@
 export const colors = {
+  // Pombo brand — a cool graphite/zinc grayscale for a monochrome
+  // developer-tool aesthetic. 50 = lightest, 900 = near-black. Primary
+  // actions read as near-black in light mode and light-gray in dark mode.
   brand: {
-    50: "#eef6ff",
-    100: "#d9eaff",
-    200: "#b8d8ff",
-    300: "#8fc0ff",
-    400: "#5fa1ff",
-    500: "#2f80ed",
-    600: "#2569c9",
-    700: "#1e529e",
-    800: "#1c447f",
-    900: "#1d3b6b",
+    50: "#f6f7f9",
+    100: "#eceef1",
+    200: "#d6dade",
+    300: "#b3bac2",
+    400: "#8a939e",
+    500: "#5f6873",
+    600: "#464e58",
+    700: "#343a42",
+    800: "#22262c",
+    900: "#141619",
   },
   accent: {
     50: "#f0fdf9",
@@ -34,18 +37,6 @@ export const colors = {
     700: "#334155",
     800: "#1e293b",
     900: "#0f172a",
-  },
-  amber: {
-    50: "#fffbeb",
-    100: "#fef3c7",
-    200: "#fde68a",
-    300: "#fcd34d",
-    400: "#fbbf24",
-    500: "#f59e0b",
-    600: "#d97706",
-    700: "#b45309",
-    800: "#92400e",
-    900: "#78350f",
   },
   surface: {
     DEFAULT: "#ffffff",

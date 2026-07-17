@@ -15,13 +15,13 @@
 # Com 1 réplica está ok. Ao escalar p/ 2+ réplicas, tirar o migrate do CMD e
 # rodá-lo como step único do deploy (corrida de migrations). Ver knowledge.
 
-name: boilerplate-app
+name: pombo-app
 
 services:
   api:
     # Tag fixada pelo CI (:<sha>) ou :latest. Sobrescreva via API_IMAGE.
     image: ${API_IMAGE:?set API_IMAGE to your published API image}
-    container_name: boilerplate-api
+    container_name: pombo-api
     restart: unless-stopped
     env_file:
       - ../.env.prod
@@ -48,7 +48,7 @@ services:
   # scrapes it via METRICS_APP_URL.
   node-exporter:
     image: prom/node-exporter:latest
-    container_name: boilerplate-node-exporter
+    container_name: pombo-node-exporter
     restart: unless-stopped
     network_mode: host
     pid: host

@@ -144,9 +144,9 @@ describe("csrfProtection", () => {
     });
   });
 
-  describe("cookie-authenticated unsafe request (boilerplate_at session cookie, no Authorization header)", () => {
+  describe("cookie-authenticated unsafe request (pombo_at session cookie, no Authorization header)", () => {
     it("rejects when the session cookie is present but the CSRF cookie is missing (fail-closed)", () => {
-      // The key hardening: a boilerplate_at-authenticated POST must NOT slip through
+      // The key hardening: a pombo_at-authenticated POST must NOT slip through
       // the unauthenticated branch just because the CSRF cookie is absent.
       const { req, res, next } = mockReqResNext({
         method: "POST",

@@ -89,7 +89,7 @@
     "profileUpdateError": "Falha ao atualizar perfil",
     "avatarUpdated": "Foto atualizada",
     "avatarUpdateError": "Falha ao atualizar foto",
-    "shareCode": "Me encontre na Boilerplate! Adicione pelo código: #{{code}}",
+    "shareCode": "Me encontre no Pombo! Adicione pelo código: #{{code}}",
     "adminCard": {
       "title": "Administrador",
       "description": "Acesso total a esta conta."

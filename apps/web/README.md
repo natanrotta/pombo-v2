@@ -1,4 +1,4 @@
-# @boilerplate/web
+# @pombo/web
 
 The web application — a React + Vite single-page app with a **sidebar dashboard shell** and single-user authentication.
 

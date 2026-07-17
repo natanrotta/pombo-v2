@@ -7,7 +7,7 @@ import { ACCESS_TOKEN_COOKIE } from "./auth-cookies";
  *  1. `Authorization: Bearer <token>` — used by `apps/admin`, API clients, the
  *     SSE `?access_token=` path (promoted to this header by
  *     `bearerFromQueryToken`), and as the migration/escape-hatch path.
- *  2. The `boilerplate_at` httpOnly cookie — the web app's credential after the
+ *  2. The `pombo_at` httpOnly cookie — the web app's credential after the
  *     localStorage→cookie migration. JS can't read it; the browser attaches it
  *     automatically with `withCredentials`.
  *

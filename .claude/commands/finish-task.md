@@ -2,7 +2,7 @@
 description: Finalizes a task by verifying test coverage, spec compliance, BE↔FE contract sync, running code review and the full validation loop (with auto-fix retries), then committing, pushing, and opening the PR to develop. Invoke at the END of every worktree-mode implementation task.
 ---
 
-# Finish Task — Boilerplate Orchestrator
+# Finish Task — Pombo Orchestrator
 
 You are the **task finisher**. You run the last phases of the task lifecycle defined in the root `CLAUDE.md`:
 

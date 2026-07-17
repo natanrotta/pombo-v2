@@ -107,7 +107,7 @@ export function SignInPage() {
     >
       <Stack spacing={7} position="relative" maxW="440px" w="full">
         <MotionImage
-          src="/boilerplate-icon.png"
+          src="/pombo-icon.png"
           alt={tc("platform.name")}
           w={24}
           h={24}
@@ -155,7 +155,7 @@ export function SignInPage() {
       position="relative"
     >
       <Image
-        src="/boilerplate-icon.png"
+        src="/pombo-icon.png"
         alt={tc("platform.name")}
         w={16}
         h={16}

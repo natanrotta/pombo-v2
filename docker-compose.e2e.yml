@@ -1,11 +1,11 @@
 services:
   postgres-e2e:
     image: postgres:15-alpine
-    container_name: boilerplate-postgres-e2e
+    container_name: pombo-postgres-e2e
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_DB: boilerplate_e2e
+      POSTGRES_DB: pombo_e2e
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: e2e
     # tmpfs = banco em RAM. ~3x mais rápido que volume e zera ao parar o
@@ -14,14 +14,14 @@ services:
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d boilerplate_e2e"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pombo_e2e"]
       interval: 2s
       timeout: 2s
       retries: 20
 
   redis-e2e:
     image: redis:7-alpine
-    container_name: boilerplate-redis-e2e
+    container_name: pombo-redis-e2e
     ports:
       - "6380:6379"
     # Sem persistência — workers BullMQ recriam filas ao subir.

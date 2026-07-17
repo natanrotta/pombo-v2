@@ -16,7 +16,7 @@
  * loop.
  */
 
-const RELOAD_GUARD_KEY = "boilerplate:chunk-reload";
+const RELOAD_GUARD_KEY = "pombo:chunk-reload";
 const RELOAD_DEBOUNCE_MS = 10_000;
 
 /** `sessionStorage` can throw when storage is fully blocked (privacy modes) — never let that kill the recovery path. */

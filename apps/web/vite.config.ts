@@ -107,10 +107,10 @@ export default defineConfig(({ command }) => ({
   // it into a single ESM blob where every named export is statically
   // reachable from the browser.
   optimizeDeps: {
-    include: ["@boilerplate/shared-types"],
+    include: ["@pombo/shared-types"],
   },
   // The dev fix above (optimizeDeps) only applies to the dev server. For the
-  // production `vite build`, @boilerplate/shared-types is a linked workspace dep that
+  // production `vite build`, @pombo/shared-types is a linked workspace dep that
   // resolves OUTSIDE node_modules (packages/shared-types/dist/index.js), so
   // Rollup treats its CommonJS output as ESM source and can't see its runtime
   // value exports (EMAIL_VERIFY_JWT_SCOPE, IMPORT_MAX_ROWS, ...). Including it in

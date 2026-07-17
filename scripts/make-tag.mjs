@@ -108,7 +108,7 @@ async function main() {
   // Trava de testes: roda o unit do backend localmente antes de gastar um build.
   // (O CI revalida no job `test` de qualquer forma — isto é o fail-fast local.)
   hr();
-  if (!runCheck("testes unitários do backend", "yarn", ["workspace", "@boilerplate/api", "test"])) {
+  if (!runCheck("testes unitários do backend", "yarn", ["workspace", "@pombo/api", "test"])) {
     if (!(await confirm("Os testes do backend falharam. Gerar o build mesmo assim? (o CI vai revalidar)"))) {
       warn("Cancelado — nada foi disparado.");
       askClose();

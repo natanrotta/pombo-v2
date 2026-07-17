@@ -5,6 +5,9 @@ import { DI_TOKENS } from "./tokens";
 
 import { registerUserModule } from "@modules/user/user.module";
 import { registerAuthModule } from "@modules/auth/auth.module";
+import { registerDevicesModule } from "@modules/devices/devices.module";
+import { registerMessagingModule } from "@modules/messaging/messaging.module";
+import { registerWebhooksModule } from "@modules/webhooks/webhooks.module";
 import { IMailProvider } from "@shared/provider/mail-provider.interface";
 import { ConsoleMailProvider } from "@core/provider/mail/console-mail-provider";
 import { ResendMailProvider } from "@core/provider/mail/resend-mail-provider";
@@ -19,11 +22,17 @@ import {
   IStorageProvider,
   IQueueProvider,
   IEventBus,
+  IDomainEventBus,
   IFlowProducer,
   IDatabaseStatusProvider,
   INodeExporterMetricsProvider,
   ICiProvider,
 } from "@shared/provider";
+import { InMemoryDomainEventBus } from "@core/provider/domain-event-bus/in-memory-domain-event-bus";
+import { IWhatsAppGateway } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
+import { DisabledWhatsAppGateway } from "@modules/devices/infrastructure/provider/disabled-whatsapp.gateway";
+import { BaileysWhatsAppGateway } from "@modules/devices/infrastructure/provider/baileys-whatsapp.gateway";
+import { IOutboxRepository } from "@modules/messaging/domain/repository/outbox-repository.interface";
 
 import {
   BcryptHashProvider,
@@ -42,6 +51,9 @@ import { PinoLoggerProvider } from "@core/provider/logger/pino-logger-provider";
 // ── Modules ──
 registerUserModule(container);
 registerAuthModule(container);
+registerDevicesModule(container);
+registerMessagingModule(container);
+registerWebhooksModule(container);
 
 // ── Providers ──
 container.registerSingleton<ICacheProvider>(
@@ -84,6 +96,47 @@ container.registerSingleton<IEventBus>(DI_TOKENS.EventBus, RedisEventBus);
 container.registerSingleton<ILoggerProvider>(
   DI_TOKENS.LoggerProvider,
   PinoLoggerProvider,
+);
+
+// ── WhatsApp Gateway (pombo) providers ──
+// The typed in-process domain event bus (session + message-status vocabulary).
+// Distinct from the Redis `EventBus` used for SSE.
+container.registerSingleton<IDomainEventBus>(
+  DI_TOKENS.DomainEventBus,
+  InMemoryDomainEventBus,
+);
+
+// The WhatsApp gateway is gated by WHATSAPP_ENABLED. When disabled (default),
+// bind the no-op gateway — it never imports Baileys and never opens a socket, so
+// the app boots and every HTTP endpoint responds; `connect` returns a clean
+// WA_GATEWAY_DISABLED. When enabled, bind the Baileys impl (which dynamically
+// imports Baileys only on first use).
+if (env.WHATSAPP_ENABLED) {
+  container.registerSingleton<IWhatsAppGateway>(
+    DI_TOKENS.WhatsAppGateway,
+    BaileysWhatsAppGateway,
+  );
+} else {
+  container.registerSingleton<IWhatsAppGateway>(
+    DI_TOKENS.WhatsAppGateway,
+    DisabledWhatsAppGateway,
+  );
+}
+
+// getMessage (a resend) resolves an outbox row's original text from a
+// waMessageId — injected as a plain function so `devices` never imports
+// `messaging` (no circular dependency). Resolved lazily from the container.
+container.register<(waMessageId: string) => Promise<string | null>>(
+  DI_TOKENS.ResolveOutboxText,
+  {
+    useValue: async (waMessageId: string): Promise<string | null> => {
+      const outbox = container.resolve<IOutboxRepository>(
+        DI_TOKENS.OutboxRepository,
+      );
+      const message = await outbox.findByWaMessageId(waMessageId);
+      return message?.text ?? null;
+    },
+  },
 );
 
 // Use Resend when an API key is configured; fall back to the console provider

@@ -68,12 +68,12 @@ Alternatives (not used): DNS-01 with the Caddy DNS plugin; a plain Let's Encrypt
 > An inbound webhook (`/api/webhooks/*`) needs the **raw body intact** and SSE endpoints need a **proxy without
 > buffering** — the `Caddyfile` handles both; on the edge, don't enable body transformations.
 
-## Backup — script variables (`/etc/boilerplate/backup.env`, on the DATA host)
+## Backup — script variables (`/etc/pombo/backup.env`, on the DATA host)
 
 ```sh
 AGE_RECIPIENT=age1xxxxxxxx           # PUBLIC age key (the PRIVATE one stays offsite)
 RCLONE_REMOTE=r2
-RCLONE_BUCKET=boilerplate-backups
+RCLONE_BUCKET=pombo-backups
 HC_PING_URL=https://hc-ping.com/<uuid>
 # optional: PG_CONTAINER, PG_USER, PG_DB, DAILY_RETENTION
 ```

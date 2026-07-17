@@ -3,7 +3,7 @@
 // rejected by every route that doesn't explicitly opt in to it via
 // `requireScope(...)`. Adding a new scope: declare it here, mint via
 // `IJwtProvider.signScoped`, and gate the consumer route(s).
-import { EMAIL_VERIFY_JWT_SCOPE } from "@boilerplate/shared-types";
+import { EMAIL_VERIFY_JWT_SCOPE } from "@pombo/shared-types";
 
 export const JWT_SCOPES = {
   ImportsStream: "imports:stream",
@@ -12,7 +12,7 @@ export const JWT_SCOPES = {
   // `authMiddleware()` already rejects it on every account-bound route by
   // default — the only routes that accept it are the send/verify-PIN
   // endpoints gated by `emailVerificationAuthMiddleware()`. Value is shared
-  // with the web client via `@boilerplate/shared-types` to prevent drift.
+  // with the web client via `@pombo/shared-types` to prevent drift.
   EmailVerification: EMAIL_VERIFY_JWT_SCOPE,
   // Issued by the admin Google sign-in to a user with `is_support = true`.
   // Carries `accountId: null` (support is account-agnostic), so the regular

@@ -63,8 +63,8 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
       {/* Logo */}
       <Flex align="center" gap={3} px={1} justify={isCollapsed ? "center" : "flex-start"}>
         <Image
-          src="/boilerplate-icon.png"
-          alt={t("platform.name", "Boilerplate")}
+          src="/pombo-icon.png"
+          alt={t("platform.name", "Pombo")}
           w={9}
           h={9}
           borderRadius="22%"
@@ -86,7 +86,7 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
             letterSpacing="-0.01em"
             whiteSpace="nowrap"
           >
-            {t("platform.name", "Boilerplate")}
+            {t("platform.name", "Pombo")}
           </Text>
           <Text fontSize="xs" color="text.muted" whiteSpace="nowrap">
             {t("platform.tagline", "")}

@@ -1,8 +1,8 @@
 ---
-description: E2E testing specialist for Boilerplate. Adds, expands, or fixes Playwright coverage for any frontend module. Dispatches the e2e-test-writer subagent (isolated context) so the orchestrator's window stays clean. Follows the module → coverage rubric → write → self-audit → babysit loop.
+description: E2E testing specialist for Pombo. Adds, expands, or fixes Playwright coverage for any frontend module. Dispatches the e2e-test-writer subagent (isolated context) so the orchestrator's window stays clean. Follows the module → coverage rubric → write → self-audit → babysit loop.
 ---
 
-# Test E2E — Boilerplate
+# Test E2E — Pombo
 
 You are the orchestrator of e2e test work in this repo. **You do not write specs yourself.** Your job is to:
 
@@ -30,7 +30,7 @@ The subagent reads the rest (existing specs, module source, locale JSONs, route 
 
 ## Step 0 — Module label mapping
 
-Boilerplate's UI is in pt-BR; users describe modules by label, not folder name. Resolve before dispatching:
+Pombo's UI is in pt-BR; users describe modules by label, not folder name. Resolve before dispatching:
 
 | User says | Module folder | Route key |
 |---|---|---|
@@ -69,7 +69,7 @@ Use the `Agent` tool with `subagent_type: "e2e-test-writer"`. The prompt must be
 Template:
 
 ```
-You are dispatched to write e2e coverage for Boilerplate.
+You are dispatched to write e2e coverage for Pombo.
 
 **Mode:** <cover-module | add-flow | fix-flaky | pom-only | audit-fix>
 **Target:** <module folder> / <specific flow or spec file>

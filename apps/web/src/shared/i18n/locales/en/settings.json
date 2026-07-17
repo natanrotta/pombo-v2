@@ -89,7 +89,7 @@
     "profileUpdateError": "Failed to update profile",
     "avatarUpdated": "Photo updated",
     "avatarUpdateError": "Failed to update photo",
-    "shareCode": "Find me on Boilerplate! Add by code: #{{code}}",
+    "shareCode": "Find me on Pombo! Add by code: #{{code}}",
     "adminCard": {
       "title": "Administrator",
       "description": "Full access to this account."

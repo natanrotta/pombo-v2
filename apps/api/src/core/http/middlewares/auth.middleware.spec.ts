@@ -70,9 +70,9 @@ describe("authMiddleware", () => {
     expect(error.code).toBe(ErrorCodes.AUTH_NO_TOKEN);
   });
 
-  it("reads the token from the boilerplate_at cookie when there is no Authorization header", async () => {
+  it("reads the token from the pombo_at cookie when there is no Authorization header", async () => {
     const { req, res, next } = mockReqResNext({}, "/api/auth/me", {
-      boilerplate_at: "cookie-token",
+      pombo_at: "cookie-token",
     });
 
     await middleware(req, res, next);
@@ -82,11 +82,11 @@ describe("authMiddleware", () => {
     expect(next).toHaveBeenCalledWith();
   });
 
-  it("prefers the Bearer header over the boilerplate_at cookie", async () => {
+  it("prefers the Bearer header over the pombo_at cookie", async () => {
     const { req, res, next } = mockReqResNext(
       { authorization: "Bearer header-token" },
       "/api/auth/me",
-      { boilerplate_at: "cookie-token" },
+      { pombo_at: "cookie-token" },
     );
 
     await middleware(req, res, next);

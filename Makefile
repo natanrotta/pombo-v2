@@ -1,4 +1,4 @@
-# Boilerplate — operações de infra de produção a partir da SUA máquina.
+# Pombo — operações de infra de produção a partir da SUA máquina.
 #
 # A interface do dia a dia são QUATRO comandos guiados (perguntam, acompanham o
 # run e verificam /api/health) — NÃO precisa deste Makefile pro fluxo normal:
@@ -27,7 +27,7 @@ DATA_HOST ?=                       # DATA host (database) — your host or IP
 SSH_USER  ?= root
 API_URL   ?=                       # e.g. https://api.your-domain.tld
 GH_REPO   ?=                       # e.g. you/your-repo (for the self-hosted runner)
-APP_DIR   ?= /opt/boilerplate/app/infra/app
+APP_DIR   ?= /opt/pombo/app/infra/app
 
 # As linhas acima trazem espaço antes do comentário inline, que entra no valor.
 # Sem normalizar, `scp $(SSH_USER)@$(DATA_HOST):/path` vira `root@host :/path`
@@ -61,7 +61,7 @@ deploy-direct: ## Plano B sem Actions: cutover DIRETO via SSH da sua máquina (T
 
 .PHONY: runner-setup
 runner-setup: ## Instala/registra o runner self-hosted do deploy na VPS-APP (1x; token via gh).
-	@echo "🤖 Registrando o runner self-hosted (label boilerplate-app) na VPS-APP…"
+	@echo "🤖 Registrando o runner self-hosted (label pombo-app) na VPS-APP…"
 	@TOKEN=$$(gh api -X POST repos/$(GH_REPO)/actions/runners/registration-token -q .token) && \
 	  ssh $(SSH_USER)@$(APP_HOST) "bash -s -- $$TOKEN" < infra/app/setup-github-runner.sh
 
@@ -96,22 +96,22 @@ ssh-data: ## Abre SSH na VPS-DATA.
 # Setup de segredos (chave age, rclone R2, healthchecks.io) é manual — ver
 # infra/backup/README.md. Estes alvos ligam/operam a automação depois disso.
 .PHONY: backup-setup
-backup-setup: ## Ativa o backup Nível 1 na VPS-DATA (scripts + systemd timers). Pré: /etc/boilerplate/backup.env preenchido.
-	ssh $(SSH_USER)@$(DATA_HOST) 'mkdir -p /opt/boilerplate/backup-src'
-	scp infra/backup/*.sh $(SSH_USER)@$(DATA_HOST):/opt/boilerplate/backup-src/
-	ssh $(SSH_USER)@$(DATA_HOST) 'bash /opt/boilerplate/backup-src/install-backup.sh'
+backup-setup: ## Ativa o backup Nível 1 na VPS-DATA (scripts + systemd timers). Pré: /etc/pombo/backup.env preenchido.
+	ssh $(SSH_USER)@$(DATA_HOST) 'mkdir -p /opt/pombo/backup-src'
+	scp infra/backup/*.sh $(SSH_USER)@$(DATA_HOST):/opt/pombo/backup-src/
+	ssh $(SSH_USER)@$(DATA_HOST) 'bash /opt/pombo/backup-src/install-backup.sh'
 
 .PHONY: backup-now
 backup-now: ## Roda um backup AGORA na VPS-DATA (2x/dia é o agendado) e mostra o log.
-	ssh $(SSH_USER)@$(DATA_HOST) 'systemctl start boilerplate-backup.service && sleep 2 && journalctl -u boilerplate-backup.service -n 25 --no-pager'
+	ssh $(SSH_USER)@$(DATA_HOST) 'systemctl start pombo-backup.service && sleep 2 && journalctl -u pombo-backup.service -n 25 --no-pager'
 
 .PHONY: backup-status
 backup-status: ## Timers (2x/dia) + contagem/últimos dumps no R2 (VPS-DATA).
-	ssh $(SSH_USER)@$(DATA_HOST) 'systemctl list-timers "boilerplate-backup*" --no-pager; echo; . /etc/boilerplate/backup.env 2>/dev/null && { echo "dumps em daily/: $$(rclone lsf "$${RCLONE_REMOTE:-r2}:$${RCLONE_BUCKET:-boilerplate-backups}/daily/" --files-only 2>/dev/null | grep -c .) (teto $${DAILY_RETENTION_COUNT:-5})"; rclone lsl "$${RCLONE_REMOTE:-r2}:$${RCLONE_BUCKET:-boilerplate-backups}/daily/" 2>/dev/null | tail -5; } || echo "(rclone/remote indisponível)"'
+	ssh $(SSH_USER)@$(DATA_HOST) 'systemctl list-timers "pombo-backup*" --no-pager; echo; . /etc/pombo/backup.env 2>/dev/null && { echo "dumps em daily/: $$(rclone lsf "$${RCLONE_REMOTE:-r2}:$${RCLONE_BUCKET:-pombo-backups}/daily/" --files-only 2>/dev/null | grep -c .) (teto $${DAILY_RETENTION_COUNT:-5})"; rclone lsl "$${RCLONE_REMOTE:-r2}:$${RCLONE_BUCKET:-pombo-backups}/daily/" 2>/dev/null | tail -5; } || echo "(rclone/remote indisponível)"'
 
 .PHONY: backup-check
 backup-check: ## Confere a invariante de retenção no R2 (0<count<=5). Sai != 0 em erro.
-	ssh $(SSH_USER)@$(DATA_HOST) '. /etc/boilerplate/backup.env 2>/dev/null; /opt/boilerplate/backup-check.sh'
+	ssh $(SSH_USER)@$(DATA_HOST) '. /etc/pombo/backup.env 2>/dev/null; /opt/pombo/backup-check.sh'
 
 .PHONY: restore-drill
 restore-drill: ## Ensaio de restauração LOCAL (não toca prod). Uso: make restore-drill AGE_KEY=/caminho/backup-age.key
@@ -121,7 +121,7 @@ restore-drill: ## Ensaio de restauração LOCAL (não toca prod). Uso: make rest
 # ── Help ───────────────────────────────────────────────────────────────────────
 .PHONY: help
 help: ## Lista os alvos disponíveis.
-	@echo "Boilerplate — infra de produção (camada avançada). O fluxo normal é o yarn:"; \
+	@echo "Pombo — infra de produção (camada avançada). O fluxo normal é o yarn:"; \
 	 echo "  yarn make-tag · yarn deploy · yarn rollback · yarn monitor-status"; echo
 	@echo "Alvos deste Makefile (SSH/backup/plano-B):"
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \

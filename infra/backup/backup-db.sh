@@ -10,19 +10,19 @@
 #
 # Agenda: os systemd timers do install-backup.sh rodam este script 2x/dia
 # (03:30 e 15:30). Alternativa por cron (crontab -e na VPS-DATA):
-#   30 3,15 * * *  . /etc/boilerplate/backup.env && /opt/boilerplate/backup-db.sh >> /var/log/boilerplate-backup.log 2>&1
+#   30 3,15 * * *  . /etc/pombo/backup.env && /opt/pombo/backup-db.sh >> /var/log/pombo-backup.log 2>&1
 #
 # Pré-requisitos: docker, age, rclone (remote 'r2' configurado), curl.
 
 set -euo pipefail
 
-# ── Config (sobrescreva via /etc/boilerplate/backup.env) ──────────────────────────
-: "${PG_CONTAINER:=boilerplate-db}"
-: "${PG_USER:=boilerplate}"
-: "${PG_DB:=boilerplate}"
+# ── Config (sobrescreva via /etc/pombo/backup.env) ──────────────────────────
+: "${PG_CONTAINER:=pombo-db}"
+: "${PG_USER:=pombo}"
+: "${PG_DB:=pombo}"
 : "${AGE_RECIPIENT:?defina AGE_RECIPIENT (chave PÚBLICA age, ex: age1xxxx...)}"
 : "${RCLONE_REMOTE:=r2}"
-: "${RCLONE_BUCKET:=boilerplate-backups}"
+: "${RCLONE_BUCKET:=pombo-backups}"
 : "${HC_PING_URL:?defina HC_PING_URL (healthchecks.io, ex: https://hc-ping.com/<uuid>)}"
 : "${TMP_DIR:=/tmp}"
 # Retenção do tier daily/: mantém só os N dumps mais recentes (count-based).
@@ -33,12 +33,12 @@ set -euo pipefail
 case "${DAILY_RETENTION_COUNT}" in ''|*[!0-9]*) echo "[backup-db] ERRO: DAILY_RETENTION_COUNT='${DAILY_RETENTION_COUNT}' não é inteiro." >&2; exit 2 ;; esac
 [ "${DAILY_RETENTION_COUNT}" -ge 1 ] || { echo "[backup-db] ERRO: DAILY_RETENTION_COUNT deve ser >= 1." >&2; exit 2; }
 
-# Padrão dos nossos dumps (boilerplate-YYYYMMDD-HHMM.dump.age). A poda só considera/
+# Padrão dos nossos dumps (pombo-YYYYMMDD-HHMM.dump.age). A poda só considera/
 # apaga arquivos que casam com isto — nunca mexe em objeto de nome inesperado.
-DUMP_RE='^boilerplate-[0-9]{8}-[0-9]{4}\.dump\.age$'
+DUMP_RE='^pombo-[0-9]{8}-[0-9]{4}\.dump\.age$'
 
 STAMP="$(date -u +%Y%m%d-%H%M)"
-FILE="boilerplate-${STAMP}.dump"
+FILE="pombo-${STAMP}.dump"
 ENC="${FILE}.age"
 
 # Sinaliza início ao dead-man switch (mede duração; opcional).
@@ -59,7 +59,7 @@ rm -f "${TMP_DIR}/${FILE}"
 rclone copy "${TMP_DIR}/${ENC}" "${RCLONE_REMOTE}:${RCLONE_BUCKET}/daily/"
 
 # 4) retenção count-based: mantém só os N dumps mais recentes em daily/, apaga
-#    os mais antigos. Os nomes (boilerplate-YYYYMMDD-HHMM.dump.age) ordenam
+#    os mais antigos. Os nomes (pombo-YYYYMMDD-HHMM.dump.age) ordenam
 #    cronologicamente, então `sort` põe o mais antigo primeiro. Removemos os
 #    (total - N) primeiros. Weekly/monthly (GFS) ficam intactos — outros prefixos.
 #    O grep restringe aos NOSSOS dumps (nunca apaga objeto de nome inesperado).

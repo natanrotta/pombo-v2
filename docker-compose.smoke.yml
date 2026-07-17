@@ -18,20 +18,20 @@
 # healthy; non-zero if the container crashes/exits or never gets healthy within
 # start_period. No `restart:` on purpose: a bad boot EXITS (fail fast).
 
-name: boilerplate-smoke
+name: pombo-smoke
 
 services:
   postgres-smoke:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: boilerplate_smoke
+      POSTGRES_DB: pombo_smoke
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: smoke
     # In-RAM DB: boots fast and vanishes on stop.
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d boilerplate_smoke"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pombo_smoke"]
       interval: 2s
       timeout: 2s
       retries: 30
@@ -58,7 +58,7 @@ services:
       # NODE_ENV=production exercises the production boot path. Every value below
       # is DISPOSABLE (exists only so the boot passes) — never a real secret.
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:smoke@postgres-smoke:5432/boilerplate_smoke?schema=public
+      DATABASE_URL: postgresql://postgres:smoke@postgres-smoke:5432/pombo_smoke?schema=public
       REDIS_HOST: redis-smoke
       REDIS_PORT: "6379"
       JWT_SECRET: smoke-only-jwt-secret-not-a-real-secret-32c

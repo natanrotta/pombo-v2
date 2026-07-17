@@ -12,4 +12,16 @@ export interface AppConfig {
   FRONTEND_URL: string;
   PASSWORD_RESET_TOKEN_TTL_MINUTES: number;
   EMAIL_VERIFICATION_PIN_TTL_MINUTES: number;
+
+  // ── WhatsApp Gateway (pombo) ──────────────────────────────────────────────
+  WHATSAPP_ENABLED: boolean;
+  DISCONNECT_DEBOUNCE_MS: number;
+  RECONNECT_BASE_DELAY_MS: number;
+  RECONNECT_MAX_DELAY_MS: number;
+  OUTBOX_TTL_HOURS: number;
+  OUTBOX_PRUNE_INTERVAL_MS: number;
+  WEBHOOK_TIMEOUT_MS: number;
+  WEBHOOK_MAX_ATTEMPTS: number;
+  WEBHOOK_RETRY_BASE_DELAY_MS: number;
+  ADVISORY_LOCK_HEARTBEAT_MS: number;
 }

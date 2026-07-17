@@ -1,0 +1,137 @@
+import { inject, injectable } from "tsyringe";
+import { DI_TOKENS } from "@core/container/tokens";
+import { IDevicesRepository } from "@modules/devices/domain/repository/devices-repository.interface";
+import { IWhatsAppGateway } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
+import { IOutboxRepository } from "@modules/messaging/domain/repository/outbox-repository.interface";
+import { type MessageStatus } from "@modules/messaging/domain/value-object/message-status";
+import { AppConfig } from "@shared/provider/app-config.interface";
+import {
+  ConflictError,
+  NotFoundError,
+  ServiceUnavailableError,
+} from "@shared/error";
+import { ErrorCodes } from "@shared/error/error-codes";
+import { SendTextInput } from "@modules/messaging/application/dto/message.dto";
+
+export interface SendTextOutput {
+  messageId: string;
+  status: MessageStatus;
+}
+
+/**
+ * The core send path. `202` means accepted + socket alive — NOT delivered (no
+ * queue). The outbox row is written BEFORE the send so getMessage can answer a
+ * resend. Idempotency is the DB unique's job, with a code fast-path for the
+ * common sequential replay.
+ */
+@injectable()
+export class SendTextMessageUseCase {
+  constructor(
+    @inject(DI_TOKENS.DevicesRepository)
+    private readonly devicesRepository: IDevicesRepository,
+    @inject(DI_TOKENS.OutboxRepository)
+    private readonly outboxRepository: IOutboxRepository,
+    @inject(DI_TOKENS.WhatsAppGateway)
+    private readonly gateway: IWhatsAppGateway,
+    @inject(DI_TOKENS.AppConfig)
+    private readonly config: AppConfig,
+  ) {}
+
+  async execute(input: SendTextInput): Promise<SendTextOutput> {
+    const device = await this.devicesRepository.findById(input.deviceId);
+    if (!device) {
+      throw new NotFoundError(
+        "Device not found",
+        undefined,
+        ErrorCodes.DEVICE_NOT_FOUND,
+      );
+    }
+    if (!this.gateway.isConnected(device.id)) {
+      throw new ServiceUnavailableError(
+        "The device is not connected",
+        undefined,
+        ErrorCodes.DEVICE_OFFLINE,
+      );
+    }
+
+    const existing = await this.outboxRepository.findByIdempotencyKey(
+      device.id,
+      input.idempotencyKey,
+    );
+    if (existing) {
+      if (existing.text !== input.text) {
+        throw new ConflictError(
+          "This Idempotency-Key was already used with a different payload",
+          undefined,
+          ErrorCodes.IDEMPOTENCY_KEY_CONFLICT,
+        );
+      }
+      // Replay the ORIGINAL 202: always PENDING. The real status is
+      // GET /messages/:id.
+      return { messageId: existing.id, status: "PENDING" };
+    }
+
+    const jid = await this.gateway.resolveJid(device.id, input.phone);
+    if (!jid) {
+      throw new NotFoundError(
+        "This number is not on WhatsApp",
+        undefined,
+        ErrorCodes.NUMBER_NOT_ON_WHATSAPP,
+      );
+    }
+
+    const expiresAt = new Date(
+      Date.now() + this.config.OUTBOX_TTL_HOURS * 60 * 60 * 1000,
+    );
+
+    let message;
+    try {
+      message = await this.outboxRepository.create({
+        deviceId: device.id,
+        idempotencyKey: input.idempotencyKey,
+        toJid: jid,
+        text: input.text,
+        expiresAt,
+      });
+    } catch (error) {
+      // Lost a concurrent race on the same key: the winner already created it.
+      if (
+        error instanceof ConflictError &&
+        error.code === ErrorCodes.IDEMPOTENCY_KEY_CONFLICT
+      ) {
+        const winner = await this.outboxRepository.findByIdempotencyKey(
+          device.id,
+          input.idempotencyKey,
+        );
+        if (winner && winner.text === input.text) {
+          return { messageId: winner.id, status: "PENDING" };
+        }
+      }
+      throw error;
+    }
+
+    try {
+      const { waMessageId } = await this.gateway.sendText(
+        device.id,
+        jid,
+        input.text,
+      );
+      await this.outboxRepository.setWaMessageId(message.id, waMessageId);
+      return { messageId: message.id, status: "PENDING" };
+    } catch (error) {
+      // The socket died between the isConnected check and the send, or Baileys
+      // rejected it. Mark FAILED so the consumer sees it via GET. Best-effort:
+      // if marking FAILED also fails, surface the ORIGINAL send error.
+      try {
+        await this.outboxRepository.updateStatus(
+          message.id,
+          "FAILED",
+          "send failed",
+        );
+      } catch {
+        // swallow — never mask the original error below
+      }
+      throw error;
+    }
+  }
+}

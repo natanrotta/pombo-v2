@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import { User } from "@modules/user/domain/entity/user.entity";
 import { MeResponseDTO } from "@modules/auth/application/dto/auth.dto";
-import type { UserStatus } from "@boilerplate/shared-types";
+import type { UserStatus } from "@pombo/shared-types";
 
 /**
  * Assembles the `MeResponseDTO` for a user. Single-user boilerplate: the

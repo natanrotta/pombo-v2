@@ -307,6 +307,27 @@ export const ErrorCodes = {
   SUBSCRIPTION_NOT_REACTIVATABLE: "SUBSCRIPTION_NOT_REACTIVATABLE",
   ACCOUNT_BLOCKED: "ACCOUNT_BLOCKED",
 
+  // WhatsApp Gateway (pombo) — devices
+  DEVICE_NOT_FOUND: "DEVICE_NOT_FOUND",
+  /** Registration with a name another device already owns. The DB `@unique`
+   *  on `device.name` is the real guard; this is how it surfaces. */
+  DEVICE_NAME_TAKEN: "DEVICE_NAME_TAKEN",
+  /** `POST /devices/:id/connect` on a device whose socket is already live. */
+  DEVICE_ALREADY_CONNECTED: "DEVICE_ALREADY_CONNECTED",
+  /** Sending to a device whose socket is not live → no queue (ADR-005). */
+  DEVICE_OFFLINE: "DEVICE_OFFLINE",
+
+  // WhatsApp Gateway (pombo) — messaging
+  MESSAGE_NOT_FOUND: "MESSAGE_NOT_FOUND",
+  /** Same `Idempotency-Key` + a DIFFERENT payload. (Same key + same payload
+   *  replays the original 202 and is NOT an error.) */
+  IDEMPOTENCY_KEY_CONFLICT: "IDEMPOTENCY_KEY_CONFLICT",
+  /** The target number is not a WhatsApp account (resolveJid → null). */
+  NUMBER_NOT_ON_WHATSAPP: "NUMBER_NOT_ON_WHATSAPP",
+  /** `connect` requested while `WHATSAPP_ENABLED=false` — the gateway is
+   *  disabled at boot, so there is no socket to open. */
+  WA_GATEWAY_DISABLED: "WA_GATEWAY_DISABLED",
+
   // Mail
   MAIL_SEND_FAILED: "MAIL_SEND_FAILED",
 

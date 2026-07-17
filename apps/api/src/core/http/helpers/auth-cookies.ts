@@ -5,15 +5,15 @@ import { parseExpiresIn } from "@shared/util/parse-expires-in";
 const isProduction =
   env.NODE_ENV === "production" || env.NODE_ENV === "staging";
 
-const REFRESH_TOKEN_COOKIE = "boilerplate_rt";
-const CSRF_TOKEN_COOKIE = "boilerplate_csrf";
+const REFRESH_TOKEN_COOKIE = "pombo_rt";
+const CSRF_TOKEN_COOKIE = "pombo_csrf";
 // Session access JWT. httpOnly so JS can never read it (closes XSS→session
 // theft) — the browser sends it automatically with `withCredentials`. Path "/"
 // because every API route needs it (unlike the refresh cookie, scoped to
 // /api/auth). The JWT's own `exp` (15m) governs real validity; the maxAge just
 // mirrors the refresh cookie so the cookie persists across the session and the
 // refresh flow rotates it.
-const ACCESS_TOKEN_COOKIE = "boilerplate_at";
+const ACCESS_TOKEN_COOKIE = "pombo_at";
 
 /**
  * Sets only the CSRF cookie. Used on its own at sign-up — the account is not
@@ -35,7 +35,7 @@ export function setCsrfCookie(res: Response, csrfToken: string): void {
 }
 
 /**
- * Sets the httpOnly access-token cookie (`boilerplate_at`). Called wherever a
+ * Sets the httpOnly access-token cookie (`pombo_at`). Called wherever a
  * session JWT is issued — alongside `setAuthCookies` for the normal flows, and
  * on its own for impersonation (which has no refresh token). Kept separate from
  * `setAuthCookies` so the access/refresh tokens can never be swapped by a

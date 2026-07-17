@@ -15,6 +15,11 @@ export const DI_TOKENS = {
   PasswordResetTokenRepository: "PasswordResetTokenRepository",
   EmailVerificationPinRepository: "EmailVerificationPinRepository",
 
+  // WhatsApp Gateway (pombo)
+  DevicesRepository: "DevicesRepository",
+  AuthStateRepository: "AuthStateRepository",
+  OutboxRepository: "OutboxRepository",
+
   // ── Providers ──────────────────────────────────────────────────────────
   CacheProvider: "CacheProvider",
   /** Read-only Postgres health probe. */
@@ -31,6 +36,21 @@ export const DI_TOKENS = {
   EventBus: "EventBus",
   LoggerProvider: "LoggerProvider",
   MailProvider: "MailProvider",
+
+  // WhatsApp Gateway (pombo) providers
+  /** Typed in-process domain event bus (session + message-status vocabulary).
+   *  Distinct from `EventBus` (Redis pub/sub for SSE). */
+  DomainEventBus: "DomainEventBus",
+  /** The WhatsApp gateway port. Bound to the disabled no-op or the Baileys
+   *  impl depending on `WHATSAPP_ENABLED`. */
+  WhatsAppGateway: "WhatsAppGateway",
+  /** Signs + delivers webhooks (HMAC-SHA256, bounded retries). */
+  WebhookSender: "WebhookSender",
+  /** Resolves an outbox row's original text from a waMessageId — injected into
+   *  the Baileys getMessage so `devices` never imports `messaging`. */
+  ResolveOutboxText: "ResolveOutboxText",
+  /** Per-device disconnect debouncer (collapses socket flaps). */
+  DisconnectDebouncer: "DisconnectDebouncer",
 
   // ── Application services ──────────────────────────────────────────────
   AuthProfileBuilder: "AuthProfileBuilder",

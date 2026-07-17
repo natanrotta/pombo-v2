@@ -226,8 +226,8 @@
     }
   },
   "platform": {
-    "name": "Boilerplate",
-    "tagline": "Tu boilerplate de aplicación"
+    "name": "Pombo",
+    "tagline": "Tu gateway de mensajería"
   },
   "topbar": {
     "myProfile": "Mi perfil",
@@ -237,7 +237,7 @@
     "expand": "Expandir menú",
     "collapse": "Contraer menú",
     "copyCode": "Copiar mi código",
-    "shareCode": "¡Encuéntrame en Boilerplate! Agrega por código: #{{code}}",
+    "shareCode": "¡Encuéntrame en Pombo! Agrega por código: #{{code}}",
     "devOpenWelcome": "Abrir modal de bienvenida (dev)"
   },
   "theme": {

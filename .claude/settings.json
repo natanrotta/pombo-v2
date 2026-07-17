@@ -37,9 +37,9 @@
       "Bash(yarn test:*)",
       "Bash(yarn format)",
       "Bash(yarn format:check)",
-      "Bash(yarn workspace @boilerplate/api test)",
-      "Bash(yarn workspace @boilerplate/api test:*)",
-      "Bash(yarn workspace @boilerplate/web test:e2e)"
+      "Bash(yarn workspace @pombo/api test)",
+      "Bash(yarn workspace @pombo/api test:*)",
+      "Bash(yarn workspace @pombo/web test:e2e)"
     ]
   }
 }

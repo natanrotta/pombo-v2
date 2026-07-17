@@ -1,4 +1,4 @@
-# E2E Test Patterns — Boilerplate (`apps/web/e2e/`)
+# E2E Test Patterns — Pombo (`apps/web/e2e/`)
 
 Authoritative source for Playwright end-to-end tests in this project. Specialists, agents and hooks defer to this file. Edits here ripple to `test-e2e.md`, `code-auditor.md`, `e2e-test-writer.md` and `post-edit-e2e.sh`.
 
@@ -14,7 +14,7 @@ Authoritative source for Playwright end-to-end tests in this project. Specialist
 | App under test | React 18 + Chakra UI 2.8 + React Router v6 + TanStack Query v5 | `apps/web/src/` |
 | Web dev server | Vite on `:3000` (proxies `/api` → `:3333`) | `apps/web/vite.config.ts` |
 | API | Express + Prisma on `:3333` (real backend, no mocks) | `apps/api/src/main.ts` |
-| Database | Postgres seeded with the demo user (`felipe@boilerplate.dev` is the E2E test user) | `apps/api/prisma/seed.ts` |
+| Database | Postgres seeded with the demo user (`felipe@pombo.dev` is the E2E test user) | `apps/api/prisma/seed.ts` |
 | Auth | JWT in `localStorage`, persisted via `storageState` | `apps/web/e2e/global.setup.ts` |
 | API client (test) | `fetch`-based, authenticated as the seed user | `apps/web/e2e/fixtures/api-client.ts` |
 | Reports | HTML reporter, trace `on-first-retry`, screenshot `only-on-failure` | `playwright.config.ts` |
@@ -170,7 +170,7 @@ The single `webServer` entry spawns a **dedicated E2E Vite on `:3001`** (`VITE_P
 
 ---
 
-## Page Object Model — Boilerplate style
+## Page Object Model — Pombo style
 
 POMs are **stateless**: they only expose locators + action methods. No remembered counts, no internal state. The spec orchestrates the flow.
 
@@ -241,7 +241,7 @@ Reusable widgets (Sidebar, ConfirmDialog, FilterBar) live in `e2e/pages/componen
 
 ### Authentication — already wired
 
-There is **one** auth path: `global.setup.ts` signs in `felipe@boilerplate.dev / 123456` and writes `e2e/.auth/user.json`. The `chromium` and `docs` projects consume that file via `storageState`. Every spec inherits an authenticated page — **do not** re-login in `beforeEach`. → `E-C2`
+There is **one** auth path: `global.setup.ts` signs in `felipe@pombo.dev / 123456` and writes `e2e/.auth/user.json`. The `chromium` and `docs` projects consume that file via `storageState`. Every spec inherits an authenticated page — **do not** re-login in `beforeEach`. → `E-C2`
 
 If a test needs an **unauthenticated** page (sign-in flows, public routes), use a fresh context:
 
@@ -264,7 +264,7 @@ Add new factories here when a new module ships; never inline test data in the sp
 
 ### API client — `fixtures/api-client.ts`
 
-Authenticated REST client over `fetch`. Signs in once with the seed user (`felipe@boilerplate.dev`), caches the JWT for the suite, and exposes `apiClient.{get,post,put,patch,delete}` plus per-module helpers (`tagApi.create()`, etc.). Add a new helper block when a module ships its first spec that needs API-side setup.
+Authenticated REST client over `fetch`. Signs in once with the seed user (`felipe@pombo.dev`), caches the JWT for the suite, and exposes `apiClient.{get,post,put,patch,delete}` plus per-module helpers (`tagApi.create()`, etc.). Add a new helper block when a module ships its first spec that needs API-side setup.
 
 **Use it when:**
 - A spec needs an existing entity to assert against (search results, list with ≥N items, edit/delete tests) and creating one through the UI would just slow the suite down.
@@ -279,7 +279,7 @@ import { userApi } from "../../fixtures/api-client";
 
 // Seed: 5 rows so the search test has results to filter.
 const seeded = await Promise.all(
-  Array.from({ length: 5 }, (_, i) => userApi.create({ name: `Seed ${i}`, email: `seed${i}@boilerplate.dev` }))
+  Array.from({ length: 5 }, (_, i) => userApi.create({ name: `Seed ${i}`, email: `seed${i}@pombo.dev` }))
 );
 test.afterEach(async () => {
   for (const u of seeded) await userApi.delete(u.id).catch(() => {});
@@ -387,7 +387,7 @@ E2E specs touch Postgres **only through the running API**. There is no direct Pr
 2. **API helpers for non-assertion setup.** When the spec needs an entity to exist but its creation is not under test, call `apiClient` (see Fixtures § API client). Faster, deterministic, and contractually identical to the UI path (both go through the same controller → use case).
 3. **Cleanup is best-effort, never blocking.** The `afterEach` loop searches + deletes each `createdNames[]` entry via the UI; failures are swallowed (`E-H5`). If you need a hard guarantee, do the cleanup via `apiClient.delete()` inside `try/catch`.
 4. **State leaks across specs.** Because workers=1 and there's no DB reset, an entity created in one spec will exist when the next spec runs unless cleanup succeeded. Always use `createUnique<Entity>()` factories so collisions don't bite, and treat the seed (`yarn seed`) as the only stable baseline.
-5. **The seed is your reference data.** `apps/api/prisma/seed.ts` provisions the demo user (`felipe@boilerplate.dev`) plus any demo data you add. Treat existing seeded rows as fixtures you can read but should not modify or delete from a test.
+5. **The seed is your reference data.** `apps/api/prisma/seed.ts` provisions the demo user (`felipe@pombo.dev`) plus any demo data you add. Treat existing seeded rows as fixtures you can read but should not modify or delete from a test.
 
 **When you need a fresh account** (a state the seed user can't represent): use `apiClient.post("/auth/sign-up", ...)`, then `apiClient.signIn()` with the new credentials, then teardown via `apiClient.delete(...)`. Document the rationale in the spec — most flows are achievable on the seed user.
 

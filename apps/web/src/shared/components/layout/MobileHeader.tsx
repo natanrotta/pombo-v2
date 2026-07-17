@@ -39,8 +39,8 @@ export const MobileHeader = memo(function MobileHeader({ onOpenSidebar }: Mobile
         />
         <Flex align="center" gap={2}>
           <Image
-            src="/boilerplate-icon.png"
-            alt="Boilerplate"
+            src="/pombo-icon.png"
+            alt="Pombo"
             w={7}
             h={7}
             borderRadius="22%"
@@ -48,7 +48,7 @@ export const MobileHeader = memo(function MobileHeader({ onOpenSidebar }: Mobile
             flexShrink={0}
           />
           <Text fontSize="sm" fontWeight="700" color="text.primary" letterSpacing="-0.01em">
-            Boilerplate
+            Pombo
           </Text>
         </Flex>
       </Flex>

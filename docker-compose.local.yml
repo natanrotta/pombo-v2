@@ -1,10 +1,10 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: boilerplate-db
+    container_name: pombo-db
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5442:5432"
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -19,10 +19,10 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: boilerplate-redis
+    container_name: pombo-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6389:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -35,9 +35,9 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: boilerplate-api
+    container_name: pombo-api
     ports:
-      - "3333:3333"
+      - "3343:3343"
     depends_on:
       db:
         condition: service_healthy

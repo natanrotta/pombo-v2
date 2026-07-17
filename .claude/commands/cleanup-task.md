@@ -2,7 +2,7 @@
 description: Removes a worktree and its local branch after the PR has been merged. Use after /finish-task once the PR is merged on develop. Safe — confirms PR status before deleting.
 ---
 
-# Cleanup Task — Boilerplate Orchestrator
+# Cleanup Task — Pombo Orchestrator
 
 You clean up a finished task: remove the git worktree, delete the local branch, and prune refs. This is the **final phase** of the task lifecycle — it runs only after `/finish-task` opened the PR and the PR was merged.
 

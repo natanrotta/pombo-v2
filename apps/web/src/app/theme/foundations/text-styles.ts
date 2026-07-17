@@ -4,7 +4,9 @@ export const textStyles = {
     fontWeight: "800",
     fontSize: { base: "2xl", md: "3xl" },
     lineHeight: "1.2",
-    letterSpacing: "-0.02em",
+    // JetBrains Mono runs wide at heavy weights — pull tracking in a touch
+    // more than the previous sans display so large headings stay compact.
+    letterSpacing: "-0.03em",
   },
   pageTitle: {
     fontFamily: "heading",

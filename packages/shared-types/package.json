@@ -1,8 +1,8 @@
 {
-  "name": "@boilerplate/shared-types",
+  "name": "@pombo/shared-types",
   "version": "0.1.0",
   "private": true,
-  "description": "Canonical TypeScript contracts and shared runtime constants/helpers for @boilerplate/api and @boilerplate/web.",
+  "description": "Canonical TypeScript contracts and shared runtime constants/helpers for @pombo/api and @pombo/web.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

@@ -7,7 +7,7 @@ const AUTH_FILE = "e2e/.auth/user.json";
 // Defaults to the isolated E2E web from `yarn e2e` on :3001.
 const WEB_BASE_URL = process.env.E2E_WEB_URL ?? "http://localhost:3001";
 
-const STORAGE_KEY_LANGUAGE = "@boilerplate-web:language";
+const STORAGE_KEY_LANGUAGE = "@pombo-web:language";
 
 /**
  * Authentication setup — runs once before every Playwright run and writes the
@@ -22,8 +22,8 @@ const STORAGE_KEY_LANGUAGE = "@boilerplate-web:language";
  *      double-submit guard (cookie + token) before tests start.
  *
  * The browser context needs three things to look authenticated:
- *   - `boilerplate_at` httpOnly cookie   → session JWT
- *   - `boilerplate_csrf` cookie          → CSRF double-submit (JS-readable)
+ *   - `pombo_at` httpOnly cookie   → session JWT
+ *   - `pombo_csrf` cookie          → CSRF double-submit (JS-readable)
  *   - a protected route (/dashboard) reachable → guards aren't blocking
  *
  * The user object is intentionally NOT seeded — the SPA's `getCurrentUser()`
@@ -36,7 +36,7 @@ setup("authenticate", async ({ page }) => {
   const { token, csrfToken } = await apiClient.getSession();
 
   // Seed the cookies BEFORE first navigation. The session JWT rides the
-  // httpOnly `boilerplate_at` cookie. The CSRF cookie must be JS-readable
+  // httpOnly `pombo_at` cookie. The CSRF cookie must be JS-readable
   // (httpOnly=false) — the SPA reads it via document.cookie and echoes it in
   // `X-CSRF-Token`.
   await page.context().addCookies([

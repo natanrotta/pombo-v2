@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installStaleChunkReloadListener, reloadForStaleChunk } from "./chunkReload";
 
-const GUARD_KEY = "boilerplate:chunk-reload";
+const GUARD_KEY = "pombo:chunk-reload";
 const originalLocation = window.location;
 let reloadSpy: ReturnType<typeof vi.fn>;
 

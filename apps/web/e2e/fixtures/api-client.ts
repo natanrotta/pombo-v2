@@ -1,7 +1,7 @@
 /**
  * Minimal authenticated REST client for E2E tests.
  *
- * Boilerplate scope: single-user auth only. This client signs in the seeded
+ * Pombo scope: single-user auth only. This client signs in the seeded
  * demo user against the surviving API (`/auth/sign-in`, `/auth/me`) and caches
  * the session so `global.setup.ts` can seed the browser context with both
  * halves of the CSRF double-submit guard.
@@ -18,7 +18,7 @@
  *      sets the httpOnly access cookie). Single-user: no account selection step.
  *   3. Persist `{ token, csrfToken }` to disk so subsequent runs reuse it.
  *   4. Every unsafe call sends both halves of the CSRF double-submit cookie
- *      guard (Cookie: boilerplate_csrf=<x> + X-CSRF-Token: <x>).
+ *      guard (Cookie: pombo_csrf=<x> + X-CSRF-Token: <x>).
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";

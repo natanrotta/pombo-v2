@@ -16,8 +16,8 @@
 #
 # O que faz (idempotente — re-rodar mantém um registro existente):
 #   1. cria o usuário de serviço `ghrunner` e o coloca no grupo docker
-#   2. baixa a última versão do actions/runner em /opt/boilerplate/gh-runner
-#   3. registra no repo com o label `boilerplate-app` (runs-on: [self-hosted, boilerplate-app])
+#   2. baixa a última versão do actions/runner em /opt/pombo/gh-runner
+#   3. registra no repo com o label `pombo-app` (runs-on: [self-hosted, pombo-app])
 #   4. instala como serviço systemd (sobe sozinho no boot da VPS)
 #   5. garante que o ghrunner consegue LER o .env.prod (env_file do compose)
 #
@@ -26,9 +26,9 @@ set -euo pipefail
 
 TOKEN="${1:?uso: setup-github-runner.sh <registration-token> [repo-url]}"
 REPO_URL="${2:?pass the repo URL as arg 2, e.g. https://github.com/you/your-repo}"
-RUNNER_DIR="/opt/boilerplate/gh-runner"
+RUNNER_DIR="/opt/pombo/gh-runner"
 RUNNER_USER="ghrunner"
-ENV_PROD="${ENV_PROD:-/opt/boilerplate/app/infra/.env.prod}"
+ENV_PROD="${ENV_PROD:-/opt/pombo/app/infra/.env.prod}"
 
 echo "→ Usuário de serviço ${RUNNER_USER} (grupo docker)…"
 id -u "$RUNNER_USER" >/dev/null 2>&1 \
@@ -52,10 +52,10 @@ else
   "$RUNNER_DIR/bin/installdependencies.sh" || true
   chown -R "$RUNNER_USER:$RUNNER_USER" "$RUNNER_DIR"
 
-  echo "→ Registrando no repo (label: boilerplate-app)…"
+  echo "→ Registrando no repo (label: pombo-app)…"
   cd "$RUNNER_DIR"
   sudo -u "$RUNNER_USER" ./config.sh --url "$REPO_URL" --token "$TOKEN" \
-    --name boilerplate-app --labels boilerplate-app --work _work --unattended --replace
+    --name pombo-app --labels pombo-app --work _work --unattended --replace
 fi
 
 echo "→ Serviço systemd (sobe no boot)…"

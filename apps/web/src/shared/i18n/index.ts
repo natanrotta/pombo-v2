@@ -34,7 +34,7 @@ i18n
     },
     detection: {
       order: ["localStorage", "navigator"],
-      lookupLocalStorage: "@boilerplate-web:language",
+      lookupLocalStorage: "@pombo-web:language",
       caches: ["localStorage"],
     },
   });

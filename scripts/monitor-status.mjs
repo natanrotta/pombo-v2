@@ -103,9 +103,9 @@ async function frontendProbe(base, { versioned }) {
 // Roda um script curto na VPS-DATA e emite `chave=valor` parseável. Hardcode dos
 // nomes de container/credenciais = os mesmos defaults do infra/status.sh.
 const DB_REMOTE = `set -uo pipefail
-PG_CONTAINER=boilerplate-db
-PG_USER=boilerplate
-PG_DB=boilerplate
+PG_CONTAINER=pombo-db
+PG_USER=pombo
+PG_DB=pombo
 q(){ docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -tAc "$1" 2>/dev/null; }
 if docker exec "$PG_CONTAINER" pg_isready -U "$PG_USER" -d "$PG_DB" >/dev/null 2>&1; then
   echo "reachable=1"
@@ -201,7 +201,7 @@ function head(name, target, dot, label, meta) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
-  log(c.bold("\n📊  Boilerplate — status de produção"));
+  log(c.bold("\n📊  Pombo — status de produção"));
 
   // No targets configured → nothing to monitor. The boilerplate ships EMPTY on
   // purpose so it never probes/SSHes into an unrelated host. Configure and retry.

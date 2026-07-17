@@ -153,7 +153,7 @@ port, never on Redis.
 
 ## The domains (module list)
 
-The boilerplate ships with **2 domains** — the minimum a real product needs.
+Pombo ships with **2 domains** — the minimum a real product needs.
 Add new modules by cloning the canonical skeleton above.
 
 | Domain | Owns |
@@ -167,7 +167,7 @@ own vertical slice with the same skeleton — the boundaries matter more than th
 exact count.
 
 > The `user` module was originally named `platform` in the source project; the
-> boilerplate uses `user` for clarity. If you still see a `platform/` folder in
+> Pombo uses `user` for clarity. If you still see a `platform/` folder in
 > `apps/api/src/modules/`, treat it as the `user` domain.
 
 ## Where do I put X? (cheat-sheet)

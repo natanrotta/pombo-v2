@@ -2,27 +2,27 @@
 # infra/status.sh — snapshot de saúde da VPS-DATA (Postgres + Redis + túnel + disco + backup).
 #
 # Responde "está tudo ok?" numa tela só. Read-only: não altera nada.
-# Uso na VPS-DATA:  bash /opt/boilerplate/repo/infra/status.sh
-# Atalho opcional:  ln -s /opt/boilerplate/repo/infra/status.sh /usr/local/bin/boilerplate-status
+# Uso na VPS-DATA:  bash /opt/pombo/repo/infra/status.sh
+# Atalho opcional:  ln -s /opt/pombo/repo/infra/status.sh /usr/local/bin/pombo-status
 #
 # Sobrescreva os defaults via env se mudar os caminhos/nomes.
 set -uo pipefail
 
-DATA_DIR="${DATA_DIR:-/opt/boilerplate/repo/infra/data}"
-PG_CONTAINER="${PG_CONTAINER:-boilerplate-db}"
-REDIS_CONTAINER="${REDIS_CONTAINER:-boilerplate-redis}"
-PG_USER="${PG_USER:-boilerplate}"
-PG_DB="${PG_DB:-boilerplate}"
+DATA_DIR="${DATA_DIR:-/opt/pombo/repo/infra/data}"
+PG_CONTAINER="${PG_CONTAINER:-pombo-db}"
+REDIS_CONTAINER="${REDIS_CONTAINER:-pombo-redis}"
+PG_USER="${PG_USER:-pombo}"
+PG_DB="${PG_DB:-pombo}"
 
 c_ok()  { printf '  \033[32m✓\033[0m %s\n' "$1"; }
 c_no()  { printf '  \033[31m✗\033[0m %s\n' "$1"; }
 c_wn()  { printf '  \033[33m!\033[0m %s\n' "$1"; }
 psqlq() { docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -tAc "$1" 2>/dev/null; }
 
-echo "================ BOILERPLATE · STATUS · $(date '+%F %T %Z') ================"
+echo "================ POMBO · STATUS · $(date '+%F %T %Z') ================"
 
 echo; echo "## Containers"
-docker ps --filter "name=boilerplate-" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null \
+docker ps --filter "name=pombo-" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null \
   || c_no "docker indisponível"
 
 echo; echo "## Postgres"
@@ -87,14 +87,14 @@ USEP=$(df --output=pcent / | tail -1 | tr -dc '0-9')
 if [ "${USEP:-0}" -ge 80 ]; then c_no "disco em ${USEP}% (acima de 80%!)"; else c_ok "disco em ${USEP}%"; fi
 
 echo; echo "## Backup (Nível 1)"
-if systemctl list-timers 'boilerplate-backup*' >/dev/null 2>&1; then
-  systemctl list-timers 'boilerplate-backup*' --no-pager 2>/dev/null | sed 's/^/  /' | head -4
+if systemctl list-timers 'pombo-backup*' >/dev/null 2>&1; then
+  systemctl list-timers 'pombo-backup*' --no-pager 2>/dev/null | sed 's/^/  /' | head -4
 fi
 # Contagem de dumps em daily/ vs o teto de retenção (count-based, default 5).
-if command -v rclone >/dev/null 2>&1 && [ -f /etc/boilerplate/backup.env ]; then
+if command -v rclone >/dev/null 2>&1 && [ -f /etc/pombo/backup.env ]; then
   # shellcheck disable=SC1091
-  . /etc/boilerplate/backup.env 2>/dev/null || true
-  N=$(rclone lsf "${RCLONE_REMOTE:-r2}:${RCLONE_BUCKET:-boilerplate-backups}/daily/" --files-only 2>/dev/null | grep -c . || echo 0)
+  . /etc/pombo/backup.env 2>/dev/null || true
+  N=$(rclone lsf "${RCLONE_REMOTE:-r2}:${RCLONE_BUCKET:-pombo-backups}/daily/" --files-only 2>/dev/null | grep -c . || echo 0)
   KEEP="${DAILY_RETENTION_COUNT:-5}"
   if [ "${N:-0}" -eq 0 ]; then
     c_wn "nenhum dump em daily/ ainda (backup rodou? ver dead-man switch)"
@@ -106,8 +106,8 @@ if command -v rclone >/dev/null 2>&1 && [ -f /etc/boilerplate/backup.env ]; then
 else
   c_wn "rclone/backup.env indisponível — pulei a contagem de dumps"
 fi
-if [ -f /var/log/boilerplate-backup.log ]; then
-  tail -2 /var/log/boilerplate-backup.log | sed 's/^/  /'
+if [ -f /var/log/pombo-backup.log ]; then
+  tail -2 /var/log/pombo-backup.log | sed 's/^/  /'
 else
   c_wn "sem log ainda — backup é configurado no passo A5"
 fi

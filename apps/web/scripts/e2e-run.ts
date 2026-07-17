@@ -159,9 +159,9 @@ function seedUserPresent(): boolean {
       "-U",
       "postgres",
       "-d",
-      "boilerplate_e2e",
+      "pombo_e2e",
       "-tAc",
-      `SELECT COUNT(*) FROM "user" WHERE email = 'felipe@boilerplate.dev';`,
+      `SELECT COUNT(*) FROM "user" WHERE email = 'felipe@pombo.dev';`,
     ],
     { encoding: "utf8" }
   );
@@ -177,7 +177,7 @@ function dockerDown(label: string) {
   // crashed run — or from the same compose file invoked from another worktree
   // (different compose project) — slip past `down -v` and collide on the next
   // `up`. Force-remove by name; silent if they don't exist.
-  spawnSync("docker", ["rm", "-f", "boilerplate-postgres-e2e", "boilerplate-redis-e2e"], {
+  spawnSync("docker", ["rm", "-f", "pombo-postgres-e2e", "pombo-redis-e2e"], {
     stdio: "ignore",
   });
 }
@@ -252,7 +252,7 @@ async function main() {
     }
 
     // Step 5 — spawn API.
-    log("api", "spawning API on :3334 (DB=boilerplate_e2e)…");
+    log("api", "spawning API on :3334 (DB=pombo_e2e)…");
     apiProcess = spawn("npx", ["tsx", "src/main.ts"], {
       cwd: API_DIR,
       env: apiEnv,

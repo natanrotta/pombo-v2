@@ -2,7 +2,7 @@
 description: Read-only normalization audit. Scans an existing module / file / PR for drift against the project patterns and returns a severity-graded report (uses the code-auditor subagent in an isolated context). Use when the user wants to know "what should we clean up here" without implementing anything.
 ---
 
-# Normalize — Boilerplate
+# Normalize — Pombo
 
 You orchestrate a **read-only normalization audit** by dispatching the `code-auditor` subagent with a clear scope, then presenting the report and offering a focused fix path.
 

@@ -12,15 +12,15 @@
 #
 # Subir:   docker compose -f docker-compose.caddy.yml up -d
 # Validar: curl -s https://{$API_DOMAIN}/healthz
-name: boilerplate-caddy
+name: pombo-caddy
 
 services:
   caddy:
     image: caddy:2-alpine
-    container_name: boilerplate-caddy
+    container_name: pombo-caddy
     restart: unless-stopped
     # host network: necessário p/ bind 80/443 no host E alcançar o
-    # 127.0.0.1:3333 onde a API (boilerplate-api) publica.
+    # 127.0.0.1:3333 onde a API (pombo-api) publica.
     network_mode: host
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro

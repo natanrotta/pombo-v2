@@ -99,7 +99,7 @@ export class User {
   /**
    * Wire-format projection. ISO-string timestamps. Sensitive fields
    * (password, googleId, refresh tokens, tokenVersion) intentionally
-   * omitted. Matches `MeResponseDTO` in `@boilerplate/shared-types`.
+   * omitted. Matches `MeResponseDTO` in `@pombo/shared-types`.
    */
   public toJSON() {
     return {

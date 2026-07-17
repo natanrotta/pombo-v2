@@ -52,7 +52,7 @@ const envSchema = z.object({
 
   // ── Mail (Resend) — optional (unset disables sending, fail-open) ──────────
   RESEND_API_KEY: z.string().optional(),
-  MAIL_FROM: z.string().default("Boilerplate <no-reply@example.com>"),
+  MAIL_FROM: z.string().default("Pombo <no-reply@example.com>"),
   // Dev-only: reroute all outgoing mail to this address. Ignored in prod.
   MAIL_DEV_REDIRECT_TO: z.string().optional(),
 
@@ -78,14 +78,47 @@ const envSchema = z.object({
 
   // ── Rate limiting ─────────────────────────────────────────────────────────
   // `.min(1)` floors prevent a misconfigured 0 from silently disabling a limiter.
-  RATE_LIMIT_GLOBAL_WINDOW_MS: z.coerce.number().min(1).default(5 * 60 * 1000),
+  RATE_LIMIT_GLOBAL_WINDOW_MS: z.coerce
+    .number()
+    .min(1)
+    .default(5 * 60 * 1000),
   RATE_LIMIT_GLOBAL_MAX: z.coerce.number().min(1).default(1000),
-  RATE_LIMIT_USER_WINDOW_MS: z.coerce.number().min(1).default(60 * 1000),
+  RATE_LIMIT_USER_WINDOW_MS: z.coerce
+    .number()
+    .min(1)
+    .default(60 * 1000),
   RATE_LIMIT_USER_MAX: z.coerce.number().min(1).default(200),
-  RATE_LIMIT_AUTH_WINDOW_MS: z.coerce.number().min(1).default(15 * 60 * 1000),
+  RATE_LIMIT_AUTH_WINDOW_MS: z.coerce
+    .number()
+    .min(1)
+    .default(15 * 60 * 1000),
   RATE_LIMIT_AUTH_MAX: z.coerce.number().min(1).default(10),
-  RATE_LIMIT_PUBLIC_WINDOW_MS: z.coerce.number().min(1).default(15 * 60 * 1000),
+  RATE_LIMIT_PUBLIC_WINDOW_MS: z.coerce
+    .number()
+    .min(1)
+    .default(15 * 60 * 1000),
   RATE_LIMIT_PUBLIC_MAX: z.coerce.number().min(1).default(30),
+
+  // ── WhatsApp Gateway (pombo) ──────────────────────────────────────────────
+  // Master flag. When false (default), the app boots with NO Baileys import,
+  // NO advisory lock, NO socket, NO rehydration, NO outbox prune — every HTTP
+  // endpoint still responds and `connect` returns a clean WA_GATEWAY_DISABLED.
+  WHATSAPP_ENABLED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  // How long a socket flap is debounced before a `device.disconnected` webhook.
+  DISCONNECT_DEBOUNCE_MS: z.coerce.number().int().nonnegative().default(30000),
+  RECONNECT_BASE_DELAY_MS: z.coerce.number().int().positive().default(3000),
+  RECONNECT_MAX_DELAY_MS: z.coerce.number().int().positive().default(300000),
+  // The outbox is protocol, not history: rows past this TTL are pruned.
+  OUTBOX_TTL_HOURS: z.coerce.number().int().positive().default(24),
+  OUTBOX_PRUNE_INTERVAL_MS: z.coerce.number().int().positive().default(3600000),
+  WEBHOOK_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
+  WEBHOOK_MAX_ATTEMPTS: z.coerce.number().int().positive().default(4),
+  WEBHOOK_RETRY_BASE_DELAY_MS: z.coerce.number().int().positive().default(1000),
+  // How often the advisory-lock connection heartbeats (single-replica guard).
+  ADVISORY_LOCK_HEARTBEAT_MS: z.coerce.number().int().positive().default(30000),
 });
 
 const parsed = envSchema.safeParse(process.env);

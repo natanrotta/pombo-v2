@@ -1,4 +1,4 @@
-# @boilerplate/api
+# @pombo/api
 
 REST API for the boilerplate — **single-user authentication** on a Clean Architecture, module-first codebase.
 
@@ -106,5 +106,5 @@ Or inside the workspace (`apps/api`): `yarn dev`, `yarn build`, `yarn test`, `ya
 Vitest, with `*.spec.ts` co-located next to the code they test:
 
 ```bash
-yarn workspace @boilerplate/api test
+yarn workspace @pombo/api test
 ```

@@ -39,7 +39,7 @@ Nothing builds or ships on push on its own — only the static frontends deploy 
 One screen with the services. **API** and **DB** are the **critical** ones (the command exits `1` if either is down; `0` otherwise):
 
 ```
- Boilerplate — production status
+ Pombo — production status
 
   API       <api-host>/api/health
   ● ONLINE   HTTP 200 · 131ms

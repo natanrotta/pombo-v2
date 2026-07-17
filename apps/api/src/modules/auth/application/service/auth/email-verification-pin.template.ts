@@ -1,6 +1,6 @@
 /**
  * Renders the HTML + plain-text bodies for the e-mail-confirmation PIN
- * e-mail. Locale-aware (pt-BR / en / es) and branded as Boilerplate, mirroring
+ * e-mail. Locale-aware (pt-BR / en / es) and branded as Pombo, mirroring
  * the password-reset template. The 6-digit PIN is shown prominently — there
  * is no link to click; the user types the code back into the app.
  *
@@ -42,10 +42,10 @@ interface CopyBundle {
 
 const COPY: Record<EmailVerificationPinLocale, CopyBundle> = {
   "pt-BR": {
-    subject: "Seu código de confirmação — Boilerplate",
-    preheader: "Confirme seu e-mail para continuar na Boilerplate.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · Pra quem boilerplate de vidas",
+    subject: "Seu código de confirmação — Pombo",
+    preheader: "Confirme seu e-mail para continuar na Pombo.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Seu gateway de mensagens",
     headline: (name) => `Olá, ${name}`,
     bodyIntro:
       "Use o código abaixo para confirmar seu e-mail e continuar criando sua conta.",
@@ -53,13 +53,13 @@ const COPY: Record<EmailVerificationPinLocale, CopyBundle> = {
     expiryHint: (ttl) =>
       `O código expira em <strong style="color:#0f172a;">${ttl} minutos</strong>.`,
     ignore:
-      "Se você não criou uma conta na Boilerplate, pode ignorar este e-mail com segurança.",
+      "Se você não criou uma conta na Pombo, pode ignorar este e-mail com segurança.",
   },
   en: {
-    subject: "Your confirmation code — Boilerplate",
-    preheader: "Confirm your email to continue on Boilerplate.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · For those who care for lives",
+    subject: "Your confirmation code — Pombo",
+    preheader: "Confirm your email to continue on Pombo.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Your messaging gateway",
     headline: (name) => `Hi ${name},`,
     bodyIntro:
       "Use the code below to confirm your email and finish creating your account.",
@@ -67,13 +67,13 @@ const COPY: Record<EmailVerificationPinLocale, CopyBundle> = {
     expiryHint: (ttl) =>
       `The code expires in <strong style="color:#0f172a;">${ttl} minutes</strong>.`,
     ignore:
-      "If you didn't create a Boilerplate account, you can safely ignore this email.",
+      "If you didn't create a Pombo account, you can safely ignore this email.",
   },
   es: {
-    subject: "Tu código de confirmación — Boilerplate",
-    preheader: "Confirma tu correo para continuar en Boilerplate.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · Para quienes cuidan vidas",
+    subject: "Tu código de confirmación — Pombo",
+    preheader: "Confirma tu correo para continuar en Pombo.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Tu gateway de mensajería",
     headline: (name) => `Hola, ${name}`,
     bodyIntro:
       "Usa el código de abajo para confirmar tu correo y terminar de crear tu cuenta.",
@@ -81,7 +81,7 @@ const COPY: Record<EmailVerificationPinLocale, CopyBundle> = {
     expiryHint: (ttl) =>
       `El código expira en <strong style="color:#0f172a;">${ttl} minutos</strong>.`,
     ignore:
-      "Si no creaste una cuenta en Boilerplate, puedes ignorar este correo con seguridad.",
+      "Si no creaste una cuenta en Pombo, puedes ignorar este correo con seguridad.",
   },
 };
 

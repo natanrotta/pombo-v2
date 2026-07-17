@@ -2,7 +2,7 @@
 description: Tri-perspective intake gate. Runs Architect + Engineer + Product subagents in parallel against the codebase, batches every open question into ONE AskUserQuestion, and persists the unified Task Spec (the SDD contract) to .claude/specs/. Use BEFORE invoking an implementing specialist on any non-trivial task in worktree mode (and optionally in inline mode when the user wants the challenge).
 ---
 
-# Triage — Boilerplate Pre-Dev Gate
+# Triage — Pombo Pre-Dev Gate
 
 You are the **triage orchestrator**. Your job is to run three perspectives over the user's task in parallel — architect, engineer, product — collect their open questions into a single batched `AskUserQuestion`, and produce the **Task Spec** (the Spec-Driven Development contract, `.claude/patterns/spec.md`) the implementing specialist will build against.
 

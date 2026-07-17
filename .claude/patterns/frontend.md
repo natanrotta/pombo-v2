@@ -96,7 +96,7 @@ For "user opens the settings/profile page" (illustrative):
 3. `useProfile()` is called — wraps `useEntityDetail({ queryKey: queryKeys.profile, repository: repositories.profile })`
 4. TanStack Query checks cache for `queryKeys.profile.detail()`; if stale or missing → `queryFn` runs
 5. `queryFn` → `repositories.profile.get()` → `HttpProfileRepository.get()` → `httpClient.get("/users/me")`
-6. Axios request interceptor: the session rides the httpOnly `boilerplate_at` cookie automatically (`withCredentials: true`) — JS never holds the JWT; the interceptor attaches `X-CSRF-Token` (from cookie) and `Accept-Language` (from localStorage).
+6. Axios request interceptor: the session rides the httpOnly `pombo_at` cookie automatically (`withCredentials: true`) — JS never holds the JWT; the interceptor attaches `X-CSRF-Token` (from cookie) and `Accept-Language` (from localStorage).
 7. API responds `{ ok: true, data: { id, name, email, ... } }`
 8. Axios response interceptor unwraps: returns `data` directly (or throws `AppError` on `{ ok: false }` / network error)
 9. TanStack Query caches under `queryKeys.profile.detail()`; component re-renders with `entity` populated
@@ -268,7 +268,7 @@ export const EntityRow = memo(function EntityRow({ title, onAction }: EntityRowP
 
 ### HTTP Client (`core/http/httpClient.ts`)
 
-- baseURL: `import.meta.env.VITE_API_URL || "/api"`, timeout 30s, `withCredentials: true` (httpOnly `boilerplate_at` session + refresh cookies)
+- baseURL: `import.meta.env.VITE_API_URL || "/api"`, timeout 30s, `withCredentials: true` (httpOnly `pombo_at` session + refresh cookies)
 - Request interceptor: the session cookie is sent automatically — no `Authorization` header for normal calls. Attaches CSRF header + `Accept-Language`; deletes `Content-Type` for `FormData` (browser sets boundary). `getCsrfToken` is exported for any non-Axios transport you might add (e.g. an SSE `fetch`).
 - Response interceptor:
   - Success: unwraps `{ ok: true, data }` → returns `data`
@@ -413,7 +413,7 @@ Use this pattern only when the operation is fast and rollback is cheap; otherwis
 ### Auth
 
 - `AuthContext` provides `{ user, isAuthenticated, isLoading, signIn, signUp, signOut, updateProfile, resetPassword }`
-- `useAuth()` to read; the session JWT lives in the httpOnly `boilerplate_at` cookie — JS never sees or stores it (closes XSS→session theft). `AuthSession` carries only `{ user }`.
+- `useAuth()` to read; the session JWT lives in the httpOnly `pombo_at` cookie — JS never sees or stores it (closes XSS→session theft). `AuthSession` carries only `{ user }`.
 - After login, `i18n.changeLanguage(user.language)` is called automatically
 - Token refresh handled transparently by `httpClient` interceptor (cookie-only)
 - **Session-termination hygiene:** every sign-out path — explicit `signOut()` AND the token-expiry handler (`setAuthExpiredHandler`) — must both `queryClient.clear()` and wipe any browser-persisted, session-scoped data (localStorage/sessionStorage). A shared device must never leak one account's data to the next.
@@ -566,7 +566,7 @@ Global font-size: `sm` (14px). FormLabel: `xs`, `600`, `gray.600`. Section headi
 
 Two layers, both live in this project:
 
-- **Unit / component (Vitest + jsdom):** co-located `*.spec.ts(x)` next to the source (`yarn workspace @boilerplate/web test`). Cover pure utils, hooks, and component logic; mock at the repository boundary, never `httpClient`. This is the fast inner loop — a red `yarn test` blocks the PR.
+- **Unit / component (Vitest + jsdom):** co-located `*.spec.ts(x)` next to the source (`yarn workspace @pombo/web test`). Cover pure utils, hooks, and component logic; mock at the repository boundary, never `httpClient`. This is the fast inner loop — a red `yarn test` blocks the PR.
 - **E2E (Playwright):** in `apps/web/e2e/`, run only when `apps/web/**` changed. Details below.
 
 ### E2E (Playwright)

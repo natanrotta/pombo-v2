@@ -14,7 +14,7 @@
    picker flips automatically between light and dark mode. */
 
 .custom-datepicker {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   background: var(--chakra-colors-bg-elevated);
   color: var(--chakra-colors-text-primary);
   border: 1.5px solid var(--chakra-colors-border-default);
@@ -54,7 +54,7 @@
 .custom-datepicker .react-datepicker__month-select,
 .custom-datepicker .react-datepicker__year-select {
   appearance: auto;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: var(--chakra-colors-text-secondary);
@@ -166,7 +166,7 @@
    ================================================================ */
 
 .custom-timepicker {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   background: var(--chakra-colors-bg-elevated);
   color: var(--chakra-colors-text-primary);
   border: 1.5px solid var(--chakra-colors-border-default);

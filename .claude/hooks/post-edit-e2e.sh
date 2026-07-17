@@ -71,7 +71,7 @@ fi
 # E-C4: hardcoded credentials / secrets in fixtures or specs
 if grep -nE '(password|senha|api[_-]?key|secret|token)["'\'']?\s*[:=]\s*["'\''][A-Za-z0-9!@#$%^&*\-_=+]{8,}' "$file" >/dev/null; then
   # Allow the documented test password and obvious placeholders
-  unsafe="$(grep -nE '(password|senha|api[_-]?key|secret|token)["'\'']?\s*[:=]\s*["'\''][A-Za-z0-9!@#$%^&*\-_=+]{8,}' "$file" | grep -vE '123456|password123|test@|boilerplate\.dev|example' || true)"
+  unsafe="$(grep -nE '(password|senha|api[_-]?key|secret|token)["'\'']?\s*[:=]\s*["'\''][A-Za-z0-9!@#$%^&*\-_=+]{8,}' "$file" | grep -vE '123456|password123|test@|pombo\.dev|example' || true)"
   if [ -n "$unsafe" ]; then
     warn "E-C4: possible hardcoded credential — verify it isn't a real secret. Lines: $(printf '%s' "$unsafe" | head -3)"
   fi

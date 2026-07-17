@@ -1,6 +1,6 @@
 /**
  * Renders the HTML + plain-text bodies for the password-reset e-mail.
- * Locale-aware (pt-BR / en / es) and branded as Boilerplate, matching
+ * Locale-aware (pt-BR / en / es) and branded as Pombo, matching
  * the invite-email + patient-document-email templates.
  *
  * Locale comes from the user's `user.language` (we already loaded the
@@ -40,10 +40,10 @@ interface CopyBundle {
 
 const COPY: Record<PasswordResetEmailLocale, CopyBundle> = {
   "pt-BR": {
-    subject: "Redefinição de senha — Boilerplate",
-    preheader: "Crie uma nova senha para acessar sua conta na Boilerplate.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · Pra quem boilerplate de vidas",
+    subject: "Redefinição de senha — Pombo",
+    preheader: "Crie uma nova senha para acessar sua conta na Pombo.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Seu gateway de mensagens",
     headline: (name) => `Olá, ${name}`,
     bodyIntro: (ttl) =>
       `Recebemos uma solicitação para redefinir a senha da sua conta. Clique no botão abaixo para criar uma nova senha — o link expira em <strong style="color:#0f172a;">${ttl} minutos</strong> e só pode ser usado uma vez.`,
@@ -54,10 +54,10 @@ const COPY: Record<PasswordResetEmailLocale, CopyBundle> = {
       "Se você não solicitou essa redefinição, pode ignorar este e-mail com segurança.",
   },
   en: {
-    subject: "Reset your password — Boilerplate",
-    preheader: "Create a new password to access your Boilerplate account.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · For those who care for lives",
+    subject: "Reset your password — Pombo",
+    preheader: "Create a new password to access your Pombo account.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Your messaging gateway",
     headline: (name) => `Hi ${name},`,
     bodyIntro: (ttl) =>
       `We received a request to reset your account password. Click the button below to set a new one — the link expires in <strong style="color:#0f172a;">${ttl} minutes</strong> and can only be used once.`,
@@ -68,11 +68,10 @@ const COPY: Record<PasswordResetEmailLocale, CopyBundle> = {
       "If you didn't request this reset, you can safely ignore this email.",
   },
   es: {
-    subject: "Restablecer contraseña — Boilerplate",
-    preheader:
-      "Crea una nueva contraseña para acceder a tu cuenta de Boilerplate.",
-    brand: "Boilerplate",
-    brandTagline: "Boilerplate · Para quienes cuidan vidas",
+    subject: "Restablecer contraseña — Pombo",
+    preheader: "Crea una nueva contraseña para acceder a tu cuenta de Pombo.",
+    brand: "Pombo",
+    brandTagline: "Pombo · Tu gateway de mensajería",
     headline: (name) => `Hola, ${name}`,
     bodyIntro: (ttl) =>
       `Recibimos una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón para crear una nueva — el enlace expira en <strong style="color:#0f172a;">${ttl} minutos</strong> y solo se puede usar una vez.`,

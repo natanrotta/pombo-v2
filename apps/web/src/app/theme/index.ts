@@ -17,7 +17,7 @@ import { shadows } from "@/app/theme/foundations/shadows";
 import { semanticTokens } from "@/app/theme/foundations/semantic-tokens";
 import { textStyles } from "@/app/theme/foundations/text-styles";
 
-export const COLOR_MODE_STORAGE_KEY = "boilerplate-color-mode";
+export const COLOR_MODE_STORAGE_KEY = "pombo-color-mode";
 
 // Respect the user's OS preference on the very first visit, then persist the
 // explicit choice via localStorage. `useSystemColorMode: false` intentionally
@@ -48,8 +48,8 @@ export const theme = extendTheme({
         // existed before doubled the noise on a slate background, so it's
         // dropped in dark mode and only kept (faintly) in light mode.
         backgroundImage: mode(
-          "radial-gradient(ellipse 60% 40% at 10% -10%, rgba(47, 128, 237, 0.06) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 90% 5%, rgba(30, 178, 138, 0.05) 0%, transparent 55%)",
-          "radial-gradient(ellipse 70% 50% at 12% -10%, rgba(95, 161, 255, 0.05) 0%, transparent 65%)"
+          "radial-gradient(ellipse 60% 40% at 10% -10%, rgba(70, 78, 88, 0.05) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 90% 5%, rgba(30, 178, 138, 0.04) 0%, transparent 55%)",
+          "radial-gradient(ellipse 70% 50% at 12% -10%, rgba(179, 186, 194, 0.04) 0%, transparent 65%)"
         )(props),
       },
       "*::placeholder": {

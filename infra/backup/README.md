@@ -18,7 +18,7 @@ de longo prazo, em prefixos separados — não contam no limite dos 5.
 | `backup-check.sh` | confere a invariante de retenção (0 < count ≤ 5) — read-only, sai != 0 em erro |
 | `restore-drill.sh` | restaura o último dump num container descartável (**não toca prod**) |
 | `install-backup.sh` | ativa tudo na VPS-DATA (scripts + systemd timers 2x/dia + GFS) |
-| `backup.env.example` | template de `/etc/boilerplate/backup.env` |
+| `backup.env.example` | template de `/etc/pombo/backup.env` |
 
 ## Setup (uma vez) — segredos, manual
 
@@ -30,7 +30,7 @@ age-keygen -o backup-age.key      # NA SUA máquina, NÃO na VPS
 ```
 
 ### 2. Cloudflare R2 + rclone (na VPS-DATA)
-Crie o bucket `boilerplate-backups` no R2 + um API token (R2 read/write). Na VPS-DATA:
+Crie o bucket `pombo-backups` no R2 + um API token (R2 read/write). Na VPS-DATA:
 ```sh
 rclone config     # n) new · name: r2 · type: s3 · provider: Cloudflare
                   # + access_key/secret + endpoint https://<accountid>.r2.cloudflarestorage.com
@@ -41,10 +41,10 @@ rclone lsd r2:    # deve listar o bucket
 Crie um check em healthchecks.io com **período ~12h** (roda 2x/dia) + folga
 (grace ≥ ~15min, cobre o `RandomizedDelaySec`) → copie a **ping URL**.
 
-### 4. `/etc/boilerplate/backup.env` (na VPS-DATA)
+### 4. `/etc/pombo/backup.env` (na VPS-DATA)
 ```sh
-scp infra/backup/backup.env.example root@<VPS-DATA>:/etc/boilerplate/backup.env
-# edite: AGE_RECIPIENT · HC_PING_URL · RCLONE_* ; depois: chmod 600 /etc/boilerplate/backup.env
+scp infra/backup/backup.env.example root@<VPS-DATA>:/etc/pombo/backup.env
+# edite: AGE_RECIPIENT · HC_PING_URL · RCLONE_* ; depois: chmod 600 /etc/pombo/backup.env
 ```
 
 ## Ativar (do seu laptop)
@@ -60,14 +60,14 @@ Roda **LOCAL** (nunca toca prod). Precisa `docker` + `rclone` (remote `r2`) + `a
 ```sh
 make restore-drill AGE_KEY=/caminho/backup-age.key
 # baixa o último dump, descriptografa e restaura num Postgres descartável;
-# valide:  docker exec boilerplate-db-test psql -U boilerplate -d boilerplate_restore -c '\dt'
+# valide:  docker exec pombo-db-test psql -U pombo -d pombo_restore -c '\dt'
 ```
 
 ## Restaurar em desastre (prod real)
-1. Postgres limpo (ou reset do `boilerplate-db`).
-2. `rclone copyto r2:boilerplate-backups/daily/<X>.dump.age /tmp/x.age`
+1. Postgres limpo (ou reset do `pombo-db`).
+2. `rclone copyto r2:pombo-backups/daily/<X>.dump.age /tmp/x.age`
 3. `age -d -i backup-age.key /tmp/x.age > /tmp/x.dump`  (chave privada, trazida do cofre)
-4. `cat /tmp/x.dump | docker exec -i boilerplate-db pg_restore -U boilerplate -d boilerplate --clean --if-exists --no-owner`
+4. `cat /tmp/x.dump | docker exec -i pombo-db pg_restore -U pombo -d pombo --clean --if-exists --no-owner`
 5. Suba a API e confira `/api/health` + admin → system-status.
 
 ## Fora do escopo (não esquecer)

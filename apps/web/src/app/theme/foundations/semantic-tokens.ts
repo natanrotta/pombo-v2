@@ -38,26 +38,28 @@ export const semanticTokens = {
     },
     "bg.brand.subtle": {
       default: "brand.50",
-      _dark: "rgba(95, 161, 255, 0.14)",
+      // Faint graphite wash on the dark canvas (matches the grayscale brand).
+      _dark: "rgba(138, 147, 158, 0.14)",
     },
     "bg.brand.emphasis": {
-      default: "brand.500",
-      _dark: "brand.400",
+      default: "brand.800",
+      _dark: "brand.200",
     },
-    // Brand button states — light uses brand.500/600/700; dark de-saturates one
-    // step (brand.400/300/500) so the CTA reads as a button on slate, not a
-    // hyperlink. Consumed by the Button "solid" variant.
+    // Brand button states — monochrome CTA. Light mode reads near-black
+    // (brand.800/900) with white text; dark mode inverts to a light-gray
+    // pill (brand.200/100) with near-black text. Consumed by the Button
+    // "solid" variant via `text.onBrand`.
     "bg.brand.solid": {
-      default: "brand.500",
-      _dark: "brand.400",
+      default: "brand.800",
+      _dark: "brand.200",
     },
     "bg.brand.solid-hover": {
-      default: "brand.600",
-      _dark: "brand.300",
+      default: "brand.900",
+      _dark: "brand.100",
     },
     "bg.brand.solid-active": {
       default: "brand.700",
-      _dark: "brand.500",
+      _dark: "brand.300",
     },
     "bg.accent.subtle": {
       default: "accent.50",
@@ -101,9 +103,11 @@ export const semanticTokens = {
       default: "accent.600",
       _dark: "accent.300",
     },
+    // Text/icon color that sits ON the solid brand button. Light: white on
+    // the near-black CTA. Dark: near-black on the light-gray CTA pill.
     "text.onBrand": {
       default: "#ffffff",
-      _dark: "#ffffff",
+      _dark: "#141619",
     },
 
     "border.subtle": {
@@ -119,7 +123,9 @@ export const semanticTokens = {
       _dark: "rgba(255, 255, 255, 0.20)",
     },
     "border.brand": {
-      default: "brand.200",
+      // brand.200 was too faint as a graphite outline on white — bump to
+      // brand.400 so a "brand" border is actually visible in light mode.
+      default: "brand.400",
       _dark: "brand.500",
     },
     // Accent (green) callout border. Pairs with `bg.accent.subtle`: the dark
@@ -149,9 +155,11 @@ export const semanticTokens = {
     "status.error.bg": { default: "red.50", _dark: "rgba(239, 68, 68, 0.12)" },
     "status.error.border": { default: "red.200", _dark: "rgba(239, 68, 68, 0.30)" },
 
+    // Info maps to the grayscale brand family — a neutral graphite callout
+    // (the dark rgba is graphite, not the old blue).
     "status.info.fg": { default: "brand.600", _dark: "brand.300" },
-    "status.info.bg": { default: "brand.50", _dark: "rgba(95, 161, 255, 0.12)" },
-    "status.info.border": { default: "brand.200", _dark: "rgba(95, 161, 255, 0.30)" },
+    "status.info.bg": { default: "brand.50", _dark: "rgba(138, 147, 158, 0.14)" },
+    "status.info.border": { default: "brand.300", _dark: "rgba(138, 147, 158, 0.32)" },
 
     "status.neutral.fg": { default: "neutral.600", _dark: "#a8a6b1" },
     "status.neutral.bg": { default: "neutral.100", _dark: "rgba(255, 255, 255, 0.06)" },
@@ -194,12 +202,14 @@ export const semanticTokens = {
     // `boxShadow: "input-focus"` keep working without edits. Dark mode lifts
     // alpha so the ring still reads on slate canvas.
     outline: {
-      default: "0 0 0 3px rgba(47, 128, 237, 0.30)",
-      _dark: "0 0 0 3px rgba(143, 192, 255, 0.45)",
+      // Graphite focus ring (was blue) — light uses a mid-graphite, dark
+      // lifts to a light-gray so the ring reads on the near-black canvas.
+      default: "0 0 0 3px rgba(70, 78, 88, 0.35)",
+      _dark: "0 0 0 3px rgba(179, 186, 194, 0.45)",
     },
     "input-focus": {
-      default: "0 0 0 3px rgba(47, 128, 237, 0.15)",
-      _dark: "0 0 0 3px rgba(143, 192, 255, 0.28)",
+      default: "0 0 0 3px rgba(70, 78, 88, 0.18)",
+      _dark: "0 0 0 3px rgba(179, 186, 194, 0.28)",
     },
     "input-error": {
       default: "0 0 0 3px rgba(245, 101, 101, 0.12)",
@@ -210,8 +220,9 @@ export const semanticTokens = {
       _dark: "0 0 0 3px rgba(252, 165, 165, 0.32)",
     },
     "brand-glow": {
-      default: "0px 0px 0px 3px rgba(47, 128, 237, 0.20), 0px 4px 12px rgba(47, 128, 237, 0.15)",
-      _dark: "0px 0px 0px 3px rgba(143, 192, 255, 0.18), 0px 4px 12px rgba(95, 161, 255, 0.18)",
+      // Graphite glow to match the grayscale brand (was blue).
+      default: "0px 0px 0px 3px rgba(70, 78, 88, 0.20), 0px 4px 12px rgba(70, 78, 88, 0.15)",
+      _dark: "0px 0px 0px 3px rgba(179, 186, 194, 0.18), 0px 4px 12px rgba(138, 147, 158, 0.18)",
     },
     "accent-glow": {
       default: "0px 0px 0px 3px rgba(30, 178, 138, 0.20), 0px 4px 12px rgba(30, 178, 138, 0.15)",

@@ -6,7 +6,7 @@ import type {
   RefreshTokenResponseDTO,
   SignInResponseDTO,
   SignUpResponseDTO,
-} from "@boilerplate/shared-types";
+} from "@pombo/shared-types";
 
 export type {
   AuthResponseDTO,
@@ -50,7 +50,7 @@ export const GoogleSignInDTOSchema = z.object({
 export type GoogleSignInDTO = z.infer<typeof GoogleSignInDTOSchema>;
 
 export const RefreshTokenDTOSchema = z.object({
-  // Optional: the web app sends the refresh token via the httpOnly `boilerplate_rt`
+  // Optional: the web app sends the refresh token via the httpOnly `pombo_rt`
   // cookie and posts an empty body. The controller reads the cookie first and
   // only falls back to this body field for non-browser/API clients.
   refreshToken: z.string().min(1, "Refresh token is required").optional(),

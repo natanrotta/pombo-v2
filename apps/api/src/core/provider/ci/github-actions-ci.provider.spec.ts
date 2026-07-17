@@ -243,7 +243,7 @@ describe("GitHubActionsCiProvider", () => {
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: "Bearer tok-123",
-          "User-Agent": "boilerplate-admin",
+          "User-Agent": "pombo-admin",
         }),
         signal: expect.any(AbortSignal),
       }),
@@ -309,7 +309,7 @@ describe("GitHubActionsCiProvider", () => {
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: "Bearer tok-123",
-            "User-Agent": "boilerplate-admin",
+            "User-Agent": "pombo-admin",
           }),
         }),
       );

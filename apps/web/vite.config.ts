@@ -8,11 +8,11 @@ const enableHttps = process.env.VITE_HTTPS === "true";
 // `VITE_PORT` + `VITE_API_PROXY_TARGET` let the Playwright webServer (see
 // playwright.config.ts, orchestrated by `scripts/e2e-run.ts`) spin a second
 // Vite on port 3001 proxying to the E2E API on :3334 — without disturbing the
-// dev pair already running on :3000/:3333. `VITE_API_PROXY_TARGET` doubles as
+// dev pair already running on :3000/:3343. `VITE_API_PROXY_TARGET` doubles as
 // the "this is the E2E instance" signal below.
 const isE2eInstance = Boolean(process.env.VITE_API_PROXY_TARGET);
 const vitePort = Number(process.env.VITE_PORT ?? 3000);
-const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? "http://localhost:3333";
+const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? "http://localhost:3343";
 
 // Build-time version stamp surfaced in the sidebar (see src/shared/appVersion.ts).
 // Resolution order: explicit VITE_APP_VERSION → Cloudflare Pages' CF_PAGES_COMMIT_SHA
@@ -107,10 +107,10 @@ export default defineConfig(({ command }) => ({
   // it into a single ESM blob where every named export is statically
   // reachable from the browser.
   optimizeDeps: {
-    include: ["@boilerplate/shared-types"],
+    include: ["@pombo/shared-types"],
   },
   // The dev fix above (optimizeDeps) only applies to the dev server. For the
-  // production `vite build`, @boilerplate/shared-types is a linked workspace dep that
+  // production `vite build`, @pombo/shared-types is a linked workspace dep that
   // resolves OUTSIDE node_modules (packages/shared-types/dist/index.js), so
   // Rollup treats its CommonJS output as ESM source and can't see its runtime
   // value exports (EMAIL_VERIFY_JWT_SCOPE, IMPORT_MAX_ROWS, ...). Including it in

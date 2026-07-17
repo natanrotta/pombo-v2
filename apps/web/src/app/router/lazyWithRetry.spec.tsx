@@ -74,7 +74,7 @@ describe("lazyWithRetry", () => {
     // Guard holds a RECENT reload timestamp → a prior reload didn't recover →
     // surface the error instead of looping.
     vi.spyOn(console, "error").mockImplementation(() => {});
-    window.sessionStorage.setItem("boilerplate:chunk-reload", String(Date.now()));
+    window.sessionStorage.setItem("pombo:chunk-reload", String(Date.now()));
     const Comp = lazyWithRetry(chunkError);
 
     render(
@@ -92,7 +92,7 @@ describe("lazyWithRetry", () => {
   it("reloads again for a fresh stale-chunk event once the debounce window has passed", async () => {
     // An old reload timestamp (well beyond the 10s window) must not block a new
     // recovery — otherwise a later, unrelated re-optimization would be stuck.
-    window.sessionStorage.setItem("boilerplate:chunk-reload", String(Date.now() - 60_000));
+    window.sessionStorage.setItem("pombo:chunk-reload", String(Date.now() - 60_000));
     const Comp = lazyWithRetry(chunkError);
 
     render(

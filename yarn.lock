@@ -7319,9 +7319,9 @@ libphonenumber-js@^1.13.8:
   resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.13.8.tgz#4250f92798e64ffc6556aae2894058861e878ea5"
   integrity sha512-80xal1m93rADejw2pMp2MSzFhHCPLEspjHxnH2UtqI+DgAmElsbmLMiqk9niwH9NWAfjsRtaJI+qBrOEmRx9nQ==
 
-"libsignal@git+https://github.com/whiskeysockets/libsignal-node.git":
+"libsignal@git+https://github.com/whiskeysockets/libsignal-node":
   version "6.0.0"
-  resolved "git+https://github.com/whiskeysockets/libsignal-node.git#bcea72df9ec34d9d9140ab30619cf479c7c144c7"
+  resolved "git+https://github.com/whiskeysockets/libsignal-node#bcea72df9ec34d9d9140ab30619cf479c7c144c7"
   dependencies:
     curve25519-js "^0.0.4"
     protobufjs "^7.5.5"

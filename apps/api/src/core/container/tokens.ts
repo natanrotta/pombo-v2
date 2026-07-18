@@ -54,6 +54,8 @@ export const DI_TOKENS = {
   ResolveOutboxText: "ResolveOutboxText",
   /** Per-device disconnect debouncer (collapses socket flaps). */
   DisconnectDebouncer: "DisconnectDebouncer",
+  /** Per-device outbound send rate limiter (anti-ban throttle). */
+  SendRateLimiter: "SendRateLimiter",
 
   // ── Application services ──────────────────────────────────────────────
   AuthProfileBuilder: "AuthProfileBuilder",

@@ -5,9 +5,12 @@ export const ROUTE_PATHS = {
   resetPassword: "/reset-password",
   verifyEmail: "/verify-email",
 
-  dashboard: "/dashboard",
+  devices: "/devices",
+  deviceDetail: "/devices/:id",
+  sandbox: "/sandbox",
+  profile: "/perfil",
+  api: "/api",
   settings: "/settings",
-  profile: "/profile",
 
   notFound: "/404",
 } as const;

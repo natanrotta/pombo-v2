@@ -26,7 +26,7 @@ describe("getPostAuthDestination", () => {
     );
   });
 
-  it("redirects to dashboard for a verified user", () => {
-    expect(getPostAuthDestination(makeUser())).toBe(ROUTE_PATHS.dashboard);
+  it("redirects to devices for a verified user", () => {
+    expect(getPostAuthDestination(makeUser())).toBe(ROUTE_PATHS.devices);
   });
 });

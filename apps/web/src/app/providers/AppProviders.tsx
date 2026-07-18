@@ -33,7 +33,7 @@ export function AppProviders({ children }: PropsWithChildren) {
             <AuthProvider>{children}</AuthProvider>
           </GoogleOAuthProvider>
           <Suspense>
-            <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
           </Suspense>
         </QueryClientProvider>
       </ChakraProvider>

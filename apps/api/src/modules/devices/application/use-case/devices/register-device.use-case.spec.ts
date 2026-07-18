@@ -3,6 +3,9 @@ import { InMemoryDevicesRepository } from "@modules/devices/test/in-memory-devic
 import { ConflictError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
+const ACCOUNT_A = "account-a";
+const ACCOUNT_B = "account-b";
+
 describe("RegisterDeviceUseCase", () => {
   let devices: InMemoryDevicesRepository;
   let sut: RegisterDeviceUseCase;
@@ -13,34 +16,47 @@ describe("RegisterDeviceUseCase", () => {
   });
 
   it("creates a device and returns a fresh webhookSecret once", async () => {
-    const out = await sut.execute({ name: "my-phone" });
+    const out = await sut.execute(ACCOUNT_A, { name: "my-phone" });
 
     expect(out.id).toBeTruthy();
     expect(out.webhookSecret).toMatch(/^[0-9a-f]{64}$/);
 
-    const stored = await devices.findById(out.id);
+    const stored = await devices.findById(ACCOUNT_A, out.id);
+    expect(stored?.accountId).toBe(ACCOUNT_A);
     expect(stored?.webhookSecret).toBe(out.webhookSecret);
     expect(stored?.status).toBe("DISCONNECTED");
     expect(stored?.identifier).toBeNull();
   });
 
-  it("stores the webhookUrl when provided", async () => {
-    const out = await sut.execute({
-      name: "phone",
-      webhookUrl: "https://hook",
+  it("creates the device with no webhooks configured (set later via PATCH)", async () => {
+    const out = await sut.execute(ACCOUNT_A, { name: "phone" });
+    const stored = await devices.findById(ACCOUNT_A, out.id);
+    expect(stored?.webhooks).toEqual({
+      onConnect: null,
+      onDisconnect: null,
+      onReceive: null,
+      onMessageStatus: null,
+      onSend: null,
     });
-    const stored = await devices.findById(out.id);
-    expect(stored?.webhookUrl).toBe("https://hook");
   });
 
-  it("rejects a duplicate name with DEVICE_NAME_TAKEN", async () => {
-    await sut.execute({ name: "dup" });
+  it("rejects a duplicate name within the same account", async () => {
+    await sut.execute(ACCOUNT_A, { name: "dup" });
 
-    await expect(sut.execute({ name: "dup" })).rejects.toBeInstanceOf(
-      ConflictError,
+    await expect(
+      sut.execute(ACCOUNT_A, { name: "dup" }),
+    ).rejects.toBeInstanceOf(ConflictError);
+    await expect(sut.execute(ACCOUNT_A, { name: "dup" })).rejects.toMatchObject(
+      { code: ErrorCodes.DEVICE_NAME_TAKEN },
     );
-    await expect(sut.execute({ name: "dup" })).rejects.toMatchObject({
-      code: ErrorCodes.DEVICE_NAME_TAKEN,
-    });
+  });
+
+  it("allows the same device name across different accounts", async () => {
+    const a = await sut.execute(ACCOUNT_A, { name: "shared-name" });
+    const b = await sut.execute(ACCOUNT_B, { name: "shared-name" });
+
+    expect(a.id).not.toBe(b.id);
+    expect((await devices.findById(ACCOUNT_A, a.id))?.name).toBe("shared-name");
+    expect((await devices.findById(ACCOUNT_B, b.id))?.name).toBe("shared-name");
   });
 });

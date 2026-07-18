@@ -5,19 +5,27 @@ import {
   HandleSessionConnectedUseCase,
   HandleSessionDisconnectedUseCase,
   HandleSessionLoggedOutUseCase,
+  HandleSessionQrUseCase,
 } from "@modules/devices/application/use-case/devices";
 
 /**
  * Wires the domain bus session events → the device-lifecycle use cases: this is
  * where `devices` reacts to its OWN Baileys adapter's events to keep the DB
  * status truthful. `webhooks` subscribes to the same bus independently —
- * `devices` never imports `webhooks`. `session.qr` is not handled here (it is a
- * live QR for pairing — the composition root prints it to the terminal).
+ * `devices` never imports `webhooks`. `session.qr` marks the device QR_PENDING
+ * so `GET /devices/:id/qr` can serve the live QR (the composition root also
+ * prints it to the terminal — the bus fans out to both).
  *
  * Called from the composition root only when `WHATSAPP_ENABLED=true`.
  */
 export function registerSessionListeners(): void {
   const bus = container.resolve<IDomainEventBus>(DI_TOKENS.DomainEventBus);
+
+  bus.subscribe("session.qr", async (event) => {
+    await container
+      .resolve(HandleSessionQrUseCase)
+      .execute({ deviceId: event.deviceId });
+  });
 
   bus.subscribe("session.connected", async (event) => {
     await container

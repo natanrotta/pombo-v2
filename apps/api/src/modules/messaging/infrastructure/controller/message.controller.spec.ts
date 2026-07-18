@@ -16,6 +16,7 @@ function mockReqRes(overrides: Partial<Request> = {}) {
   const req = {
     body: {},
     params: {},
+    auth: { userId: "u-1", accountId: "acc-1", language: "pt-BR" },
     header: (name: string) => headers[name.toLowerCase()],
     __setHeader: (name: string, value: string) => {
       headers[name.toLowerCase()] = value;
@@ -48,6 +49,7 @@ describe("MessageController", () => {
     await controller.send(req, res);
 
     expect(mockExecute).toHaveBeenCalledWith({
+      accountId: "acc-1",
       deviceId: "d1",
       phone: "5548",
       text: "oi",
@@ -76,7 +78,7 @@ describe("MessageController", () => {
 
     await controller.getStatus(req, res);
 
-    expect(mockExecute).toHaveBeenCalledWith("m1");
+    expect(mockExecute).toHaveBeenCalledWith("acc-1", "m1");
     expect(status).toHaveBeenCalledWith(200);
   });
 });

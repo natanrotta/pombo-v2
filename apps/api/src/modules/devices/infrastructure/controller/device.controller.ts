@@ -4,7 +4,10 @@ import {
   RegisterDeviceUseCase,
   ListDevicesUseCase,
   GetDeviceUseCase,
+  GetDeviceQrUseCase,
+  UpdateDeviceWebhooksUseCase,
   ConnectDeviceUseCase,
+  DisconnectDeviceUseCase,
   DeleteDeviceUseCase,
 } from "@modules/devices/application/use-case/devices";
 
@@ -16,34 +19,55 @@ import {
 export class DeviceController {
   async register(req: Request, res: Response): Promise<Response> {
     const useCase = container.resolve(RegisterDeviceUseCase);
-    const result = await useCase.execute(req.body);
+    const result = await useCase.execute(req.auth.accountId, req.body);
     return res.status(201).json({ ok: true, data: result });
   }
 
-  async list(_req: Request, res: Response): Promise<Response> {
+  async list(req: Request, res: Response): Promise<Response> {
     const useCase = container.resolve(ListDevicesUseCase);
-    const result = await useCase.execute();
+    const result = await useCase.execute(req.auth.accountId);
     return res.status(200).json({ ok: true, data: result });
   }
 
   async getById(req: Request, res: Response): Promise<Response> {
     const { id } = req.params as { id: string };
     const useCase = container.resolve(GetDeviceUseCase);
-    const result = await useCase.execute(id);
+    const result = await useCase.execute(req.auth.accountId, id);
+    return res.status(200).json({ ok: true, data: result });
+  }
+
+  async getQr(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params as { id: string };
+    const useCase = container.resolve(GetDeviceQrUseCase);
+    const result = await useCase.execute(req.auth.accountId, id);
+    return res.status(200).json({ ok: true, data: result });
+  }
+
+  async updateWebhooks(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params as { id: string };
+    const useCase = container.resolve(UpdateDeviceWebhooksUseCase);
+    const result = await useCase.execute(req.auth.accountId, id, req.body);
     return res.status(200).json({ ok: true, data: result });
   }
 
   async connect(req: Request, res: Response): Promise<Response> {
     const { id } = req.params as { id: string };
     const useCase = container.resolve(ConnectDeviceUseCase);
-    const result = await useCase.execute(id);
+    const result = await useCase.execute(req.auth.accountId, id);
     return res.status(202).json({ ok: true, data: result });
+  }
+
+  async disconnect(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params as { id: string };
+    const useCase = container.resolve(DisconnectDeviceUseCase);
+    const result = await useCase.execute(req.auth.accountId, id);
+    return res.status(200).json({ ok: true, data: result });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
     const { id } = req.params as { id: string };
     const useCase = container.resolve(DeleteDeviceUseCase);
-    await useCase.execute(id);
+    await useCase.execute(req.auth.accountId, id);
     return res.status(204).send();
   }
 }

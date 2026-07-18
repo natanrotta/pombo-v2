@@ -111,7 +111,7 @@ export const EntityCard = memo(function EntityCard({
       </Flex>
 
       {badges && badges.length > 0 && (
-        <Flex gap={1.5} flexWrap="wrap" align="center">
+        <Flex gap={1.5} flexWrap="wrap" align="center" mb={3}>
           {badges}
         </Flex>
       )}

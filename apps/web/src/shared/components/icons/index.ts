@@ -106,6 +106,7 @@ import {
   Settings,
   Share2,
   Shield,
+  Smartphone,
   ShieldAlert,
   SlidersHorizontal,
   Square,
@@ -250,6 +251,7 @@ export const FiSave = lucide(Save, "FiSave");
 export const FiSearch = lucide(Search, "FiSearch");
 export const FiSend = lucide(Send, "FiSend");
 export const FiSettings = lucide(Settings, "FiSettings");
+export const FiSmartphone = lucide(Smartphone, "FiSmartphone");
 export const FiShare2 = lucide(Share2, "FiShare2");
 export const FiShield = lucide(Shield, "FiShield");
 export const FiShieldAlert = lucide(ShieldAlert, "FiShieldAlert");

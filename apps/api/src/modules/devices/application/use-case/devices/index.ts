@@ -1,8 +1,12 @@
 export { RegisterDeviceUseCase } from "./register-device.use-case";
 export { ListDevicesUseCase } from "./list-devices.use-case";
 export { GetDeviceUseCase } from "./get-device.use-case";
+export { GetDeviceQrUseCase } from "./get-device-qr.use-case";
+export { UpdateDeviceWebhooksUseCase } from "./update-device-webhooks.use-case";
 export { ConnectDeviceUseCase } from "./connect-device.use-case";
+export { DisconnectDeviceUseCase } from "./disconnect-device.use-case";
 export { DeleteDeviceUseCase } from "./delete-device.use-case";
 export { HandleSessionConnectedUseCase } from "./handle-session-connected.use-case";
 export { HandleSessionDisconnectedUseCase } from "./handle-session-disconnected.use-case";
 export { HandleSessionLoggedOutUseCase } from "./handle-session-logged-out.use-case";
+export { HandleSessionQrUseCase } from "./handle-session-qr.use-case";

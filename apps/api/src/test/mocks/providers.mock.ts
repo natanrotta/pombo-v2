@@ -134,6 +134,8 @@ export function mockAppConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     WEBHOOK_MAX_ATTEMPTS: 4,
     WEBHOOK_RETRY_BASE_DELAY_MS: 1000,
     ADVISORY_LOCK_HEARTBEAT_MS: 30000,
+    CACHE_ENTITY_TTL_SECONDS: 60,
+    CACHE_API_TOKEN_TTL_SECONDS: 60,
     ...overrides,
   };
 }

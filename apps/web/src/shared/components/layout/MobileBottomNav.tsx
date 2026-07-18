@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Box, Flex, Icon, Text } from "@chakra-ui/react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiHome, FiSettings } from "@/shared/components/icons";
+import { FiCode, FiSend, FiSmartphone, FiUser } from "@/shared/components/icons";
 import type { IconType } from "@/shared/components/icons";
 import { ROUTE_PATHS } from "@/app/router/RoutePaths";
 
@@ -15,14 +15,25 @@ interface BottomNavItem {
 
 const bottomNavItems: BottomNavItem[] = [
   {
-    labelKey: "nav.dashboard",
-    to: ROUTE_PATHS.dashboard,
-    icon: FiHome,
+    labelKey: "nav.devices",
+    to: ROUTE_PATHS.devices,
+    icon: FiSmartphone,
+    matchPaths: [ROUTE_PATHS.devices],
   },
   {
-    labelKey: "nav.settings",
-    to: ROUTE_PATHS.settings,
-    icon: FiSettings,
+    labelKey: "nav.sandbox",
+    to: ROUTE_PATHS.sandbox,
+    icon: FiSend,
+  },
+  {
+    labelKey: "nav.profile",
+    to: ROUTE_PATHS.profile,
+    icon: FiUser,
+  },
+  {
+    labelKey: "nav.api",
+    to: ROUTE_PATHS.api,
+    icon: FiCode,
   },
 ];
 

@@ -44,6 +44,10 @@ export class DisabledWhatsAppGateway implements IWhatsAppGateway {
     return false;
   }
 
+  getCurrentQr(): string | null {
+    return null;
+  }
+
   async resolveJid(): Promise<string | null> {
     throw new ServiceUnavailableError(
       "The WhatsApp integration is disabled in this environment",

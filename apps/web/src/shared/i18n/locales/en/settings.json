@@ -1,12 +1,42 @@
 {
-  "page": {
-    "title": "Settings",
-    "description": "Manage your profile, team and account"
+  "profilePage": {
+    "title": "Profile",
+    "description": "Manage your account details and preferences."
   },
-  "tabs": {
-    "profile": "Profile",
-    "team": "Team",
-    "account": "Account"
+  "apiPage": {
+    "title": "API",
+    "description": "Generate and manage your public API token."
+  },
+  "apiToken": {
+    "prefix": "Prefix",
+    "copyPrefix": "Copy prefix",
+    "createdAt": "Created at",
+    "lastUsedAt": "Last used",
+    "neverUsed": "Never used",
+    "generate": "Generate token",
+    "generated": "Token generated.",
+    "regenerate": "Generate new token",
+    "empty": {
+      "title": "No API token",
+      "description": "Generate a token to authenticate calls to the public API."
+    },
+    "usage": {
+      "title": "How to use",
+      "description": "Send the token in the Authorization header of every API request.",
+      "codeExample": "Authorization: Bearer pmb_…",
+      "copy": "Copy example"
+    },
+    "reveal": {
+      "title": "Save your API token",
+      "done": "Close",
+      "warning": "This token is shown only once. Save it now — it won't be shown again.",
+      "label": "API token",
+      "copy": "Copy token"
+    },
+    "regenerateConfirm": {
+      "title": "Generate new token",
+      "description": "The current token will be revoked immediately and stop working. This action cannot be undone."
+    }
   },
   "account": {
     "title": "Account Details",

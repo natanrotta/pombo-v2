@@ -12,6 +12,7 @@ import {
 } from "./middlewares";
 import { createRateLimitStore } from "./middlewares/rate-limit-store";
 import { router } from "./routes";
+import { publicApiRoutes } from "@modules/public-api/infrastructure/route/public-api.routes";
 import { expressRequestHandler } from "../service/error-reporter";
 import { i18n } from "@shared/i18n";
 import { ErrorCodes } from "@shared/error";
@@ -87,6 +88,9 @@ app.use(
       "Authorization",
       "Accept-Language",
       "X-CSRF-Token",
+      // Public API send-text + internal message send accept this header; browser
+      // consumers need it whitelisted for the preflight to pass.
+      "Idempotency-Key",
     ],
     credentials: true,
   }),
@@ -94,9 +98,17 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.json({ limit: "10kb" }));
-app.use(csrfProtection);
 
 app.use(httpLogger);
+
+// Public token API (Authorization: Bearer pmb_…). Header-authenticated with no
+// cookies, so it is CSRF-exempt by construction — mounted BEFORE csrfProtection.
+// It carries its own token auth + per-token rate limit inside the router. Still
+// sits behind helmet, the global rate limit, CORS and the JSON body parser
+// above.
+app.use("/api/v1", publicApiRoutes);
+
+app.use(csrfProtection);
 
 app.get("/healthz", (_req, res) => res.status(200).send("ok"));
 

@@ -6,6 +6,7 @@ export function makeUser(overrides: Partial<UserProps> = {}): User {
   seq++;
   return new User({
     id: `user-${seq}`,
+    accountId: `account-${seq}`,
     name: `User ${seq}`,
     email: `user${seq}@test.com`,
     password: "hashed-password",

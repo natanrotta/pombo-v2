@@ -1,0 +1,51 @@
+{
+  "title": "Sandbox",
+  "description": "Prueba el envío de mensajes con un dispositivo conectado.",
+  "empty": {
+    "title": "Ningún dispositivo conectado",
+    "description": "Conecta un dispositivo para probar el envío de mensajes.",
+    "action": "Ir a dispositivos"
+  },
+  "fields": {
+    "device": "Dispositivo",
+    "type": "Tipo de mensaje",
+    "phone": "Número de destino",
+    "phonePlaceholder": "(11) 99999-9999",
+    "text": "Mensaje",
+    "textPlaceholder": "Escribe el mensaje de prueba..."
+  },
+  "type": {
+    "text": "Texto"
+  },
+  "status": {
+    "PENDING": "Pendiente",
+    "SERVER_ACK": "Enviada",
+    "DELIVERY_ACK": "Entregada",
+    "READ": "Leída",
+    "FAILED": "Fallida"
+  },
+  "errors": {
+    "deviceRequired": "Selecciona un dispositivo.",
+    "phoneInvalid": "Ingresa un número válido.",
+    "textRequired": "Escribe un mensaje."
+  },
+  "actions": {
+    "send": "Enviar",
+    "clear": "Limpiar"
+  },
+  "result": {
+    "title": "Resultado del envío",
+    "empty": {
+      "title": "Aún no hay envíos",
+      "description": "Envía un mensaje de prueba para seguir su estado aquí en tiempo real."
+    },
+    "messageId": "ID del mensaje",
+    "failureReason": "Motivo del fallo",
+    "live": "Actualizando el estado en tiempo real...",
+    "done": "Estado final.",
+    "statusError": "No se pudo obtener el estado. Inténtalo de nuevo.",
+    "note": "Nota",
+    "noteValue": "Envío de prueba — no se guarda, solo en memoria."
+  },
+  "success": "Mensaje enviado para procesamiento."
+}

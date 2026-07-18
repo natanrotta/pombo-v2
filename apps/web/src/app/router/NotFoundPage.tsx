@@ -19,7 +19,7 @@ export function NotFoundPage() {
         <Text color="text.secondary">
           {t("notFound.description", "A página que você procura não existe ou foi movida.")}
         </Text>
-        <Button data-cy="not-found-home" onClick={() => navigate(ROUTE_PATHS.dashboard)}>
+        <Button data-cy="not-found-home" onClick={() => navigate(ROUTE_PATHS.devices)}>
           {t("notFound.backHome", "Voltar ao início")}
         </Button>
       </Stack>

@@ -48,8 +48,8 @@ export const theme = extendTheme({
         // existed before doubled the noise on a slate background, so it's
         // dropped in dark mode and only kept (faintly) in light mode.
         backgroundImage: mode(
-          "radial-gradient(ellipse 60% 40% at 10% -10%, rgba(70, 78, 88, 0.05) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 90% 5%, rgba(30, 178, 138, 0.04) 0%, transparent 55%)",
-          "radial-gradient(ellipse 70% 50% at 12% -10%, rgba(179, 186, 194, 0.04) 0%, transparent 65%)"
+          "radial-gradient(ellipse 60% 40% at 10% -10%, rgba(107, 101, 96, 0.05) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 90% 5%, rgba(30, 178, 138, 0.04) 0%, transparent 55%)",
+          "radial-gradient(ellipse 70% 50% at 12% -10%, rgba(195, 188, 181, 0.04) 0%, transparent 65%)"
         )(props),
       },
       "*::placeholder": {

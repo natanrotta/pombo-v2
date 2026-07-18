@@ -15,6 +15,7 @@ function mockReqRes(overrides: Partial<Request> = {}) {
     body: {},
     params: {},
     headers: {},
+    auth: { userId: "u-1", accountId: "acc-1", language: "pt-BR" },
     ...overrides,
   } as unknown as Request;
   const json = vi.fn();
@@ -61,7 +62,36 @@ describe("DeviceController", () => {
 
     await controller.getById(req, res);
 
-    expect(mockExecute).toHaveBeenCalledWith("d1");
+    expect(mockExecute).toHaveBeenCalledWith("acc-1", "d1");
+    expect(status).toHaveBeenCalledWith(200);
+  });
+
+  it("getQr passes account + id and returns 200 { ok, data }", async () => {
+    mockExecute.mockResolvedValue({ status: "QR_PENDING", qr: "qr-str" });
+    const { req, res, status, json } = mockReqRes({ params: { id: "d1" } });
+
+    await controller.getQr(req, res);
+
+    expect(mockExecute).toHaveBeenCalledWith("acc-1", "d1");
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({
+      ok: true,
+      data: { status: "QR_PENDING", qr: "qr-str" },
+    });
+  });
+
+  it("updateWebhooks passes account + id + body and returns 200", async () => {
+    mockExecute.mockResolvedValue({ id: "d1", webhooks: {} });
+    const { req, res, status } = mockReqRes({
+      params: { id: "d1" },
+      body: { onConnect: "https://hook" },
+    });
+
+    await controller.updateWebhooks(req, res);
+
+    expect(mockExecute).toHaveBeenCalledWith("acc-1", "d1", {
+      onConnect: "https://hook",
+    });
     expect(status).toHaveBeenCalledWith(200);
   });
 
@@ -84,7 +114,7 @@ describe("DeviceController", () => {
 
     await controller.remove(req, res);
 
-    expect(mockExecute).toHaveBeenCalledWith("d1");
+    expect(mockExecute).toHaveBeenCalledWith("acc-1", "d1");
     expect(status).toHaveBeenCalledWith(204);
     expect(send).toHaveBeenCalled();
   });

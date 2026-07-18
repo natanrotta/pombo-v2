@@ -82,7 +82,8 @@ export async function startWhatsAppGateway(): Promise<() => Promise<void>> {
   // nobody scans anything. Stale CONNECTED/CONNECTING/QR_PENDING (from an
   // unclean stop) are reset to DISCONNECTED first so the connect guard doesn't
   // block the reopen; the events flip them back.
-  const devices = await devicesRepository.list();
+  // Boot spans every account (system rehydration, not a user request).
+  const devices = await devicesRepository.listAll();
   const wasConnected = devices.filter(
     (device) => device.status === "CONNECTED",
   );

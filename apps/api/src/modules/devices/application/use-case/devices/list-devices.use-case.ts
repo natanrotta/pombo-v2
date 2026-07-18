@@ -13,8 +13,8 @@ export class ListDevicesUseCase {
     private readonly devicesRepository: IDevicesRepository,
   ) {}
 
-  async execute(): Promise<DeviceResponse[]> {
-    const devices = await this.devicesRepository.list();
+  async execute(accountId: string): Promise<DeviceResponse[]> {
+    const devices = await this.devicesRepository.list(accountId);
     return devices.map((device) => device.toJSON());
   }
 }

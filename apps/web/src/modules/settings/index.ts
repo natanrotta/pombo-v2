@@ -1,2 +1,2 @@
 export { ProfileTab } from "./presentation/components/ProfileTab";
-export { SettingsPage } from "./presentation/pages/SettingsPage";
+export { ProfilePage } from "./presentation/pages/ProfilePage";

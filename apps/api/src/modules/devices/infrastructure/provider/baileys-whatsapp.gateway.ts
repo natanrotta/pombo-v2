@@ -86,6 +86,11 @@ export class BaileysWhatsAppGateway implements IWhatsAppGateway {
     return this.manager ? this.manager.isConnected(deviceId) : false;
   }
 
+  getCurrentQr(deviceId: string): string | null {
+    // Synchronous by contract. No manager yet → no pending QR.
+    return this.manager ? this.manager.getCurrentQr(deviceId) : null;
+  }
+
   async resolveJid(deviceId: string, phone: string): Promise<string | null> {
     const manager = await this.getManager();
     return manager.resolveJid(deviceId, phone);

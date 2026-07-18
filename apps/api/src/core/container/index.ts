@@ -5,6 +5,7 @@ import { DI_TOKENS } from "./tokens";
 
 import { registerUserModule } from "@modules/user/user.module";
 import { registerAuthModule } from "@modules/auth/auth.module";
+import { registerAccountModule } from "@modules/account/account.module";
 import { registerDevicesModule } from "@modules/devices/devices.module";
 import { registerMessagingModule } from "@modules/messaging/messaging.module";
 import { registerWebhooksModule } from "@modules/webhooks/webhooks.module";
@@ -51,6 +52,7 @@ import { PinoLoggerProvider } from "@core/provider/logger/pino-logger-provider";
 // ── Modules ──
 registerUserModule(container);
 registerAuthModule(container);
+registerAccountModule(container);
 registerDevicesModule(container);
 registerMessagingModule(container);
 registerWebhooksModule(container);

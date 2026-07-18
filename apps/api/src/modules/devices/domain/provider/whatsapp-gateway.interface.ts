@@ -14,6 +14,10 @@ export interface IWhatsAppGateway {
   disconnect(deviceId: string): Promise<void>;
   logout(deviceId: string): Promise<void>;
   isConnected(deviceId: string): boolean;
+  /** The current pairing QR string for a device, or null when none is pending
+   *  (not connecting, already connected, or logged out). Synchronous by
+   *  contract — read from the in-process session cache. */
+  getCurrentQr(deviceId: string): string | null;
   resolveJid(deviceId: string, phone: string): Promise<string | null>;
   sendText(
     deviceId: string,

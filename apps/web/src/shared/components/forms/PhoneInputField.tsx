@@ -333,7 +333,7 @@ function PhoneInputFieldComponent({
             w="20rem"
             maxW="20rem"
             borderColor="border.default"
-            boxShadow="card-hover"
+            boxShadow="shadow.cardHover"
           >
             <PopoverBody p={2}>
               <Box mb={2}>

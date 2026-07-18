@@ -62,11 +62,10 @@
     "documents": "documentos"
   },
   "nav": {
-    "sections": {
-      "main": "Menú"
-    },
-    "dashboard": "Panel",
-    "settings": "Configuración"
+    "devices": "Dispositivos",
+    "sandbox": "Sandbox",
+    "profile": "Perfil",
+    "api": "API"
   },
   "notFound": {
     "title": "Página no encontrada",

@@ -1,0 +1,51 @@
+{
+  "title": "Sandbox",
+  "description": "Test message sending through a connected device.",
+  "empty": {
+    "title": "No connected device",
+    "description": "Connect a device to test message sending.",
+    "action": "Go to devices"
+  },
+  "fields": {
+    "device": "Device",
+    "type": "Message type",
+    "phone": "Recipient number",
+    "phonePlaceholder": "(11) 99999-9999",
+    "text": "Message",
+    "textPlaceholder": "Type the test message..."
+  },
+  "type": {
+    "text": "Text"
+  },
+  "status": {
+    "PENDING": "Pending",
+    "SERVER_ACK": "Sent",
+    "DELIVERY_ACK": "Delivered",
+    "READ": "Read",
+    "FAILED": "Failed"
+  },
+  "errors": {
+    "deviceRequired": "Select a device.",
+    "phoneInvalid": "Enter a valid number.",
+    "textRequired": "Type a message."
+  },
+  "actions": {
+    "send": "Send",
+    "clear": "Clear"
+  },
+  "result": {
+    "title": "Send result",
+    "empty": {
+      "title": "No send yet",
+      "description": "Send a test message to follow its status here in real time."
+    },
+    "messageId": "Message ID",
+    "failureReason": "Failure reason",
+    "live": "Updating status in real time...",
+    "done": "Final status.",
+    "statusError": "Couldn't fetch the status. Please try again.",
+    "note": "Note",
+    "noteValue": "Test send — not persisted, in memory only."
+  },
+  "success": "Message queued for processing."
+}

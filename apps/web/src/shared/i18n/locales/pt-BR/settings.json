@@ -1,12 +1,42 @@
 {
-  "page": {
-    "title": "Configurações",
-    "description": "Gerencie seu perfil, equipe e conta"
+  "profilePage": {
+    "title": "Perfil",
+    "description": "Gerencie seus dados de conta e preferências."
   },
-  "tabs": {
-    "profile": "Perfil",
-    "team": "Equipe",
-    "account": "Conta"
+  "apiPage": {
+    "title": "API",
+    "description": "Gere e gerencie o token da API pública."
+  },
+  "apiToken": {
+    "prefix": "Prefixo",
+    "copyPrefix": "Copiar prefixo",
+    "createdAt": "Criado em",
+    "lastUsedAt": "Último uso",
+    "neverUsed": "Nunca usado",
+    "generate": "Gerar token",
+    "generated": "Token gerado.",
+    "regenerate": "Gerar novo token",
+    "empty": {
+      "title": "Nenhum token de API",
+      "description": "Gere um token para autenticar as chamadas à API pública."
+    },
+    "usage": {
+      "title": "Como usar",
+      "description": "Envie o token no cabeçalho Authorization de cada requisição à API.",
+      "codeExample": "Authorization: Bearer pmb_…",
+      "copy": "Copiar exemplo"
+    },
+    "reveal": {
+      "title": "Guarde o seu token de API",
+      "done": "Fechar",
+      "warning": "Este token é exibido apenas uma vez. Guarde-o agora — não será exibido novamente.",
+      "label": "Token de API",
+      "copy": "Copiar token"
+    },
+    "regenerateConfirm": {
+      "title": "Gerar novo token",
+      "description": "O token atual será revogado imediatamente e deixará de funcionar. Esta ação não pode ser desfeita."
+    }
   },
   "account": {
     "title": "Dados da Conta",

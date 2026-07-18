@@ -279,7 +279,12 @@ describe("ErrorCodes", () => {
     );
   });
 
-  it("should have exactly 183 error codes", () => {
-    expect(Object.keys(ErrorCodes)).toHaveLength(183);
+  it("should contain the public API-token error codes", () => {
+    expect(ErrorCodes.API_TOKEN_MISSING).toBe("API_TOKEN_MISSING");
+    expect(ErrorCodes.API_TOKEN_INVALID).toBe("API_TOKEN_INVALID");
+  });
+
+  it("should have exactly 185 error codes", () => {
+    expect(Object.keys(ErrorCodes)).toHaveLength(185);
   });
 });

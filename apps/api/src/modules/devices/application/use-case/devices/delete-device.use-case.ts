@@ -18,8 +18,8 @@ export class DeleteDeviceUseCase {
     private readonly gateway: IWhatsAppGateway,
   ) {}
 
-  async execute(id: string): Promise<void> {
-    const device = await this.devicesRepository.findById(id);
+  async execute(accountId: string, id: string): Promise<void> {
+    const device = await this.devicesRepository.findById(accountId, id);
     if (!device) {
       throw new NotFoundError(
         "Device not found",
@@ -29,6 +29,6 @@ export class DeleteDeviceUseCase {
     }
 
     await this.gateway.logout(device.id);
-    await this.devicesRepository.delete(device.id);
+    await this.devicesRepository.delete(accountId, device.id);
   }
 }

@@ -6,9 +6,10 @@ import { resolveLazyLanguageBase, type LazyLanguageBase } from "./lazyLanguageBa
 import commonPtBR from "./locales/pt-BR/common.json";
 import authPtBR from "./locales/pt-BR/auth.json";
 import settingsPtBR from "./locales/pt-BR/settings.json";
-import dashboardPtBR from "./locales/pt-BR/dashboard.json";
+import devicesPtBR from "./locales/pt-BR/devices.json";
+import sandboxPtBR from "./locales/pt-BR/sandbox.json";
 
-const NAMESPACES = ["common", "auth", "settings", "dashboard"] as const;
+const NAMESPACES = ["common", "auth", "settings", "devices", "sandbox"] as const;
 
 i18n
   .use(LanguageDetector)
@@ -22,7 +23,8 @@ i18n
         common: commonPtBR,
         auth: authPtBR,
         settings: settingsPtBR,
-        dashboard: dashboardPtBR,
+        devices: devicesPtBR,
+        sandbox: sandboxPtBR,
       },
     },
     fallbackLng: "pt-BR",

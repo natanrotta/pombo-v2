@@ -23,8 +23,8 @@ import {
   FiChevronsRight,
   FiLogOut,
   FiMoon,
-  FiSettings,
   FiSun,
+  FiUser,
 } from "@/shared/components/icons";
 import { navigationSections } from "@/shared/components/layout/navigation";
 import { AppVersion } from "@/shared/components/layout/AppVersion";
@@ -69,7 +69,7 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
           h={9}
           borderRadius="22%"
           objectFit="cover"
-          boxShadow="0 2px 8px rgba(47, 128, 237, 0.30)"
+          boxShadow="shadow.card"
           flexShrink={0}
         />
         <Box
@@ -122,24 +122,8 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
         overflowY="auto"
         sx={{ scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}
       >
-        {navigationSections.map((section) => (
-          <Box key={t(section.labelKey)}>
-            <Text
-              px={2}
-              fontSize="xs"
-              fontWeight="700"
-              textTransform="uppercase"
-              letterSpacing="wider"
-              color="text.muted"
-              opacity={isCollapsed ? 0 : 1}
-              h={isCollapsed ? 0 : "auto"}
-              mb={isCollapsed ? 0 : 1.5}
-              overflow="hidden"
-              transition="opacity 0.15s ease, height 0.2s ease, margin 0.2s ease"
-              whiteSpace="nowrap"
-            >
-              {t(section.labelKey)}
-            </Text>
+        {navigationSections.map((section, index) => (
+          <Box key={index}>
             <Flex direction="column" gap={1}>
               {section.items.map((item) => {
                 const ItemIcon = item.icon;
@@ -277,10 +261,10 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
             <Portal>
               <MenuList fontSize="sm">
                 <MenuItem
-                  icon={<Icon as={FiSettings} boxSize={4} />}
-                  onClick={() => navigate(ROUTE_PATHS.settings)}
+                  icon={<Icon as={FiUser} boxSize={4} />}
+                  onClick={() => navigate(ROUTE_PATHS.profile)}
                 >
-                  {t("nav.settings")}
+                  {t("nav.profile")}
                 </MenuItem>
                 <MenuItem
                   icon={<Icon as={isDark ? FiSun : FiMoon} boxSize={4} />}

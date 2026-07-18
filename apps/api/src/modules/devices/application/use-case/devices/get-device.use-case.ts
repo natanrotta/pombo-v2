@@ -15,8 +15,8 @@ export class GetDeviceUseCase {
     private readonly devicesRepository: IDevicesRepository,
   ) {}
 
-  async execute(id: string): Promise<DeviceResponse> {
-    const device = await this.devicesRepository.findById(id);
+  async execute(accountId: string, id: string): Promise<DeviceResponse> {
+    const device = await this.devicesRepository.findById(accountId, id);
     if (!device) {
       throw new NotFoundError(
         "Device not found",

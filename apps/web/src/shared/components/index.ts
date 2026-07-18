@@ -48,7 +48,6 @@ export * from "@/shared/components/forms/TextAreaField";
 export * from "@/shared/components/forms/TimeField";
 
 // Skeletons
-export * from "@/shared/components/skeletons/DashboardSkeleton";
 export * from "@/shared/components/skeletons/DetailPageSkeleton";
 export * from "@/shared/components/skeletons/EntityCardSkeleton";
 export * from "@/shared/components/skeletons/FilterBarSkeleton";

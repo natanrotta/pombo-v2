@@ -99,6 +99,7 @@ export default defineConfig(({ command }) => ({
       "@/core": fileURLToPath(new URL("./src/core", import.meta.url)),
       "@/shared": fileURLToPath(new URL("./src/shared", import.meta.url)),
       "@/modules": fileURLToPath(new URL("./src/modules", import.meta.url)),
+      "@assets": fileURLToPath(new URL("./assets", import.meta.url)),
     },
   },
   // shared-types ships as CommonJS via `__exportStar(require(...))` chains;

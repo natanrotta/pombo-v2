@@ -14,7 +14,7 @@ import { DEMO_USER } from "../fixtures/constants";
  * exercise the actual login form from a signed-out state.
  */
 test.describe("auth", () => {
-  test("logs in through the UI and lands on the dashboard", async ({ page, context }) => {
+  test("logs in through the UI and lands on the app shell", async ({ page, context }) => {
     // Start signed-out so we test the real sign-in flow, not the seeded session.
     await context.clearCookies();
 
@@ -22,16 +22,23 @@ test.describe("auth", () => {
     await expect(page).toHaveURL(/\/sign-in/);
 
     await page.getByRole("textbox", { name: /e-?mail/i }).fill(DEMO_USER.email);
-    await page.getByLabel(/senha|password/i).fill(DEMO_USER.password);
+    // Anchor the label so it matches only the "Senha" field — the bare
+    // /senha/i substring also matched the "Mostrar senha" show-password toggle.
+    await page.getByLabel(/^(senha|password)$/i).fill(DEMO_USER.password);
     await page.getByRole("button", { name: /^entrar$|^sign in$/i }).click();
 
-    // Successful sign-in redirects into the authenticated app shell.
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    // Successful sign-in redirects into the authenticated app shell; the index
+    // route (`/`) redirects to `/devices` (the default landing — there is no
+    // `/dashboard` route in this app).
+    await expect(page).toHaveURL(/\/devices/, { timeout: 15000 });
   });
 
   test("an authenticated session can open settings", async ({ page }) => {
     // `page` is pre-authenticated via storageState from global.setup.ts.
+    // `/settings` is a legacy deep-link kept as a redirect to `/perfil` (the
+    // real profile route) — landing there proves both the redirect and that
+    // the auth guard let us into the protected app shell.
     await page.goto("/settings");
-    await expect(page).toHaveURL(/\/settings/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/perfil/, { timeout: 15000 });
   });
 });

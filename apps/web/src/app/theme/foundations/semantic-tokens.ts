@@ -165,6 +165,12 @@ export const semanticTokens = {
     "status.neutral.bg": { default: "neutral.100", _dark: "rgba(255, 255, 255, 0.06)" },
     "status.neutral.border": { default: "neutral.200", _dark: "rgba(255, 255, 255, 0.12)" },
 
+    // Blue — a real blue accent (distinct from the graphite "info"), used for
+    // count/total emphasis (e.g. the Devices "Total" stat card).
+    "status.blue.fg": { default: "blue.600", _dark: "blue.300" },
+    "status.blue.bg": { default: "blue.50", _dark: "rgba(59, 130, 246, 0.12)" },
+    "status.blue.border": { default: "blue.200", _dark: "rgba(59, 130, 246, 0.30)" },
+
     // Gold — INTENTIONAL, SCOPED exception to the project's no-yellow/orange/amber
     // rule. A favorite/primary "star" is conventionally gold and reads wrong in any
     // other color; per explicit product request this is the ONE place gold is

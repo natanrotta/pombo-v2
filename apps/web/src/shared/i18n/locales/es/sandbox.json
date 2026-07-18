@@ -34,6 +34,11 @@
     "clear": "Limpiar"
   },
   "result": {
+    "title": "Resultado del envío",
+    "empty": {
+      "title": "Aún no hay envíos",
+      "description": "Envía un mensaje de prueba para seguir su estado aquí en tiempo real."
+    },
     "messageId": "ID del mensaje",
     "failureReason": "Motivo del fallo",
     "live": "Actualizando el estado en tiempo real...",

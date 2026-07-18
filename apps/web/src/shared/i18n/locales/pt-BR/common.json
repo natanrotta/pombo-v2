@@ -62,9 +62,6 @@
     "documents": "documentos"
   },
   "nav": {
-    "sections": {
-      "main": "Menu"
-    },
     "devices": "Dispositivos",
     "sandbox": "Sandbox",
     "profile": "Perfil",

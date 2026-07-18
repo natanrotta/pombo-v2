@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Flex, Icon, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
+import { Button, Flex, Icon, SimpleGrid } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { FiSend } from "@/shared/components/icons";
 import { PageHeader } from "@/shared/components/ui/PageHeader";
 import { SectionCard } from "@/shared/components/ui/SectionCard";
 import { EmptyState } from "@/shared/components/ui/EmptyState";
-import { InfoRow } from "@/shared/components/ui/InfoRow";
-import { StatusBadge } from "@/shared/components/ui/StatusBadge";
 import { ListPageSkeleton } from "@/shared/components/skeletons/ListPageSkeleton";
 import { FormField } from "@/shared/components/forms/FormField";
 import { SelectField } from "@/shared/components/forms/SelectField";
@@ -21,6 +19,7 @@ import {
   useSendMessage,
   useMessageStatus,
 } from "@/modules/messaging/presentation/hooks/useSendMessage";
+import { SandboxResult } from "@/modules/messaging/presentation/components/SandboxResult";
 import type {
   SendMessageResult,
   MessageStatus,
@@ -31,17 +30,6 @@ type SandboxForm = {
   messageType: string;
   phone: string;
   text: string;
-};
-
-const STATUS_TONE: Record<
-  MessageStatus,
-  "neutral" | "info" | "success" | "error"
-> = {
-  PENDING: "neutral",
-  SERVER_ACK: "info",
-  DELIVERY_ACK: "info",
-  READ: "success",
-  FAILED: "error",
 };
 
 export function SandboxPage() {
@@ -158,7 +146,12 @@ export function SandboxPage() {
           onAction={() => navigate(ROUTE_PATHS.devices)}
         />
       ) : (
-        <Flex direction="column" gap={5} maxW="2xl">
+        <SimpleGrid
+          columns={{ base: 1, lg: 2 }}
+          spacing={5}
+          alignItems="start"
+        >
+          {/* Compose (request) */}
           <SectionCard>
             <Flex direction="column" gap={4}>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
@@ -192,7 +185,7 @@ export function SandboxPage() {
                 value={form.formData.text}
                 onChange={(v) => setField("text", v)}
                 error={form.errors.text ? t("errors.textRequired") : undefined}
-                rows={4}
+                rows={6}
               />
 
               <Flex justify="flex-end" gap={2}>
@@ -211,40 +204,15 @@ export function SandboxPage() {
             </Flex>
           </SectionCard>
 
-          {result && liveStatus && (
-            <SectionCard>
-              <Flex direction="column" gap={3}>
-                <Flex align="center" justify="space-between" gap={3}>
-                  <InfoRow label={t("result.messageId")} value={result.messageId} />
-                  <Flex align="center" gap={2} flexShrink={0}>
-                    {isPolling && <Spinner size="xs" color="text.muted" />}
-                    <StatusBadge
-                      status={STATUS_TONE[liveStatus]}
-                      label={t(`status.${liveStatus}`)}
-                    />
-                  </Flex>
-                </Flex>
-                {failureReason && (
-                  <InfoRow
-                    label={t("result.failureReason")}
-                    value={failureReason}
-                  />
-                )}
-                <Text
-                  fontSize="xs"
-                  color={statusError ? "status.error.fg" : "text.muted"}
-                >
-                  {statusError
-                    ? t("result.statusError")
-                    : isPolling
-                      ? t("result.live")
-                      : t("result.done")}
-                </Text>
-                <InfoRow label={t("result.note")} value={t("result.noteValue")} />
-              </Flex>
-            </SectionCard>
-          )}
-        </Flex>
+          {/* Result (response) */}
+          <SandboxResult
+            messageId={result?.messageId ?? null}
+            status={liveStatus}
+            failureReason={failureReason}
+            isPolling={isPolling}
+            isError={statusError}
+          />
+        </SimpleGrid>
       )}
     </>
   );

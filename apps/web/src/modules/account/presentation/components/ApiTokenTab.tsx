@@ -60,13 +60,16 @@ export function ApiTokenTab() {
             gap={4}
           >
             <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={5} flex="1">
-              <Flex align="center" gap={1}>
-                <InfoRow label={t("apiToken.prefix")} value={token.prefix} />
-                <CopyButton
-                  value={token.prefix}
-                  ariaLabel={t("apiToken.copyPrefix")}
-                />
-              </Flex>
+              <InfoRow
+                label={t("apiToken.prefix")}
+                value={token.prefix}
+                action={
+                  <CopyButton
+                    value={token.prefix}
+                    ariaLabel={t("apiToken.copyPrefix")}
+                  />
+                }
+              />
               <InfoRow
                 label={t("apiToken.createdAt")}
                 value={formatShortDate(token.createdAt)}

@@ -136,7 +136,7 @@ export function DevicesListPage() {
               value={String(stats.total)}
               hint={t("list.stats.totalHint")}
               icon={FiSmartphone}
-              tone="brand"
+              tone="blue"
             />
             <StatCard
               label={t("list.stats.connected")}
@@ -150,7 +150,7 @@ export function DevicesListPage() {
               value={String(stats.disconnected)}
               hint={t("list.stats.disconnectedHint")}
               icon={FiSlash}
-              tone="neutral"
+              tone="error"
             />
           </SimpleGrid>
 

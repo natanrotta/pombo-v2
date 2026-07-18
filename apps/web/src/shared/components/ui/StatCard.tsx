@@ -5,7 +5,13 @@ import { SectionCard } from "@/shared/components/ui/SectionCard";
 
 /** Accent palette for the icon chip + value. `brand` is the default; the
  *  others pull from the shared semantic status tokens (never raw hex). */
-export type StatCardTone = "brand" | "success" | "info" | "neutral" | "error";
+export type StatCardTone =
+  | "brand"
+  | "success"
+  | "info"
+  | "neutral"
+  | "error"
+  | "blue";
 
 interface StatCardProps {
   label: string;
@@ -43,6 +49,11 @@ const toneStyles = {
     bg: "status.error.bg",
     border: "status.error.border",
     fg: "status.error.fg",
+  },
+  blue: {
+    bg: "status.blue.bg",
+    border: "status.blue.border",
+    fg: "status.blue.fg",
   },
 } as const;
 

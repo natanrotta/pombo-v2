@@ -122,24 +122,8 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
         overflowY="auto"
         sx={{ scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}
       >
-        {navigationSections.map((section) => (
-          <Box key={t(section.labelKey)}>
-            <Text
-              px={2}
-              fontSize="xs"
-              fontWeight="700"
-              textTransform="uppercase"
-              letterSpacing="wider"
-              color="text.muted"
-              opacity={isCollapsed ? 0 : 1}
-              h={isCollapsed ? 0 : "auto"}
-              mb={isCollapsed ? 0 : 1.5}
-              overflow="hidden"
-              transition="opacity 0.15s ease, height 0.2s ease, margin 0.2s ease"
-              whiteSpace="nowrap"
-            >
-              {t(section.labelKey)}
-            </Text>
+        {navigationSections.map((section, index) => (
+          <Box key={index}>
             <Flex direction="column" gap={1}>
               {section.items.map((item) => {
                 const ItemIcon = item.icon;

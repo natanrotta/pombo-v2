@@ -8,14 +8,14 @@ export interface NavigationItem {
   icon: IconType;
 }
 
+/** A group of nav items. The sidebar renders the items only — the group has no
+ *  visible header. */
 export interface NavigationSection {
-  labelKey: string;
   items: NavigationItem[];
 }
 
 export const navigationSections: NavigationSection[] = [
   {
-    labelKey: "nav.sections.main",
     items: [
       {
         labelKey: "nav.devices",
@@ -40,5 +40,3 @@ export const navigationSections: NavigationSection[] = [
     ],
   },
 ];
-
-export const navigationItems = navigationSections.flatMap((section) => section.items);

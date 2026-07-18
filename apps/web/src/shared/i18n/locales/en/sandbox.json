@@ -34,6 +34,11 @@
     "clear": "Clear"
   },
   "result": {
+    "title": "Send result",
+    "empty": {
+      "title": "No send yet",
+      "description": "Send a test message to follow its status here in real time."
+    },
     "messageId": "Message ID",
     "failureReason": "Failure reason",
     "live": "Updating status in real time...",

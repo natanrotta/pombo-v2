@@ -34,6 +34,11 @@
     "clear": "Limpar"
   },
   "result": {
+    "title": "Resultado do envio",
+    "empty": {
+      "title": "Nenhum envio ainda",
+      "description": "Envie uma mensagem de teste para acompanhar o status por aqui em tempo real."
+    },
     "messageId": "ID da mensagem",
     "failureReason": "Motivo da falha",
     "live": "Atualizando o status em tempo real...",

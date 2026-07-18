@@ -6,10 +6,12 @@ import { IOutboxRepository } from "@modules/messaging/domain/repository/outbox-r
 import { type MessageStatus } from "@modules/messaging/domain/value-object/message-status";
 import { AppConfig } from "@shared/provider/app-config.interface";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
+import type { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
 import { ConflictError, NotFoundError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 import { SendTextInput } from "@modules/messaging/application/dto/message.dto";
 import { buildUserJid } from "@modules/messaging/domain/value-object/wa-jid";
+import { DrainOutboxUseCase } from "./drain-outbox.use-case";
 
 export interface SendTextOutput {
   messageId: string;
@@ -17,11 +19,13 @@ export interface SendTextOutput {
 }
 
 /**
- * The core send path. `202` means accepted — NOT delivered. If the device is
- * online the message goes out immediately; if it's offline (or the socket drops
- * mid-send) the row is left QUEUED and the drain sends it on reconnect (still a
- * 202). The outbox row is written BEFORE the send so getMessage can answer a
- * resend. Idempotency is the DB unique's job, with a code fast-path for the
+ * The core send path. `202` means accepted — NOT delivered. The message goes
+ * out immediately only if the device is online AND under its per-device send
+ * budget; otherwise (offline, socket drops mid-send, or over the rate limit)
+ * the row is left QUEUED and the drain sends it later — offline waits for
+ * `session.connected`, over-budget is kicked to the drain now. Still a 202
+ * either way. The outbox row is written BEFORE the send so getMessage can answer
+ * a resend. Idempotency is the DB unique's job, with a code fast-path for the
  * common sequential replay.
  */
 @injectable()
@@ -37,6 +41,10 @@ export class SendTextMessageUseCase {
     private readonly config: AppConfig,
     @inject(DI_TOKENS.DomainEventBus)
     private readonly bus: IDomainEventBus,
+    @inject(DI_TOKENS.SendRateLimiter)
+    private readonly rateLimiter: ISendRateLimiter,
+    @inject(DrainOutboxUseCase)
+    private readonly drainOutbox: DrainOutboxUseCase,
   ) {}
 
   async execute(input: SendTextInput): Promise<SendTextOutput> {
@@ -119,6 +127,16 @@ export class SendTextMessageUseCase {
 
     // Offline → the row is queued; the drain sends it on reconnect. 202 now.
     if (!online) {
+      return { messageId: message.id, status: "PENDING" };
+    }
+
+    // Over the per-device send budget → queue it (don't send now) and kick the
+    // drain, which paces itself on the same rate limiter and sends it once the
+    // budget frees. Single-flight, so this joins a running drain or starts one.
+    if (!this.rateLimiter.tryConsume(device.id)) {
+      // fire-and-forget; the drain has its own try/finally and never throws, but
+      // .catch keeps the contract explicit against future changes.
+      void this.drainOutbox.execute({ deviceId: device.id }).catch(() => {});
       return { messageId: message.id, status: "PENDING" };
     }
 

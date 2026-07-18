@@ -1,7 +1,9 @@
 import { DrainOutboxUseCase } from "./drain-outbox.use-case";
 import { InMemoryOutboxRepository } from "@modules/messaging/test/in-memory-outbox.repository";
 import { FakeWhatsAppGateway } from "@modules/devices/test/fake-whatsapp.gateway";
-import { mockAppConfig, mockLoggerProvider } from "@test/mocks";
+import { TokenBucketSendRateLimiter } from "@modules/messaging/infrastructure/provider/token-bucket-send-rate-limiter";
+import type { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
+import { mockLoggerProvider, mockSendRateLimiter } from "@test/mocks";
 import type {
   DomainEvent,
   IDomainEventBus,
@@ -19,17 +21,16 @@ class RecordingBus implements IDomainEventBus {
 
 const future = (): Date => new Date(Date.now() + 60 * 60 * 1000);
 
-const setup = () => {
+const setup = (rateLimiter: ISendRateLimiter = mockSendRateLimiter()) => {
   const outbox = new InMemoryOutboxRepository();
   const gateway = new FakeWhatsAppGateway();
   const bus = new RecordingBus();
-  const config = mockAppConfig({ OUTBOX_DRAIN_DELAY_MS: 0 });
   gateway.setConnected(DEVICE, true);
   const sut = new DrainOutboxUseCase(
     outbox,
     gateway,
     bus,
-    config,
+    rateLimiter,
     mockLoggerProvider(),
   );
   const enqueue = (
@@ -130,6 +131,24 @@ describe("DrainOutboxUseCase", () => {
     );
     expect((await outbox.findById(a.id))?.status).toBe("SERVER_ACK");
     expect(await outbox.findQueued(DEVICE, 100)).toHaveLength(0);
+  });
+
+  it("paces the drain on the rate limiter — sends the whole queue FIFO despite a tight budget", async () => {
+    // Capacity 1, refills 1 token / 10ms: the first send exhausts the budget,
+    // so the drain must WAIT for the refill before the second — and still send
+    // both, in order. Uses a real limiter + real (tiny) waits.
+    const { sut, gateway, enqueue } = setup(
+      new TokenBucketSendRateLimiter(1, 10),
+    );
+    await enqueue("a", "5511@s.whatsapp.net");
+    await enqueue("b", "5522@s.whatsapp.net");
+
+    await sut.execute({ deviceId: DEVICE });
+
+    expect(gateway.sentTexts.map((s) => s.jid)).toEqual([
+      "5511@s.whatsapp.net",
+      "5522@s.whatsapp.net",
+    ]);
   });
 
   it("is single-flight per device (a concurrent drain is a no-op)", async () => {

@@ -1,8 +1,15 @@
 import { SendTextMessageUseCase } from "./send-text-message.use-case";
+import { DrainOutboxUseCase } from "./drain-outbox.use-case";
 import { InMemoryDevicesRepository } from "@modules/devices/test/in-memory-devices.repository";
 import { InMemoryOutboxRepository } from "@modules/messaging/test/in-memory-outbox.repository";
 import { FakeWhatsAppGateway } from "@modules/devices/test/fake-whatsapp.gateway";
-import { mockAppConfig } from "@test/mocks";
+import { TokenBucketSendRateLimiter } from "@modules/messaging/infrastructure/provider/token-bucket-send-rate-limiter";
+import type { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
+import {
+  mockAppConfig,
+  mockLoggerProvider,
+  mockSendRateLimiter,
+} from "@test/mocks";
 import { Device } from "@modules/devices/domain/entity/device.entity";
 import type {
   DomainEvent,
@@ -22,7 +29,9 @@ class RecordingBus implements IDomainEventBus {
   subscribe(): void {}
 }
 
-const setup = async () => {
+// Default: a rate limiter with a high ceiling so it never throttles unless a
+// test passes its own (low-capacity) limiter to exercise the queue path.
+const setup = async (rateLimiter: ISendRateLimiter = mockSendRateLimiter()) => {
   const devices = new InMemoryDevicesRepository();
   const outbox = new InMemoryOutboxRepository();
   const gateway = new FakeWhatsAppGateway();
@@ -34,8 +43,32 @@ const setup = async () => {
     webhookSecret: "s",
   });
   gateway.setConnected(device.id, true);
-  const sut = new SendTextMessageUseCase(devices, outbox, gateway, config, bus);
-  return { devices, outbox, gateway, device, bus, sut };
+  const drainOutbox = new DrainOutboxUseCase(
+    outbox,
+    gateway,
+    bus,
+    rateLimiter,
+    mockLoggerProvider(),
+  );
+  const sut = new SendTextMessageUseCase(
+    devices,
+    outbox,
+    gateway,
+    config,
+    bus,
+    rateLimiter,
+    drainOutbox,
+  );
+  return {
+    devices,
+    outbox,
+    gateway,
+    device,
+    bus,
+    sut,
+    rateLimiter,
+    drainOutbox,
+  };
 };
 
 describe("SendTextMessageUseCase", () => {
@@ -166,6 +199,40 @@ describe("SendTextMessageUseCase", () => {
     expect((await outbox.findByIdempotencyKey(device.id, "k"))?.status).toBe(
       "PENDING",
     );
+  });
+
+  it("queues (202) and does NOT send now when the per-device rate limit is exhausted", async () => {
+    // Budget of exactly 1: the first send consumes it, the second is queued.
+    const limiter = new TokenBucketSendRateLimiter(1, 60000);
+    const { sut, gateway, outbox, device, drainOutbox } = await setup(limiter);
+    // Don't spin a real drain in the fire-and-forget kick — just record it.
+    const drainCalls: string[] = [];
+    drainOutbox.execute = async ({ deviceId }) => {
+      drainCalls.push(deviceId);
+    };
+
+    await sut.execute({
+      accountId: ACCOUNT_A,
+      deviceId: device.id,
+      phone: "5548",
+      text: "um",
+      idempotencyKey: "k1",
+    });
+    expect(gateway.sentTexts).toHaveLength(1); // had a token → sent
+
+    const out = await sut.execute({
+      accountId: ACCOUNT_A,
+      deviceId: device.id,
+      phone: "5548",
+      text: "dois",
+      idempotencyKey: "k2",
+    });
+    expect(out.status).toBe("PENDING");
+    expect(gateway.sentTexts).toHaveLength(1); // no token → NOT sent
+    const row = await outbox.findByIdempotencyKey(device.id, "k2");
+    expect(row?.status).toBe("PENDING");
+    expect(row?.waMessageId).toBeNull();
+    expect(drainCalls).toEqual([device.id]); // drain was kicked
   });
 
   it("replays the original on same key + same text (idempotent)", async () => {

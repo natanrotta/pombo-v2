@@ -4,7 +4,7 @@ import { IOutboxRepository } from "@modules/messaging/domain/repository/outbox-r
 import { OutboxMessage } from "@modules/messaging/domain/entity/outbox-message.entity";
 import { IWhatsAppGateway } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import { userJidToPhone } from "@modules/messaging/domain/value-object/wa-jid";
-import type { AppConfig } from "@shared/provider/app-config.interface";
+import type { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
 import type { ILoggerProvider } from "@shared/provider/logger-provider.interface";
 
@@ -31,13 +31,14 @@ const errText = (error: unknown): string =>
 type SendOutcome = "sent" | "failed" | "dropped";
 
 /**
- * Sends the messages that piled up in the outbox while a device was offline —
- * triggered on `session.connected`. FIFO, paced (`OUTBOX_DRAIN_DELAY_MS`), in
- * bounded batches, and it STOPS the moment the device drops again (the rest
- * waits for the next reconnect). Single-flight per device via the `draining`
- * guard so the same row is never sent twice — which is why this use case MUST
- * be a container singleton (a transient instance would reset the guard every
- * event).
+ * Sends messages queued in the outbox — because a device was offline, or
+ * because a live send hit the per-device rate limit. Triggered on
+ * `session.connected` AND by the live send path when it queues an over-budget
+ * message. FIFO, in bounded batches, PACED BY THE RATE LIMITER (it waits for a
+ * send token before each message), and it STOPS the moment the device drops
+ * again. Single-flight per device via the `draining` guard so the same row is
+ * never sent twice — which is why this use case MUST be a container singleton
+ * (a transient instance would reset the guard every event).
  */
 @injectable()
 export class DrainOutboxUseCase {
@@ -50,8 +51,8 @@ export class DrainOutboxUseCase {
     private readonly gateway: IWhatsAppGateway,
     @inject(DI_TOKENS.DomainEventBus)
     private readonly bus: IDomainEventBus,
-    @inject(DI_TOKENS.AppConfig)
-    private readonly config: AppConfig,
+    @inject(DI_TOKENS.SendRateLimiter)
+    private readonly rateLimiter: ISendRateLimiter,
     @inject(DI_TOKENS.LoggerProvider)
     private readonly logger: ILoggerProvider,
   ) {}
@@ -70,18 +71,20 @@ export class DrainOutboxUseCase {
         );
         if (batch.length === 0) break;
         if (!logged) {
+          // Triggered by session.connected OR by a rate-limited live send, so
+          // don't claim "reconnect" here.
           this.logger.info(
             { deviceId, count: batch.length },
-            "draining outbox after reconnect",
+            "draining outbox",
           );
           logged = true;
         }
 
         let dropped = false;
         for (const message of batch) {
-          // Device dropped again mid-drain → stop; the rest drains on the next
-          // reconnect. Re-checked every iteration, not just once.
-          if (!this.gateway.isConnected(deviceId)) {
+          // Wait for a send token (the rate limiter IS the pacing). Returns
+          // false if the device dropped while waiting → stop the drain.
+          if (!(await this.waitForToken(deviceId))) {
             dropped = true;
             break;
           }
@@ -89,7 +92,6 @@ export class DrainOutboxUseCase {
             dropped = true;
             break;
           }
-          await delay(this.config.OUTBOX_DRAIN_DELAY_MS);
         }
 
         // Stop on a drop, or when the last (partial) batch is drained. A full
@@ -98,6 +100,19 @@ export class DrainOutboxUseCase {
       }
     } finally {
       this.draining.delete(deviceId);
+    }
+  }
+
+  /** Block until a send token is available for the device, pacing via the rate
+   *  limiter. Returns false if the device dropped while waiting (caller stops).
+   *  Consumes the token on success — the caller sends exactly once after. */
+  private async waitForToken(deviceId: string): Promise<boolean> {
+    for (;;) {
+      if (!this.gateway.isConnected(deviceId)) return false;
+      if (this.rateLimiter.tryConsume(deviceId)) return true;
+      // Floor the wait so a 0/near-0 remaining (clock-resolution race) can't
+      // busy-spin; it never adds meaningful latency at real send rates.
+      await delay(Math.max(this.rateLimiter.msUntilNextToken(deviceId), 25));
     }
   }
 

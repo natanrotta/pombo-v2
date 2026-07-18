@@ -26,6 +26,11 @@
       "codeExample": "Authorization: Bearer pmb_…",
       "copy": "Copy example"
     },
+    "collection": {
+      "description": "Download a Postman collection with every public API endpoint, pre-filled with environment variables and ready to test.",
+      "button": "Download collection",
+      "success": "Collection downloaded."
+    },
     "reveal": {
       "title": "Save your API token",
       "done": "Close",

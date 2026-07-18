@@ -11,6 +11,12 @@ import { BaileysWhatsAppGateway } from "@modules/devices/infrastructure/provider
 import { PruneOutboxJob } from "@modules/messaging/infrastructure/job/prune-outbox.job";
 import { makeAdvisoryLock } from "./advisory-lock";
 
+// Boot-rehydration stagger: spread the reconnections over a random window sized
+// by the fleet (≈ this much per device) but capped, so N devices don't
+// reconnect in lockstep (thundering herd → WhatsApp rate-limit → more drops).
+const BOOT_STAGGER_MS_PER_DEVICE = 250;
+const BOOT_STAGGER_MAX_MS = 30_000;
+
 /**
  * All the boot steps that run ONLY when `WHATSAPP_ENABLED=true`. Kept behind the
  * flag so they never run in dev/test: the advisory lock, boot rehydration, the
@@ -96,8 +102,17 @@ export async function startWhatsAppGateway(): Promise<() => Promise<void>> {
       await devicesRepository.updateStatus(device.id, "DISCONNECTED");
     }
   }
+  // Stagger the boot reconnections across a bounded random window (see the
+  // BOOT_STAGGER_* constants) so they don't fire in lockstep. Each connect goes
+  // off at a random offset; the timers are unref'd so a pending one never
+  // blocks SIGTERM.
+  const spreadMs = Math.min(
+    wasConnected.length * BOOT_STAGGER_MS_PER_DEVICE,
+    BOOT_STAGGER_MAX_MS,
+  );
   for (const device of wasConnected) {
-    void gateway.connect(device.id);
+    const offset = Math.floor(Math.random() * spreadMs);
+    setTimeout(() => void gateway.connect(device.id), offset).unref();
   }
 
   // Prune the outbox on a TTL (protocol, not history).

@@ -101,6 +101,24 @@ export class PrismaOutboxRepository implements IOutboxRepository {
     }
   }
 
+  async findQueued(deviceId: string, limit: number): Promise<OutboxMessage[]> {
+    try {
+      const rows = await prisma.outbox_message.findMany({
+        where: {
+          device_id: deviceId,
+          status: "PENDING",
+          wa_message_id: null,
+          expires_at: { gt: new Date() },
+        },
+        orderBy: { created_at: "asc" },
+        take: limit,
+      });
+      return rows.map((row) => this.toEntity(row));
+    } catch (error) {
+      throw mapPrismaError(error);
+    }
+  }
+
   async setWaMessageId(id: string, waMessageId: string): Promise<void> {
     try {
       await prisma.outbox_message.update({

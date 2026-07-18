@@ -22,6 +22,13 @@ export interface IOutboxRepository {
   ): Promise<OutboxMessage | null>;
   findByWaMessageId(waMessageId: string): Promise<OutboxMessage | null>;
   create(data: CreateOutboxData): Promise<OutboxMessage>;
+  /**
+   * Messages queued for a device but not yet sent — `PENDING`, no `wa_message_id`
+   * (never handed to WhatsApp), still within TTL. FIFO by creation, capped at
+   * `limit` so a device with a huge backlog can't load it all at once (the drain
+   * re-queries in batches). This is the set reopened when the device reconnects.
+   */
+  findQueued(deviceId: string, limit: number): Promise<OutboxMessage[]>;
   setWaMessageId(id: string, waMessageId: string): Promise<void>;
   updateStatus(
     id: string,

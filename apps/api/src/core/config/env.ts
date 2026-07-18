@@ -121,6 +121,9 @@ const envSchema = z.object({
   // The outbox is protocol, not history: rows past this TTL are pruned.
   OUTBOX_TTL_HOURS: z.coerce.number().int().positive().default(24),
   OUTBOX_PRUNE_INTERVAL_MS: z.coerce.number().int().positive().default(3600000),
+  // Pause between each message when draining the queue after a device reconnects
+  // — a burst of sends trips WhatsApp's anti-spam. Item #3 adds adaptive throttle.
+  OUTBOX_DRAIN_DELAY_MS: z.coerce.number().int().nonnegative().default(1000),
   WEBHOOK_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
   WEBHOOK_MAX_ATTEMPTS: z.coerce.number().int().positive().default(4),
   WEBHOOK_RETRY_BASE_DELAY_MS: z.coerce.number().int().positive().default(1000),

@@ -20,6 +20,7 @@ export interface AppConfig {
   RECONNECT_MAX_DELAY_MS: number;
   OUTBOX_TTL_HOURS: number;
   OUTBOX_PRUNE_INTERVAL_MS: number;
+  OUTBOX_DRAIN_DELAY_MS: number;
   WEBHOOK_TIMEOUT_MS: number;
   WEBHOOK_MAX_ATTEMPTS: number;
   WEBHOOK_RETRY_BASE_DELAY_MS: number;

@@ -1,0 +1,162 @@
+import { DrainOutboxUseCase } from "./drain-outbox.use-case";
+import { InMemoryOutboxRepository } from "@modules/messaging/test/in-memory-outbox.repository";
+import { FakeWhatsAppGateway } from "@modules/devices/test/fake-whatsapp.gateway";
+import { mockAppConfig, mockLoggerProvider } from "@test/mocks";
+import type {
+  DomainEvent,
+  IDomainEventBus,
+} from "@shared/provider/domain-event-bus.interface";
+
+const DEVICE = "device-1";
+
+class RecordingBus implements IDomainEventBus {
+  public published: DomainEvent[] = [];
+  publish(event: DomainEvent): void {
+    this.published.push(event);
+  }
+  subscribe(): void {}
+}
+
+const future = (): Date => new Date(Date.now() + 60 * 60 * 1000);
+
+const setup = () => {
+  const outbox = new InMemoryOutboxRepository();
+  const gateway = new FakeWhatsAppGateway();
+  const bus = new RecordingBus();
+  const config = mockAppConfig({ OUTBOX_DRAIN_DELAY_MS: 0 });
+  gateway.setConnected(DEVICE, true);
+  const sut = new DrainOutboxUseCase(
+    outbox,
+    gateway,
+    bus,
+    config,
+    mockLoggerProvider(),
+  );
+  const enqueue = (
+    idempotencyKey: string,
+    toJid: string,
+    expiresAt = future(),
+  ) =>
+    outbox.create({
+      deviceId: DEVICE,
+      idempotencyKey,
+      toJid,
+      text: `t-${idempotencyKey}`,
+      expiresAt,
+    });
+  return { outbox, gateway, bus, sut, enqueue };
+};
+
+describe("DrainOutboxUseCase", () => {
+  it("sends every queued message, stamps it, and publishes message.sent", async () => {
+    const { sut, outbox, gateway, bus, enqueue } = setup();
+    const a = await enqueue("a", "5511@s.whatsapp.net");
+    const b = await enqueue("b", "5522@s.whatsapp.net");
+
+    await sut.execute({ deviceId: DEVICE });
+
+    expect(gateway.sentTexts.map((s) => s.jid)).toEqual([
+      "5511@s.whatsapp.net",
+      "5522@s.whatsapp.net",
+    ]);
+    // Both rows now carry a waMessageId (sent).
+    expect((await outbox.findById(a.id))?.waMessageId).toBeTruthy();
+    expect((await outbox.findById(b.id))?.waMessageId).toBeTruthy();
+    // message.sent published per drained message, phone recovered from the jid.
+    const sent = bus.published.filter((e) => e.type === "message.sent");
+    expect(sent).toHaveLength(2);
+    expect(sent).toContainEqual({
+      type: "message.sent",
+      deviceId: DEVICE,
+      messageId: a.id,
+      phone: "5511",
+    });
+  });
+
+  it("stops draining the moment the device drops again", async () => {
+    const { sut, outbox, gateway, enqueue } = setup();
+    await enqueue("a", "5511@s.whatsapp.net");
+    const b = await enqueue("b", "5522@s.whatsapp.net");
+    // The first send drops the device → the loop must break before the second.
+    gateway.sendText = async (deviceId, jid, text) => {
+      gateway.sentTexts.push({ deviceId, jid, text });
+      gateway.setConnected(deviceId, false);
+      return { waMessageId: "wa-1" };
+    };
+
+    await sut.execute({ deviceId: DEVICE });
+
+    expect(gateway.sentTexts).toHaveLength(1);
+    // b was never sent — still queued for the next reconnect.
+    expect((await outbox.findById(b.id))?.waMessageId).toBeNull();
+    expect((await outbox.findById(b.id))?.status).toBe("PENDING");
+  });
+
+  it("does not send expired queued messages", async () => {
+    const { sut, gateway, enqueue } = setup();
+    await enqueue("old", "5511@s.whatsapp.net", new Date(Date.now() - 1000));
+
+    await sut.execute({ deviceId: DEVICE });
+
+    expect(gateway.sentTexts).toHaveLength(0);
+  });
+
+  it("marks a message FAILED when the send fails while still connected", async () => {
+    const { sut, outbox, gateway, enqueue } = setup();
+    const a = await enqueue("a", "5511@s.whatsapp.net");
+    gateway.sendText = async () => {
+      throw new Error("bad number");
+    };
+
+    await sut.execute({ deviceId: DEVICE });
+
+    expect((await outbox.findById(a.id))?.status).toBe("FAILED");
+  });
+
+  it("moves the row to SERVER_ACK (not FAILED, not re-sent) when only the stamp fails after delivery", async () => {
+    const { sut, outbox, gateway, bus, enqueue } = setup();
+    const a = await enqueue("a", "5511@s.whatsapp.net");
+    outbox.setWaMessageId = async () => {
+      throw new Error("stamp db down");
+    };
+
+    await sut.execute({ deviceId: DEVICE });
+
+    // Delivered (message.sent fired), NOT FAILED, and out of the queue so the
+    // next reconnect can't re-send it.
+    expect(gateway.sentTexts).toHaveLength(1);
+    expect(bus.published.filter((e) => e.type === "message.sent")).toHaveLength(
+      1,
+    );
+    expect((await outbox.findById(a.id))?.status).toBe("SERVER_ACK");
+    expect(await outbox.findQueued(DEVICE, 100)).toHaveLength(0);
+  });
+
+  it("is single-flight per device (a concurrent drain is a no-op)", async () => {
+    const { sut, gateway, enqueue } = setup();
+    await enqueue("a", "5511@s.whatsapp.net");
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    let calls = 0;
+    gateway.sendText = async () => {
+      calls += 1;
+      await gate;
+      return { waMessageId: `wa-${calls}` };
+    };
+
+    const first = sut.execute({ deviceId: DEVICE });
+    const second = sut.execute({ deviceId: DEVICE }); // guarded → no-op
+    release();
+    await Promise.all([first, second]);
+
+    expect(calls).toBe(1);
+  });
+
+  it("no-ops when nothing is queued", async () => {
+    const { sut, gateway } = setup();
+    await sut.execute({ deviceId: DEVICE });
+    expect(gateway.sentTexts).toHaveLength(0);
+  });
+});

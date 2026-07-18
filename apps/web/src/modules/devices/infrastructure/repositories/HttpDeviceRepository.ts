@@ -7,6 +7,7 @@ import type {
   UpdateDeviceWebhooksInput,
   DeviceQr,
   ConnectDeviceResult,
+  DisconnectDeviceResult,
 } from "@/modules/devices/domain/entities/Device";
 
 // The httpClient response interceptor unwraps `{ ok, data }` → each call
@@ -37,6 +38,12 @@ export class HttpDeviceRepository implements DeviceRepository {
   connect(id: string): Promise<ConnectDeviceResult> {
     return httpClient.post<never, ConnectDeviceResult>(
       `/devices/${id}/connect`,
+    );
+  }
+
+  disconnect(id: string): Promise<DisconnectDeviceResult> {
+    return httpClient.post<never, DisconnectDeviceResult>(
+      `/devices/${id}/disconnect`,
     );
   }
 

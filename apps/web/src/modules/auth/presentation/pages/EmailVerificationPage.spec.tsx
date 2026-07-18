@@ -77,7 +77,7 @@ describe("EmailVerificationPage", () => {
 
     await waitFor(() => expect(verifyEmailPinMock).toHaveBeenCalledWith("123456"));
     await waitFor(() =>
-      expect(navigateMock).toHaveBeenCalledWith(ROUTE_PATHS.dashboard, { replace: true })
+      expect(navigateMock).toHaveBeenCalledWith(ROUTE_PATHS.devices, { replace: true })
     );
   });
 

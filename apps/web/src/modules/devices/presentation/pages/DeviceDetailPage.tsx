@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import {
+  Box,
   Button,
   Flex,
   Icon,
@@ -10,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { FiArrowLeft, FiTrash2, FiZap } from "@/shared/components/icons";
+import { FiArrowLeft, FiLogOut, FiTrash2, FiZap } from "@/shared/components/icons";
 import { PageHeader } from "@/shared/components/ui/PageHeader";
 import { SectionCard } from "@/shared/components/ui/SectionCard";
 import { ConfirmDialog } from "@/shared/components/ui/ConfirmDialog";
@@ -18,6 +19,8 @@ import { DetailPageGuard } from "@/shared/components/ui/DetailPageGuard";
 import { InfoRow } from "@/shared/components/ui/InfoRow";
 import { useConfirm } from "@/shared/hooks/useConfirm";
 import { useNotify } from "@/shared/hooks/useNotify";
+import { formatDateTime } from "@/shared/utils/date";
+import { formatPhoneDisplay } from "@/shared/utils/phone";
 import { ROUTE_PATHS } from "@/app/router/RoutePaths";
 import { DeviceStatusBadge } from "@/modules/devices/presentation/components/DeviceStatusBadge";
 import { DeviceWebhooksSection } from "@/modules/devices/presentation/components/DeviceWebhooksSection";
@@ -25,6 +28,7 @@ import { QrConnectModal } from "@/modules/devices/presentation/components/QrConn
 import {
   useDeviceDetail,
   useDeleteDevice,
+  useDisconnectDevice,
 } from "@/modules/devices/presentation/hooks/useDevices";
 import type { Device } from "@/modules/devices/domain/entities/Device";
 
@@ -33,8 +37,10 @@ function DeviceDetailContent({ device }: { device: Device }) {
   const navigate = useNavigate();
   const { showSuccess } = useNotify();
   const deleteDevice = useDeleteDevice();
+  const disconnectDevice = useDisconnectDevice();
   const qrModal = useDisclosure();
   const deleteConfirm = useConfirm();
+  const disconnectConfirm = useConfirm();
 
   const handleConfirmDelete = useCallback(() => {
     deleteConfirm.confirm(async (id) => {
@@ -48,7 +54,18 @@ function DeviceDetailContent({ device }: { device: Device }) {
     });
   }, [deleteConfirm, deleteDevice, showSuccess, t, navigate]);
 
-  const canConnect = device.status !== "CONNECTED";
+  const handleConfirmDisconnect = useCallback(() => {
+    disconnectConfirm.confirm(async (id) => {
+      try {
+        await disconnectDevice.mutateAsync(id);
+        showSuccess(t("detail.disconnected"));
+      } catch {
+        // Error surfaced by the mutation's onError toast.
+      }
+    });
+  }, [disconnectConfirm, disconnectDevice, showSuccess, t]);
+
+  const isConnected = device.status === "CONNECTED";
 
   return (
     <Flex direction="column" gap={5}>
@@ -74,28 +91,43 @@ function DeviceDetailContent({ device }: { device: Device }) {
           gap={4}
         >
           <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={5} flex="1">
-            <Stack spacing={1.5}>
+            <Stack spacing={1.5} align="flex-start">
               <Text fontSize="xs" color="text.secondary">
                 {t("detail.statusLabel")}
               </Text>
-              <DeviceStatusBadge status={device.status} />
+              <Box>
+                <DeviceStatusBadge status={device.status} />
+              </Box>
             </Stack>
             <InfoRow
               label={t("detail.identifier")}
-              value={device.identifier ?? t("list.notPaired")}
+              value={
+                device.identifier
+                  ? formatPhoneDisplay(device.identifier)
+                  : t("list.notPaired")
+              }
             />
             <InfoRow
               label={t("detail.lastConnected")}
               value={
                 device.lastConnectedAt
-                  ? new Date(device.lastConnectedAt).toLocaleString()
+                  ? formatDateTime(device.lastConnectedAt)
                   : t("list.neverConnected")
               }
             />
           </SimpleGrid>
 
           <Flex gap={2} align="center">
-            {canConnect && (
+            {isConnected ? (
+              <Button
+                variant="outline"
+                colorScheme="gray"
+                leftIcon={<Icon as={FiLogOut} />}
+                onClick={() => disconnectConfirm.requestConfirm(device.id)}
+              >
+                {t("detail.disconnect")}
+              </Button>
+            ) : (
               <Button
                 colorScheme="brand"
                 leftIcon={<Icon as={FiZap} />}
@@ -108,6 +140,11 @@ function DeviceDetailContent({ device }: { device: Device }) {
               variant="outline"
               colorScheme="red"
               leftIcon={<Icon as={FiTrash2} />}
+              _hover={{
+                bg: "status.error.bg",
+                borderColor: "status.error.border",
+                color: "status.error.fg",
+              }}
               onClick={() => deleteConfirm.requestConfirm(device.id)}
             >
               {t("detail.delete")}
@@ -132,6 +169,15 @@ function DeviceDetailContent({ device }: { device: Device }) {
         confirmLabel={t("detail.delete")}
         isDanger
         isLoading={deleteDevice.isPending}
+      />
+      <ConfirmDialog
+        isOpen={disconnectConfirm.isOpen}
+        onClose={disconnectConfirm.cancel}
+        onConfirm={handleConfirmDisconnect}
+        title={t("detail.disconnectConfirm.title")}
+        description={t("detail.disconnectConfirm.description")}
+        confirmLabel={t("detail.disconnect")}
+        isLoading={disconnectDevice.isPending}
       />
     </Flex>
   );

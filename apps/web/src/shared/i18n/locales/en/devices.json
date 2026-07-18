@@ -15,6 +15,8 @@
     "notPaired": "Not paired",
     "delete": "Delete",
     "deleted": "Device deleted.",
+    "disconnect": "Disconnect",
+    "disconnected": "Device disconnected.",
     "stats": {
       "total": "Total devices",
       "totalHint": "All registered devices",
@@ -39,6 +41,10 @@
     "deleteConfirm": {
       "title": "Delete device",
       "description": "The device will be disconnected and permanently removed. This action cannot be undone."
+    },
+    "disconnectConfirm": {
+      "title": "Disconnect device",
+      "description": "The WhatsApp session will be ended. To reconnect, scan the QR code again."
     }
   },
   "create": {
@@ -89,11 +95,17 @@
     "identifier": "Number",
     "lastConnected": "Last connection",
     "connect": "Connect",
+    "disconnect": "Disconnect",
+    "disconnected": "Device disconnected.",
     "delete": "Delete",
     "deleted": "Device deleted.",
     "deleteConfirm": {
       "title": "Delete device",
       "description": "The device will be disconnected and permanently removed. This action cannot be undone."
+    },
+    "disconnectConfirm": {
+      "title": "Disconnect device",
+      "description": "The WhatsApp session will be ended. To reconnect, scan the QR code again."
     }
   }
 }

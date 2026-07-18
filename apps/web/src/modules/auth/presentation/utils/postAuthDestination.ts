@@ -13,5 +13,5 @@ export function getPostAuthDestination(user: AuthUser | null): string {
   // session), so this is a defensive guard for any path that surfaces an
   // unverified user.
   if (!user.emailVerified) return ROUTE_PATHS.verifyEmail;
-  return ROUTE_PATHS.dashboard;
+  return ROUTE_PATHS.devices;
 }

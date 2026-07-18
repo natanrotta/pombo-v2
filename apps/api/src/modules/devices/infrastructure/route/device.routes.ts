@@ -56,6 +56,12 @@ deviceRoutes.post(
   asyncHandler(deviceController.connect.bind(deviceController)),
 );
 
+deviceRoutes.post(
+  "/:id/disconnect",
+  validateRequest({ params: DeviceIdParamSchema }),
+  asyncHandler(deviceController.disconnect.bind(deviceController)),
+);
+
 deviceRoutes.delete(
   "/:id",
   validateRequest({ params: DeviceIdParamSchema }),

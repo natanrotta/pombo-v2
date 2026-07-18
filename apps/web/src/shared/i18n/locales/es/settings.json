@@ -11,6 +11,7 @@
   },
   "apiToken": {
     "prefix": "Prefijo",
+    "copyPrefix": "Copiar prefijo",
     "createdAt": "Creado el",
     "lastUsedAt": "Último uso",
     "neverUsed": "Nunca usado",
@@ -24,7 +25,8 @@
     "usage": {
       "title": "Cómo usar",
       "description": "Envía el token en el encabezado Authorization de cada solicitud a la API.",
-      "codeExample": "Authorization: Bearer pmb_…"
+      "codeExample": "Authorization: Bearer pmb_…",
+      "copy": "Copiar ejemplo"
     },
     "reveal": {
       "title": "Guarda tu token de API",

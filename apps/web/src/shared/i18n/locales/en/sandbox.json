@@ -1,0 +1,35 @@
+{
+  "title": "Sandbox",
+  "description": "Test message sending through a connected device.",
+  "empty": {
+    "title": "No connected device",
+    "description": "Connect a device to test message sending.",
+    "action": "Go to devices"
+  },
+  "fields": {
+    "device": "Device",
+    "type": "Message type",
+    "phone": "Recipient number",
+    "phonePlaceholder": "(11) 99999-9999",
+    "text": "Message",
+    "textPlaceholder": "Type the test message..."
+  },
+  "type": {
+    "text": "Text"
+  },
+  "errors": {
+    "deviceRequired": "Select a device.",
+    "phoneInvalid": "Enter a valid number.",
+    "textRequired": "Type a message."
+  },
+  "actions": {
+    "send": "Send",
+    "clear": "Clear"
+  },
+  "result": {
+    "messageId": "Message ID",
+    "note": "Note",
+    "noteValue": "Test send — not persisted, in memory only."
+  },
+  "success": "Message queued for processing."
+}

@@ -34,11 +34,6 @@ const ResetPasswordPage = lazyWithRetry(() =>
     default: m.ResetPasswordPage,
   }))
 );
-const DashboardPage = lazyWithRetry(() =>
-  import("@/modules/dashboard/presentation/pages/DashboardPage").then((m) => ({
-    default: m.DashboardPage,
-  }))
-);
 const SettingsPage = lazyWithRetry(() =>
   import("@/modules/settings/presentation/pages/SettingsPage").then((m) => ({
     default: m.SettingsPage,
@@ -52,6 +47,11 @@ const DevicesListPage = lazyWithRetry(() =>
 const DeviceDetailPage = lazyWithRetry(() =>
   import("@/modules/devices/presentation/pages/DeviceDetailPage").then((m) => ({
     default: m.DeviceDetailPage,
+  }))
+);
+const SandboxPage = lazyWithRetry(() =>
+  import("@/modules/messaging/presentation/pages/SandboxPage").then((m) => ({
+    default: m.SandboxPage,
   }))
 );
 
@@ -134,15 +134,15 @@ export function AppRouter() {
       {/* Protected routes share a single AppShell via the layout route below.
           This avoids remounting the shell / sidebar on every navigation. */}
       <Route element={<ProtectedLayout />}>
-        <Route path="/" element={<Navigate to={ROUTE_PATHS.dashboard} replace />} />
-
-        <Route path={ROUTE_PATHS.dashboard} element={<DashboardPage />} />
+        <Route path="/" element={<Navigate to={ROUTE_PATHS.devices} replace />} />
 
         <Route path={ROUTE_PATHS.devices} element={<DevicesListPage />} />
         <Route
           path={ROUTE_PATHS.deviceDetail}
           element={<DeviceDetailPage />}
         />
+
+        <Route path={ROUTE_PATHS.sandbox} element={<SandboxPage />} />
 
         <Route path={ROUTE_PATHS.settings} element={<SettingsPage />} />
         {/* `/profile` is an alias of Settings — kept for deep links. */}

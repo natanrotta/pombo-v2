@@ -31,6 +31,7 @@ import { CreateDeviceModal } from "@/modules/devices/presentation/components/Cre
 import {
   useDevicesList,
   useDeleteDevice,
+  useDisconnectDevice,
 } from "@/modules/devices/presentation/hooks/useDevices";
 
 type StatusFilter = "all" | "connected" | "disconnected";
@@ -42,8 +43,10 @@ export function DevicesListPage() {
 
   const { data: devices = [], isLoading, isFetching } = useDevicesList();
   const deleteDevice = useDeleteDevice();
+  const disconnectDevice = useDisconnectDevice();
   const createModal = useDisclosure();
   const deleteConfirm = useConfirm();
+  const disconnectConfirm = useConfirm();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
@@ -90,6 +93,20 @@ export function DevicesListPage() {
       }
     });
   }, [deleteConfirm, deleteDevice, showSuccess, t]);
+  const handleDisconnect = useCallback(
+    (id: string) => disconnectConfirm.requestConfirm(id),
+    [disconnectConfirm],
+  );
+  const handleConfirmDisconnect = useCallback(() => {
+    disconnectConfirm.confirm(async (id) => {
+      try {
+        await disconnectDevice.mutateAsync(id);
+        showSuccess(t("list.disconnected"));
+      } catch {
+        // Error surfaced by the mutation's onError toast.
+      }
+    });
+  }, [disconnectConfirm, disconnectDevice, showSuccess, t]);
 
   const hasDevices = devices.length > 0;
 
@@ -119,18 +136,21 @@ export function DevicesListPage() {
               value={String(stats.total)}
               hint={t("list.stats.totalHint")}
               icon={FiSmartphone}
+              tone="brand"
             />
             <StatCard
               label={t("list.stats.connected")}
               value={String(stats.connected)}
               hint={t("list.stats.connectedHint")}
               icon={FiCheckCircle}
+              tone="success"
             />
             <StatCard
               label={t("list.stats.disconnected")}
               value={String(stats.disconnected)}
               hint={t("list.stats.disconnectedHint")}
               icon={FiSlash}
+              tone="neutral"
             />
           </SimpleGrid>
 
@@ -192,6 +212,7 @@ export function DevicesListPage() {
                     device={device}
                     onOpen={handleOpen}
                     onDelete={handleDelete}
+                    onDisconnect={handleDisconnect}
                   />
                 ))}
               </SimpleGrid>
@@ -213,6 +234,15 @@ export function DevicesListPage() {
         confirmLabel={t("list.delete")}
         isDanger
         isLoading={deleteDevice.isPending}
+      />
+      <ConfirmDialog
+        isOpen={disconnectConfirm.isOpen}
+        onClose={disconnectConfirm.cancel}
+        onConfirm={handleConfirmDisconnect}
+        title={t("list.disconnectConfirm.title")}
+        description={t("list.disconnectConfirm.description")}
+        confirmLabel={t("list.disconnect")}
+        isLoading={disconnectDevice.isPending}
       />
     </>
   );

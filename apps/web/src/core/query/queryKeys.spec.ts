@@ -5,7 +5,6 @@ describe("queryKeys", () => {
   describe("hierarchy", () => {
     it("nests narrow keys under the entity's `all` root", () => {
       expect(queryKeys.auth.me()[0]).toBe("auth");
-      expect(queryKeys.dashboard.summary()[0]).toBe("dashboard");
       expect(queryKeys.health.version()[0]).toBe("health");
       expect(queryKeys.devices.list()[0]).toBe("devices");
       expect(queryKeys.account.apiToken()[0]).toBe("account");
@@ -16,17 +15,6 @@ describe("queryKeys", () => {
     it("exposes me() under the auth root for invalidation factories", () => {
       expect(queryKeys.auth.me()).toEqual(["auth", "me"]);
       expect(queryKeys.auth.all).toEqual(["auth"]);
-    });
-  });
-
-  describe("dashboard namespace", () => {
-    it("encodes the target date in the summary key", () => {
-      expect(queryKeys.dashboard.summary()).toEqual(["dashboard", "summary", "today"]);
-      expect(queryKeys.dashboard.summary("2025-03-01")).toEqual([
-        "dashboard",
-        "summary",
-        "2025-03-01",
-      ]);
     });
   });
 

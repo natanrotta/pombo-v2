@@ -4,6 +4,7 @@ export { GetDeviceUseCase } from "./get-device.use-case";
 export { GetDeviceQrUseCase } from "./get-device-qr.use-case";
 export { UpdateDeviceWebhooksUseCase } from "./update-device-webhooks.use-case";
 export { ConnectDeviceUseCase } from "./connect-device.use-case";
+export { DisconnectDeviceUseCase } from "./disconnect-device.use-case";
 export { DeleteDeviceUseCase } from "./delete-device.use-case";
 export { HandleSessionConnectedUseCase } from "./handle-session-connected.use-case";
 export { HandleSessionDisconnectedUseCase } from "./handle-session-disconnected.use-case";

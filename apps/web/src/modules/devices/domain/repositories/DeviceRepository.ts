@@ -5,6 +5,7 @@ import type {
   UpdateDeviceWebhooksInput,
   DeviceQr,
   ConnectDeviceResult,
+  DisconnectDeviceResult,
 } from "@/modules/devices/domain/entities/Device";
 
 /**
@@ -22,6 +23,7 @@ export interface DeviceRepository {
     input: UpdateDeviceWebhooksInput,
   ): Promise<Device>;
   connect(id: string): Promise<ConnectDeviceResult>;
+  disconnect(id: string): Promise<DisconnectDeviceResult>;
   getQr(id: string): Promise<DeviceQr>;
   delete(id: string): Promise<void>;
 }

@@ -58,6 +58,21 @@ export function useConnectDevice() {
   });
 }
 
+export function useDisconnectDevice() {
+  const queryClient = useQueryClient();
+  const { handleError } = useErrorHandler();
+  return useMutation({
+    mutationFn: (id: string) => repositories.devices.disconnect(id),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.devices.detail(result.id),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.devices.list() });
+    },
+    onError: (error) => handleError(error),
+  });
+}
+
 /**
  * Polls the pairing QR (GET /devices/:id/qr) while `enabled` (the connect modal
  * is open). The response carries the live `status`, so the modal reacts to

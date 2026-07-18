@@ -7,6 +7,7 @@ import {
   GetDeviceQrUseCase,
   UpdateDeviceWebhooksUseCase,
   ConnectDeviceUseCase,
+  DisconnectDeviceUseCase,
   DeleteDeviceUseCase,
 } from "@modules/devices/application/use-case/devices";
 
@@ -54,6 +55,13 @@ export class DeviceController {
     const useCase = container.resolve(ConnectDeviceUseCase);
     const result = await useCase.execute(req.auth.accountId, id);
     return res.status(202).json({ ok: true, data: result });
+  }
+
+  async disconnect(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params as { id: string };
+    const useCase = container.resolve(DisconnectDeviceUseCase);
+    const result = await useCase.execute(req.auth.accountId, id);
+    return res.status(200).json({ ok: true, data: result });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {

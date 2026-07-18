@@ -6,11 +6,6 @@ export const queryKeys = {
     all: ["auth"] as const,
     me: () => [...queryKeys.auth.all, "me"] as const,
   },
-  dashboard: {
-    all: ["dashboard"] as const,
-    summary: (targetDate?: string) =>
-      [...queryKeys.dashboard.all, "summary", targetDate ?? "today"] as const,
-  },
   devices: {
     all: ["devices"] as const,
     list: () => [...queryKeys.devices.all, "list"] as const,

@@ -65,8 +65,8 @@
     "sections": {
       "main": "Menu"
     },
-    "dashboard": "Dashboard",
     "devices": "Devices",
+    "sandbox": "Sandbox",
     "settings": "Settings"
   },
   "notFound": {

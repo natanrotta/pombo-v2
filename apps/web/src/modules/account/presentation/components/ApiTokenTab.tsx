@@ -20,6 +20,7 @@ import { InfoRow } from "@/shared/components/ui/InfoRow";
 import { SectionCardSkeleton } from "@/shared/components/skeletons/SectionCardSkeleton";
 import { FormField } from "@/shared/components/forms/FormField";
 import { useNotify } from "@/shared/hooks/useNotify";
+import { formatDateTime, formatShortDate } from "@/shared/utils/date";
 import {
   useApiToken,
   useGenerateApiToken,
@@ -59,16 +60,22 @@ export function ApiTokenTab() {
             gap={4}
           >
             <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={5} flex="1">
-              <InfoRow label={t("apiToken.prefix")} value={token.prefix} />
+              <Flex align="center" gap={1}>
+                <InfoRow label={t("apiToken.prefix")} value={token.prefix} />
+                <CopyButton
+                  value={token.prefix}
+                  ariaLabel={t("apiToken.copyPrefix")}
+                />
+              </Flex>
               <InfoRow
                 label={t("apiToken.createdAt")}
-                value={new Date(token.createdAt).toLocaleDateString()}
+                value={formatShortDate(token.createdAt)}
               />
               <InfoRow
                 label={t("apiToken.lastUsedAt")}
                 value={
                   token.lastUsedAt
-                    ? new Date(token.lastUsedAt).toLocaleString()
+                    ? formatDateTime(token.lastUsedAt)
                     : t("apiToken.neverUsed")
                 }
               />
@@ -100,16 +107,22 @@ export function ApiTokenTab() {
         <Text fontSize="xs" color="text.secondary" mb={2}>
           {t("apiToken.usage.description")}
         </Text>
-        <Code
-          fontSize="xs"
-          px={3}
-          py={2}
-          borderRadius="md"
-          w="full"
-          whiteSpace="pre-wrap"
-        >
-          {t("apiToken.usage.codeExample")}
-        </Code>
+        <Flex align="center" gap={2}>
+          <Code
+            fontSize="xs"
+            px={3}
+            py={2}
+            borderRadius="md"
+            flex="1"
+            whiteSpace="pre-wrap"
+          >
+            {t("apiToken.usage.codeExample")}
+          </Code>
+          <CopyButton
+            value={t("apiToken.usage.codeExample")}
+            ariaLabel={t("apiToken.usage.copy")}
+          />
+        </Flex>
       </SectionCard>
 
       <AppModal

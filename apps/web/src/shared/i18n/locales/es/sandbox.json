@@ -1,0 +1,35 @@
+{
+  "title": "Sandbox",
+  "description": "Prueba el envío de mensajes con un dispositivo conectado.",
+  "empty": {
+    "title": "Ningún dispositivo conectado",
+    "description": "Conecta un dispositivo para probar el envío de mensajes.",
+    "action": "Ir a dispositivos"
+  },
+  "fields": {
+    "device": "Dispositivo",
+    "type": "Tipo de mensaje",
+    "phone": "Número de destino",
+    "phonePlaceholder": "(11) 99999-9999",
+    "text": "Mensaje",
+    "textPlaceholder": "Escribe el mensaje de prueba..."
+  },
+  "type": {
+    "text": "Texto"
+  },
+  "errors": {
+    "deviceRequired": "Selecciona un dispositivo.",
+    "phoneInvalid": "Ingresa un número válido.",
+    "textRequired": "Escribe un mensaje."
+  },
+  "actions": {
+    "send": "Enviar",
+    "clear": "Limpiar"
+  },
+  "result": {
+    "messageId": "ID del mensaje",
+    "note": "Nota",
+    "noteValue": "Envío de prueba — no se guarda, solo en memoria."
+  },
+  "success": "Mensaje enviado para procesamiento."
+}

@@ -52,3 +52,8 @@ export interface ConnectDeviceResult {
   id: string;
   status: DeviceStatus;
 }
+
+export interface DisconnectDeviceResult {
+  id: string;
+  status: DeviceStatus;
+}

@@ -15,6 +15,8 @@
     "notPaired": "Não pareado",
     "delete": "Excluir",
     "deleted": "Dispositivo excluído.",
+    "disconnect": "Desconectar",
+    "disconnected": "Dispositivo desconectado.",
     "stats": {
       "total": "Total de dispositivos",
       "totalHint": "Todos os dispositivos cadastrados",
@@ -39,6 +41,10 @@
     "deleteConfirm": {
       "title": "Excluir dispositivo",
       "description": "O dispositivo será desconectado e removido permanentemente. Esta ação não pode ser desfeita."
+    },
+    "disconnectConfirm": {
+      "title": "Desconectar dispositivo",
+      "description": "A sessão do WhatsApp será encerrada. Para reconectar, escaneie o QR Code novamente."
     }
   },
   "create": {
@@ -89,11 +95,17 @@
     "identifier": "Número",
     "lastConnected": "Última conexão",
     "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "disconnected": "Dispositivo desconectado.",
     "delete": "Excluir",
     "deleted": "Dispositivo excluído.",
     "deleteConfirm": {
       "title": "Excluir dispositivo",
       "description": "O dispositivo será desconectado e removido permanentemente. Esta ação não pode ser desfeita."
+    },
+    "disconnectConfirm": {
+      "title": "Desconectar dispositivo",
+      "description": "A sessão do WhatsApp será encerrada. Para reconectar, escaneie o QR Code novamente."
     }
   }
 }

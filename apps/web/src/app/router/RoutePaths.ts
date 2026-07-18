@@ -5,9 +5,9 @@ export const ROUTE_PATHS = {
   resetPassword: "/reset-password",
   verifyEmail: "/verify-email",
 
-  dashboard: "/dashboard",
   devices: "/devices",
   deviceDetail: "/devices/:id",
+  sandbox: "/sandbox",
   settings: "/settings",
   profile: "/profile",
 

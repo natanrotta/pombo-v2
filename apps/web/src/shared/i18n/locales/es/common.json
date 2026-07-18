@@ -65,8 +65,8 @@
     "sections": {
       "main": "Menú"
     },
-    "dashboard": "Panel",
     "devices": "Dispositivos",
+    "sandbox": "Sandbox",
     "settings": "Configuración"
   },
   "notFound": {

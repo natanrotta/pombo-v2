@@ -230,7 +230,16 @@ export const makeSessionManager = (
       lastQr.delete(deviceId);
       const sock = sockets.get(deviceId);
       sockets.delete(deviceId);
-      if (sock) await sock.logout(); // unpair (DELETE /devices/:id semantics)
+      // Unpair. The in-process state above is already cleared, so a Baileys
+      // throw here (e.g. logging out a mid-handshake QR_PENDING socket) must not
+      // bubble a 500 — the device is disconnected regardless. Log and swallow.
+      if (sock) {
+        try {
+          await sock.logout();
+        } catch (error) {
+          deps.logger.warn({ deviceId, error }, "sock.logout failed (ignored)");
+        }
+      }
     },
 
     isConnected: (deviceId) => openDevices.has(deviceId),

@@ -256,7 +256,7 @@ function CountrySelectFieldComponent({
           w="100%"
           maxW="100%"
           borderColor="border.default"
-          boxShadow="card-hover"
+          boxShadow="shadow.cardHover"
         >
           <PopoverBody p={2}>
             <Box mb={2}>

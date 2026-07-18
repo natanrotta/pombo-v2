@@ -38,6 +38,17 @@ describe("queryKeys", () => {
     });
   });
 
+  describe("messaging namespace", () => {
+    it("nests messageStatus under the messaging root, encoding the id", () => {
+      expect(queryKeys.messaging.all).toEqual(["messaging"]);
+      expect(queryKeys.messaging.messageStatus("msg-1")).toEqual([
+        "messaging",
+        "message-status",
+        "msg-1",
+      ]);
+    });
+  });
+
   it("returns readonly tuples (compile-time guard)", () => {
     // Runtime check: the array must be a real array (the `as const` is a TS-only narrowing).
     const list = queryKeys.auth.me();

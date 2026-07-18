@@ -67,7 +67,8 @@
     },
     "devices": "Dispositivos",
     "sandbox": "Sandbox",
-    "settings": "Configurações"
+    "profile": "Perfil",
+    "api": "API"
   },
   "notFound": {
     "title": "Página não encontrada",

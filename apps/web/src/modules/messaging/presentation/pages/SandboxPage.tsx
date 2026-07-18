@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Flex, Icon, SimpleGrid } from "@chakra-ui/react";
+import { Button, Flex, Icon, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { FiSend } from "@/shared/components/icons";
@@ -17,14 +17,31 @@ import { useNotify } from "@/shared/hooks/useNotify";
 import { maskPhoneBr, unformatPhone, formatPhoneDisplay } from "@/shared/utils/phone";
 import { ROUTE_PATHS } from "@/app/router/RoutePaths";
 import { useDevicesList } from "@/modules/devices";
-import { useSendMessage } from "@/modules/messaging/presentation/hooks/useSendMessage";
-import type { SendMessageResult } from "@/modules/messaging/domain/entities/Message";
+import {
+  useSendMessage,
+  useMessageStatus,
+} from "@/modules/messaging/presentation/hooks/useSendMessage";
+import type {
+  SendMessageResult,
+  MessageStatus,
+} from "@/modules/messaging/domain/entities/Message";
 
 type SandboxForm = {
   deviceId: string;
   messageType: string;
   phone: string;
   text: string;
+};
+
+const STATUS_TONE: Record<
+  MessageStatus,
+  "neutral" | "info" | "success" | "error"
+> = {
+  PENDING: "neutral",
+  SERVER_ACK: "info",
+  DELIVERY_ACK: "info",
+  READ: "success",
+  FAILED: "error",
 };
 
 export function SandboxPage() {
@@ -41,6 +58,21 @@ export function SandboxPage() {
   );
 
   const [result, setResult] = useState<SendMessageResult | null>(null);
+
+  // Poll the live delivery status of the last send (stops at READ/FAILED).
+  const statusQuery = useMessageStatus(
+    result?.messageId ?? null,
+    result !== null,
+  );
+  const liveStatus: MessageStatus | null =
+    statusQuery.data?.status ?? result?.status ?? null;
+  const failureReason = statusQuery.data?.failureReason ?? null;
+  const statusError = statusQuery.isError;
+  const isPolling =
+    liveStatus !== null &&
+    liveStatus !== "READ" &&
+    liveStatus !== "FAILED" &&
+    !statusError;
 
   const form = useFormState<SandboxForm>(
     { deviceId: "", messageType: "text", phone: "", text: "" },
@@ -179,13 +211,35 @@ export function SandboxPage() {
             </Flex>
           </SectionCard>
 
-          {result && (
+          {result && liveStatus && (
             <SectionCard>
               <Flex direction="column" gap={3}>
-                <Flex align="center" justify="space-between">
+                <Flex align="center" justify="space-between" gap={3}>
                   <InfoRow label={t("result.messageId")} value={result.messageId} />
-                  <StatusBadge status="info" label={result.status} />
+                  <Flex align="center" gap={2} flexShrink={0}>
+                    {isPolling && <Spinner size="xs" color="text.muted" />}
+                    <StatusBadge
+                      status={STATUS_TONE[liveStatus]}
+                      label={t(`status.${liveStatus}`)}
+                    />
+                  </Flex>
                 </Flex>
+                {failureReason && (
+                  <InfoRow
+                    label={t("result.failureReason")}
+                    value={failureReason}
+                  />
+                )}
+                <Text
+                  fontSize="xs"
+                  color={statusError ? "status.error.fg" : "text.muted"}
+                >
+                  {statusError
+                    ? t("result.statusError")
+                    : isPolling
+                      ? t("result.live")
+                      : t("result.done")}
+                </Text>
                 <InfoRow label={t("result.note")} value={t("result.noteValue")} />
               </Flex>
             </SectionCard>

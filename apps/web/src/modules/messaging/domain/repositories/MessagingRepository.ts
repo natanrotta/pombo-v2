@@ -1,6 +1,7 @@
 import type {
   SendTextInput,
   SendMessageResult,
+  MessageStatusResult,
 } from "@/modules/messaging/domain/entities/Message";
 
 export interface MessagingRepository {
@@ -8,4 +9,5 @@ export interface MessagingRepository {
     deviceId: string,
     input: SendTextInput,
   ): Promise<SendMessageResult>;
+  getStatus(messageId: string): Promise<MessageStatusResult>;
 }

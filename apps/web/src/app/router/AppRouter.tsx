@@ -34,9 +34,14 @@ const ResetPasswordPage = lazyWithRetry(() =>
     default: m.ResetPasswordPage,
   }))
 );
-const SettingsPage = lazyWithRetry(() =>
-  import("@/modules/settings/presentation/pages/SettingsPage").then((m) => ({
-    default: m.SettingsPage,
+const ProfilePage = lazyWithRetry(() =>
+  import("@/modules/settings/presentation/pages/ProfilePage").then((m) => ({
+    default: m.ProfilePage,
+  }))
+);
+const ApiPage = lazyWithRetry(() =>
+  import("@/modules/account/presentation/pages/ApiPage").then((m) => ({
+    default: m.ApiPage,
   }))
 );
 const DevicesListPage = lazyWithRetry(() =>
@@ -144,11 +149,12 @@ export function AppRouter() {
 
         <Route path={ROUTE_PATHS.sandbox} element={<SandboxPage />} />
 
-        <Route path={ROUTE_PATHS.settings} element={<SettingsPage />} />
-        {/* `/profile` is an alias of Settings — kept for deep links. */}
+        <Route path={ROUTE_PATHS.profile} element={<ProfilePage />} />
+        <Route path={ROUTE_PATHS.api} element={<ApiPage />} />
+        {/* `/settings` is kept as a redirect to Perfil for old deep links. */}
         <Route
-          path={ROUTE_PATHS.profile}
-          element={<Navigate to={ROUTE_PATHS.settings} replace />}
+          path={ROUTE_PATHS.settings}
+          element={<Navigate to={ROUTE_PATHS.profile} replace />}
         />
 
         <Route path={ROUTE_PATHS.notFound} element={<NotFoundPage />} />

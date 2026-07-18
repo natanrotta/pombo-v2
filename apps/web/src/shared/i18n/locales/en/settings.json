@@ -1,13 +1,11 @@
 {
-  "page": {
-    "title": "Settings",
-    "description": "Manage your profile, team and account"
+  "profilePage": {
+    "title": "Profile",
+    "description": "Manage your account details and preferences."
   },
-  "tabs": {
-    "profile": "Profile",
-    "team": "Team",
-    "account": "Account",
-    "api": "API"
+  "apiPage": {
+    "title": "API",
+    "description": "Generate and manage your public API token."
   },
   "apiToken": {
     "prefix": "Prefix",

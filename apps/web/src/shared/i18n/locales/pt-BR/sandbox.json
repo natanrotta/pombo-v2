@@ -17,6 +17,13 @@
   "type": {
     "text": "Texto"
   },
+  "status": {
+    "PENDING": "Pendente",
+    "SERVER_ACK": "Enviada",
+    "DELIVERY_ACK": "Entregue",
+    "READ": "Lida",
+    "FAILED": "Falhou"
+  },
   "errors": {
     "deviceRequired": "Selecione um dispositivo.",
     "phoneInvalid": "Informe um número válido.",
@@ -28,6 +35,10 @@
   },
   "result": {
     "messageId": "ID da mensagem",
+    "failureReason": "Motivo da falha",
+    "live": "Atualizando o status em tempo real...",
+    "done": "Status final.",
+    "statusError": "Não foi possível obter o status. Tente novamente.",
     "note": "Observação",
     "noteValue": "Envio de teste — não é persistido, apenas em memória."
   },

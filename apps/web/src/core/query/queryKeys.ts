@@ -16,6 +16,11 @@ export const queryKeys = {
     all: ["account"] as const,
     apiToken: () => [...queryKeys.account.all, "api-token"] as const,
   },
+  messaging: {
+    all: ["messaging"] as const,
+    messageStatus: (id: string) =>
+      [...queryKeys.messaging.all, "message-status", id] as const,
+  },
   health: {
     all: ["health"] as const,
     version: () => [...queryKeys.health.all, "version"] as const,

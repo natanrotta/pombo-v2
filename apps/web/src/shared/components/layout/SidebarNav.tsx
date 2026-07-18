@@ -23,8 +23,8 @@ import {
   FiChevronsRight,
   FiLogOut,
   FiMoon,
-  FiSettings,
   FiSun,
+  FiUser,
 } from "@/shared/components/icons";
 import { navigationSections } from "@/shared/components/layout/navigation";
 import { AppVersion } from "@/shared/components/layout/AppVersion";
@@ -69,7 +69,7 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
           h={9}
           borderRadius="22%"
           objectFit="cover"
-          boxShadow="0 2px 8px rgba(47, 128, 237, 0.30)"
+          boxShadow="shadow.card"
           flexShrink={0}
         />
         <Box
@@ -277,10 +277,10 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
             <Portal>
               <MenuList fontSize="sm">
                 <MenuItem
-                  icon={<Icon as={FiSettings} boxSize={4} />}
-                  onClick={() => navigate(ROUTE_PATHS.settings)}
+                  icon={<Icon as={FiUser} boxSize={4} />}
+                  onClick={() => navigate(ROUTE_PATHS.profile)}
                 >
-                  {t("nav.settings")}
+                  {t("nav.profile")}
                 </MenuItem>
                 <MenuItem
                   icon={<Icon as={isDark ? FiSun : FiMoon} boxSize={4} />}

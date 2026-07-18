@@ -3,6 +3,7 @@ import type { MessagingRepository } from "@/modules/messaging/domain/repositorie
 import type {
   SendTextInput,
   SendMessageResult,
+  MessageStatusResult,
 } from "@/modules/messaging/domain/entities/Message";
 
 /** A unique idempotency key per send. `crypto.randomUUID` only exists in a
@@ -28,6 +29,12 @@ export class HttpMessagingRepository implements MessagingRepository {
       `/devices/${deviceId}/messages`,
       input,
       { headers: { "Idempotency-Key": newIdempotencyKey() } },
+    );
+  }
+
+  getStatus(messageId: string): Promise<MessageStatusResult> {
+    return httpClient.get<never, MessageStatusResult>(
+      `/messages/${messageId}`,
     );
   }
 }

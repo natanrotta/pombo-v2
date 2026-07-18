@@ -67,7 +67,8 @@
     },
     "devices": "Devices",
     "sandbox": "Sandbox",
-    "settings": "Settings"
+    "profile": "Profile",
+    "api": "API"
   },
   "notFound": {
     "title": "Page not found",

@@ -17,6 +17,13 @@
   "type": {
     "text": "Text"
   },
+  "status": {
+    "PENDING": "Pending",
+    "SERVER_ACK": "Sent",
+    "DELIVERY_ACK": "Delivered",
+    "READ": "Read",
+    "FAILED": "Failed"
+  },
   "errors": {
     "deviceRequired": "Select a device.",
     "phoneInvalid": "Enter a valid number.",
@@ -28,6 +35,10 @@
   },
   "result": {
     "messageId": "Message ID",
+    "failureReason": "Failure reason",
+    "live": "Updating status in real time...",
+    "done": "Final status.",
+    "statusError": "Couldn't fetch the status. Please try again.",
     "note": "Note",
     "noteValue": "Test send — not persisted, in memory only."
   },

@@ -1,4 +1,4 @@
-import { FiSend, FiSettings, FiSmartphone } from "@/shared/components/icons";
+import { FiCode, FiSend, FiSmartphone, FiUser } from "@/shared/components/icons";
 import type { IconType } from "@/shared/components/icons";
 import { ROUTE_PATHS } from "@/app/router/RoutePaths";
 
@@ -28,9 +28,14 @@ export const navigationSections: NavigationSection[] = [
         icon: FiSend,
       },
       {
-        labelKey: "nav.settings",
-        to: ROUTE_PATHS.settings,
-        icon: FiSettings,
+        labelKey: "nav.profile",
+        to: ROUTE_PATHS.profile,
+        icon: FiUser,
+      },
+      {
+        labelKey: "nav.api",
+        to: ROUTE_PATHS.api,
+        icon: FiCode,
       },
     ],
   },

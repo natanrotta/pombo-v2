@@ -1,18 +1,19 @@
 export const colors = {
-  // Pombo brand — a cool graphite/zinc grayscale for a monochrome
-  // developer-tool aesthetic. 50 = lightest, 900 = near-black. Primary
-  // actions read as near-black in light mode and light-gray in dark mode.
+  // Pombo brand — a WARM graphite/charcoal grayscale (taupe undertone) for a
+  // monochrome developer-tool aesthetic that reads cozy, not cold. 50 =
+  // lightest, 900 = near-black. Primary actions read as near-black warm charcoal
+  // in light mode and light warm-gray in dark mode.
   brand: {
-    50: "#f6f7f9",
-    100: "#eceef1",
-    200: "#d6dade",
-    300: "#b3bac2",
-    400: "#8a939e",
-    500: "#5f6873",
-    600: "#464e58",
-    700: "#343a42",
-    800: "#22262c",
-    900: "#141619",
+    50: "#f7f6f5",
+    100: "#eeecea",
+    200: "#ddd8d4",
+    300: "#c3bcb5",
+    400: "#948c84",
+    500: "#6b6560",
+    600: "#524d49",
+    700: "#3f3a37",
+    800: "#292524",
+    900: "#1a1817",
   },
   accent: {
     50: "#f0fdf9",
@@ -26,21 +27,23 @@ export const colors = {
     800: "#145c4a",
     900: "#124b3d",
   },
+  // Warm stone/taupe neutrals (was cool blue-slate) — the main lever that kills
+  // the "cold, melancholic gray" feeling across text, borders and surfaces.
   neutral: {
-    50: "#f8fafc",
-    100: "#f1f5f9",
-    200: "#e2e8f0",
-    300: "#cbd5e1",
-    400: "#94a3b8",
-    500: "#64748b",
-    600: "#475569",
-    700: "#334155",
-    800: "#1e293b",
-    900: "#0f172a",
+    50: "#faf9f8",
+    100: "#f4f2f0",
+    200: "#e7e4e0",
+    300: "#d6d1cb",
+    400: "#a8a29b",
+    500: "#78716c",
+    600: "#57534e",
+    700: "#44403c",
+    800: "#292524",
+    900: "#1c1917",
   },
   surface: {
     DEFAULT: "#ffffff",
-    subtle: "#f7fafc",
-    muted: "#edf2f7",
+    subtle: "#f7f5f3",
+    muted: "#efece9",
   },
 };

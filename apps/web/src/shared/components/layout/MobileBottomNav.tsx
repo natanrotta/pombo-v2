@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Box, Flex, Icon, Text } from "@chakra-ui/react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiSend, FiSettings, FiSmartphone } from "@/shared/components/icons";
+import { FiCode, FiSend, FiSmartphone, FiUser } from "@/shared/components/icons";
 import type { IconType } from "@/shared/components/icons";
 import { ROUTE_PATHS } from "@/app/router/RoutePaths";
 
@@ -26,9 +26,14 @@ const bottomNavItems: BottomNavItem[] = [
     icon: FiSend,
   },
   {
-    labelKey: "nav.settings",
-    to: ROUTE_PATHS.settings,
-    icon: FiSettings,
+    labelKey: "nav.profile",
+    to: ROUTE_PATHS.profile,
+    icon: FiUser,
+  },
+  {
+    labelKey: "nav.api",
+    to: ROUTE_PATHS.api,
+    icon: FiCode,
   },
 ];
 

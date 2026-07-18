@@ -10,8 +10,8 @@ Everything you need to build and ship — clone it, rename it, start shipping.
 
 | App | Path | Stack | Dev port |
 |---|---|---|---|
-| **API** | `apps/api` | Node.js · Express 4 · Prisma 7 (Postgres) · tsyringe DI · Zod · Vitest | `3333` |
-| **Web** | `apps/web` | React 18 · Vite 5 · Chakra UI 2 · TanStack Query 5 · react-i18next · Vitest + Playwright | `3000` |
+| **API** | `apps/api` | Node.js · Express 4 · Prisma 7 (Postgres) · tsyringe DI · Zod · Vitest | `4444` |
+| **Web** | `apps/web` | React 18 · Vite 5 · Chakra UI 2 · TanStack Query 5 · react-i18next · Vitest + Playwright | `4000` |
 | **Shared types** | `packages/shared-types` | `@pombo/shared-types` — DTOs shared by API + web | — |
 
 `apps/api` and `apps/web` are Turborepo/yarn workspaces.
@@ -36,7 +36,7 @@ yarn db:seed                      # seed the demo user
 yarn dev                          # backend (detached) + web
 ```
 
-Then open **http://localhost:3000** and sign in with the demo user:
+Then open **http://localhost:4000** and sign in with the demo user:
 
 ```
 email:    demo@example.com
@@ -49,11 +49,11 @@ password: Demo1234!
 
 | Command | What it does |
 |---|---|
-| `yarn dev` | Postgres+Redis + API (detached) + web (`:3000`), all with hot reload |
+| `yarn dev` | Postgres+Redis + API (detached) + web (`:4000`), all with hot reload |
 | `yarn backend:up` | Postgres+Redis + API in the **foreground** (you see the API logs) |
 | `yarn backend:up-d` | Postgres+Redis + API **detached** (logs → `/tmp/pombo-api.log`) |
 | `yarn backend:down` | Stop the API and `docker compose down` |
-| `yarn web:up` | Web dev server on `:3000` |
+| `yarn web:up` | Web dev server on `:4000` |
 | `yarn services:up` | Postgres + Redis only (Docker) |
 
 ### Database (Prisma)

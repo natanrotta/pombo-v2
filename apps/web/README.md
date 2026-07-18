@@ -40,7 +40,7 @@ Authenticated (inside `AppShell` + `ProtectedRoute`): `/dashboard`, `/settings` 
 
 ## Data flow
 
-`httpClient` (axios) posts to `/api/*`, which the Vite dev server proxies to the API on `:3333`. Data access goes through **DI repositories** (`core/di`) consumed by TanStack Query hooks in each module — a clean `repository → hook → page` pattern you extend per feature.
+`httpClient` (axios) posts to `/api/*`, which the Vite dev server proxies to the API on `:4444`. Data access goes through **DI repositories** (`core/di`) consumed by TanStack Query hooks in each module — a clean `repository → hook → page` pattern you extend per feature.
 
 ## Environment
 
@@ -48,7 +48,7 @@ All variables are optional locally (copy `.env.example` to `.env`):
 
 | Var | Purpose |
 |---|---|
-| `VITE_API_URL` | API base. Empty → falls back to the Vite `/api` proxy (localhost:3333). |
+| `VITE_API_URL` | API base. Empty → falls back to the Vite `/api` proxy (localhost:4444). |
 | `VITE_GOOGLE_CLIENT_ID` | Enables "Sign in with Google". Empty → the Google button is inert. |
 | `VITE_BUGSNAG_API_KEY` | Error reporting. Empty → disabled. |
 | `VITE_APP_VERSION` | Version stamp shown in the UI. |
@@ -58,14 +58,14 @@ All variables are optional locally (copy `.env.example` to `.env`):
 From the repo root:
 
 ```bash
-yarn web:up        # dev server on http://localhost:3000 (HMR)
+yarn web:up        # dev server on http://localhost:4000 (HMR)
 yarn build:web     # production build (+ version stamp)
 ```
 
 Inside the workspace (`apps/web`):
 
 ```bash
-yarn dev           # vite dev (:3000)
+yarn dev           # vite dev (:4000)
 yarn build         # tsc + vite build
 yarn test          # Vitest unit tests
 yarn test:e2e      # Playwright (spins up the e2e stack)

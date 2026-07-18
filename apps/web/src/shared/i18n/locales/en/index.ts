@@ -4,10 +4,12 @@ import common from "./common.json";
 import auth from "./auth.json";
 import settings from "./settings.json";
 import dashboard from "./dashboard.json";
+import devices from "./devices.json";
 
 export default {
   common: common,
   auth: auth,
   settings: settings,
   dashboard: dashboard,
+  devices: devices,
 } as const;

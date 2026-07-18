@@ -7,8 +7,9 @@ import commonPtBR from "./locales/pt-BR/common.json";
 import authPtBR from "./locales/pt-BR/auth.json";
 import settingsPtBR from "./locales/pt-BR/settings.json";
 import dashboardPtBR from "./locales/pt-BR/dashboard.json";
+import devicesPtBR from "./locales/pt-BR/devices.json";
 
-const NAMESPACES = ["common", "auth", "settings", "dashboard"] as const;
+const NAMESPACES = ["common", "auth", "settings", "dashboard", "devices"] as const;
 
 i18n
   .use(LanguageDetector)
@@ -23,6 +24,7 @@ i18n
         auth: authPtBR,
         settings: settingsPtBR,
         dashboard: dashboardPtBR,
+        devices: devicesPtBR,
       },
     },
     fallbackLng: "pt-BR",

@@ -1,0 +1,99 @@
+{
+  "status": {
+    "CONNECTED": "Connected",
+    "CONNECTING": "Connecting",
+    "QR_PENDING": "Awaiting QR",
+    "DISCONNECTED": "Disconnected",
+    "LOGGED_OUT": "Logged out of WhatsApp"
+  },
+  "list": {
+    "title": "Devices",
+    "description": "Connect and manage your WhatsApp devices.",
+    "add": "Add",
+    "searchPlaceholder": "Search by name or number...",
+    "neverConnected": "Never connected",
+    "notPaired": "Not paired",
+    "delete": "Delete",
+    "deleted": "Device deleted.",
+    "stats": {
+      "total": "Total devices",
+      "totalHint": "All registered devices",
+      "connected": "Connected",
+      "connectedHint": "Devices online now",
+      "disconnected": "Disconnected",
+      "disconnectedHint": "Offline devices"
+    },
+    "filter": {
+      "all": "All",
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    },
+    "empty": {
+      "title": "No devices yet",
+      "description": "Add your first device to connect a WhatsApp number."
+    },
+    "noResults": {
+      "title": "No results",
+      "description": "No device matches your search or filter."
+    },
+    "deleteConfirm": {
+      "title": "Delete device",
+      "description": "The device will be disconnected and permanently removed. This action cannot be undone."
+    }
+  },
+  "create": {
+    "title": "New device",
+    "submit": "Create",
+    "success": "Device created.",
+    "nameLabel": "Device name",
+    "namePlaceholder": "e.g. Support",
+    "errors": {
+      "required": "Enter a name."
+    }
+  },
+  "secret": {
+    "title": "Save the webhook secret",
+    "goToDevice": "Go to device",
+    "warning": "This secret signs your webhooks and is shown only once. Save it now — it won't be shown again.",
+    "label": "Webhook secret",
+    "copy": "Copy secret"
+  },
+  "qr": {
+    "title": "Connect device",
+    "close": "Close",
+    "alt": "QR code to pair WhatsApp",
+    "scan": "Open WhatsApp > Linked devices > Link a device and scan the code.",
+    "waiting": "Generating the QR code...",
+    "connected": "Device connected.",
+    "error": "Couldn't start the connection. Please try again.",
+    "retry": "Try again"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "description": "Configure one URL per event to receive the device's notifications.",
+    "saved": "Webhooks saved.",
+    "onConnect": "On connect",
+    "onDisconnect": "On disconnect",
+    "onReceive": "On receive",
+    "onMessageStatus": "Message status",
+    "onSend": "On send",
+    "onReceiveDormant": "Stored, but not yet triggered in this version.",
+    "errors": {
+      "invalid_url": "Use a valid http(s) URL."
+    }
+  },
+  "detail": {
+    "description": "Device status, connection and webhooks.",
+    "back": "Back",
+    "statusLabel": "Status",
+    "identifier": "Number",
+    "lastConnected": "Last connection",
+    "connect": "Connect",
+    "delete": "Delete",
+    "deleted": "Device deleted.",
+    "deleteConfirm": {
+      "title": "Delete device",
+      "description": "The device will be disconnected and permanently removed. This action cannot be undone."
+    }
+  }
+}

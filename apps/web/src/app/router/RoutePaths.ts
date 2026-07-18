@@ -6,6 +6,8 @@ export const ROUTE_PATHS = {
   verifyEmail: "/verify-email",
 
   dashboard: "/dashboard",
+  devices: "/devices",
+  deviceDetail: "/devices/:id",
   settings: "/settings",
   profile: "/profile",
 

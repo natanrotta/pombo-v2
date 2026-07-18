@@ -66,6 +66,7 @@
       "main": "Menu"
     },
     "dashboard": "Dashboard",
+    "devices": "Dispositivos",
     "settings": "Configurações"
   },
   "notFound": {

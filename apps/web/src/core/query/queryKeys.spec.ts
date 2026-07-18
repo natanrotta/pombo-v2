@@ -7,6 +7,8 @@ describe("queryKeys", () => {
       expect(queryKeys.auth.me()[0]).toBe("auth");
       expect(queryKeys.dashboard.summary()[0]).toBe("dashboard");
       expect(queryKeys.health.version()[0]).toBe("health");
+      expect(queryKeys.devices.list()[0]).toBe("devices");
+      expect(queryKeys.account.apiToken()[0]).toBe("account");
     });
   });
 
@@ -25,6 +27,26 @@ describe("queryKeys", () => {
         "summary",
         "2025-03-01",
       ]);
+    });
+  });
+
+  describe("devices namespace", () => {
+    it("nests list/detail/qr under the devices root, encoding the id", () => {
+      expect(queryKeys.devices.all).toEqual(["devices"]);
+      expect(queryKeys.devices.list()).toEqual(["devices", "list"]);
+      expect(queryKeys.devices.detail("dev-1")).toEqual(["devices", "detail", "dev-1"]);
+      expect(queryKeys.devices.qr("dev-1")).toEqual(["devices", "qr", "dev-1"]);
+    });
+
+    it("keeps detail and qr keys distinct for the same device id", () => {
+      expect(queryKeys.devices.detail("dev-1")).not.toEqual(queryKeys.devices.qr("dev-1"));
+    });
+  });
+
+  describe("account namespace", () => {
+    it("exposes apiToken() under the account root", () => {
+      expect(queryKeys.account.all).toEqual(["account"]);
+      expect(queryKeys.account.apiToken()).toEqual(["account", "api-token"]);
     });
   });
 

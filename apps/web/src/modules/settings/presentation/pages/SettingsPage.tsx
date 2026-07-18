@@ -5,6 +5,7 @@ import { LanguageSelector } from "@/shared/components/ui/LanguageSelector";
 import { ColorModeToggle } from "@/shared/components/ui/ColorModeToggle";
 import { AppTabs } from "@/shared/components/ui/AppTabs";
 import { ProfileTab } from "@/modules/settings/presentation/components/ProfileTab";
+import { ApiTokenTab } from "@/modules/account";
 
 export function SettingsPage() {
   const { t } = useTranslation("settings");
@@ -12,8 +13,13 @@ export function SettingsPage() {
   const tabs = [
     {
       id: "profile",
-      label: t("tabs.profile", "Perfil"),
+      label: t("tabs.profile"),
       content: <ProfileTab />,
+    },
+    {
+      id: "api",
+      label: t("tabs.api"),
+      content: <ApiTokenTab />,
     },
   ];
 

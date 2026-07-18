@@ -1,0 +1,99 @@
+{
+  "status": {
+    "CONNECTED": "Conectado",
+    "CONNECTING": "Conectando",
+    "QR_PENDING": "Esperando QR",
+    "DISCONNECTED": "Desconectado",
+    "LOGGED_OUT": "Sesión de WhatsApp cerrada"
+  },
+  "list": {
+    "title": "Dispositivos",
+    "description": "Conecta y gestiona tus dispositivos de WhatsApp.",
+    "add": "Agregar",
+    "searchPlaceholder": "Buscar por nombre o número...",
+    "neverConnected": "Nunca conectado",
+    "notPaired": "Sin vincular",
+    "delete": "Eliminar",
+    "deleted": "Dispositivo eliminado.",
+    "stats": {
+      "total": "Total de dispositivos",
+      "totalHint": "Todos los dispositivos registrados",
+      "connected": "Conectados",
+      "connectedHint": "Dispositivos en línea ahora",
+      "disconnected": "Desconectados",
+      "disconnectedHint": "Dispositivos sin conexión"
+    },
+    "filter": {
+      "all": "Todos",
+      "connected": "Conectados",
+      "disconnected": "Desconectados"
+    },
+    "empty": {
+      "title": "Aún no hay dispositivos",
+      "description": "Agrega tu primer dispositivo para conectar un número de WhatsApp."
+    },
+    "noResults": {
+      "title": "Sin resultados",
+      "description": "Ningún dispositivo coincide con la búsqueda o el filtro."
+    },
+    "deleteConfirm": {
+      "title": "Eliminar dispositivo",
+      "description": "El dispositivo se desconectará y se eliminará de forma permanente. Esta acción no se puede deshacer."
+    }
+  },
+  "create": {
+    "title": "Nuevo dispositivo",
+    "submit": "Crear",
+    "success": "Dispositivo creado.",
+    "nameLabel": "Nombre del dispositivo",
+    "namePlaceholder": "Ej.: Atención",
+    "errors": {
+      "required": "Ingresa un nombre."
+    }
+  },
+  "secret": {
+    "title": "Guarda el secreto del webhook",
+    "goToDevice": "Ir al dispositivo",
+    "warning": "Este secreto firma tus webhooks y se muestra solo una vez. Guárdalo ahora — no se mostrará de nuevo.",
+    "label": "Secreto del webhook",
+    "copy": "Copiar secreto"
+  },
+  "qr": {
+    "title": "Conectar dispositivo",
+    "close": "Cerrar",
+    "alt": "Código QR para vincular WhatsApp",
+    "scan": "Abre WhatsApp > Dispositivos vinculados > Vincular un dispositivo y escanea el código.",
+    "waiting": "Generando el código QR...",
+    "connected": "Dispositivo conectado.",
+    "error": "No se pudo iniciar la conexión. Inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "description": "Configura una URL por evento para recibir las notificaciones del dispositivo.",
+    "saved": "Webhooks guardados.",
+    "onConnect": "Al conectar",
+    "onDisconnect": "Al desconectar",
+    "onReceive": "Al recibir",
+    "onMessageStatus": "Estado del mensaje",
+    "onSend": "Al enviar",
+    "onReceiveDormant": "Almacenada, pero aún no se dispara en esta versión.",
+    "errors": {
+      "invalid_url": "Usa una URL http(s) válida."
+    }
+  },
+  "detail": {
+    "description": "Estado, conexión y webhooks del dispositivo.",
+    "back": "Volver",
+    "statusLabel": "Estado",
+    "identifier": "Número",
+    "lastConnected": "Última conexión",
+    "connect": "Conectar",
+    "delete": "Eliminar",
+    "deleted": "Dispositivo eliminado.",
+    "deleteConfirm": {
+      "title": "Eliminar dispositivo",
+      "description": "El dispositivo se desconectará y se eliminará de forma permanente. Esta acción no se puede deshacer."
+    }
+  }
+}

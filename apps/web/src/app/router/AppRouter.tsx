@@ -44,6 +44,16 @@ const SettingsPage = lazyWithRetry(() =>
     default: m.SettingsPage,
   }))
 );
+const DevicesListPage = lazyWithRetry(() =>
+  import("@/modules/devices/presentation/pages/DevicesListPage").then((m) => ({
+    default: m.DevicesListPage,
+  }))
+);
+const DeviceDetailPage = lazyWithRetry(() =>
+  import("@/modules/devices/presentation/pages/DeviceDetailPage").then((m) => ({
+    default: m.DeviceDetailPage,
+  }))
+);
 
 // Neutral placeholder while the lazy chunk is downloading. Each page owns its
 // own loading state (skeleton) once it mounts, so this only needs to hold the
@@ -127,6 +137,12 @@ export function AppRouter() {
         <Route path="/" element={<Navigate to={ROUTE_PATHS.dashboard} replace />} />
 
         <Route path={ROUTE_PATHS.dashboard} element={<DashboardPage />} />
+
+        <Route path={ROUTE_PATHS.devices} element={<DevicesListPage />} />
+        <Route
+          path={ROUTE_PATHS.deviceDetail}
+          element={<DeviceDetailPage />}
+        />
 
         <Route path={ROUTE_PATHS.settings} element={<SettingsPage />} />
         {/* `/profile` is an alias of Settings — kept for deep links. */}

@@ -1,4 +1,4 @@
-import { FiHome, FiSettings } from "@/shared/components/icons";
+import { FiHome, FiSettings, FiSmartphone } from "@/shared/components/icons";
 import type { IconType } from "@/shared/components/icons";
 import { ROUTE_PATHS } from "@/app/router/RoutePaths";
 
@@ -21,6 +21,11 @@ export const navigationSections: NavigationSection[] = [
         labelKey: "nav.dashboard",
         to: ROUTE_PATHS.dashboard,
         icon: FiHome,
+      },
+      {
+        labelKey: "nav.devices",
+        to: ROUTE_PATHS.devices,
+        icon: FiSmartphone,
       },
       {
         labelKey: "nav.settings",

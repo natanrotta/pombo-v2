@@ -2,7 +2,11 @@ import { randomUUID } from "node:crypto";
 import { Request, Response } from "express";
 import { container } from "tsyringe";
 import { ListDevicesUseCase } from "@modules/devices/application/use-case/devices";
-import { SendTextMessageUseCase } from "@modules/messaging/application/use-case/messages";
+import {
+  SendTextMessageUseCase,
+  SendRichMessageUseCase,
+} from "@modules/messaging/application/use-case/messages";
+import { type RichMessageType } from "@modules/messaging/domain/value-object/message-type";
 import { UnauthorizedError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
@@ -43,19 +47,58 @@ export class PublicApiController {
 
   async sendText(req: Request, res: Response): Promise<Response> {
     const { deviceId } = req.params as { deviceId: string };
-    // Idempotency-Key is OPTIONAL on the public surface — generate one when the
-    // caller omits it so every send still gets an idempotency guard.
-    const idempotencyKey =
-      req.header("idempotency-key")?.trim() || randomUUID();
-
     const useCase = container.resolve(SendTextMessageUseCase);
     const result = await useCase.execute({
       accountId: this.accountId(req),
       deviceId,
       phone: req.body.phone,
       text: req.body.message,
-      idempotencyKey,
+      idempotencyKey: this.idempotencyKey(req),
     });
     return res.status(202).json({ ok: true, data: result });
+  }
+
+  sendImage = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "image");
+  sendAudio = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "audio");
+  sendVideo = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "video");
+  sendDocument = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "document");
+  sendPix = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "pix");
+  sendList = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "list");
+
+  /** Shared rich-send path — reuses the internal `SendRichMessageUseCase`, same
+   *  as `sendText`. The body was validated by the route's per-type Zod schema. */
+  private async sendRich(
+    req: Request,
+    res: Response,
+    type: RichMessageType,
+  ): Promise<Response> {
+    const { deviceId } = req.params as { deviceId: string };
+    const { phone, ...payload } = req.body as {
+      phone: string;
+      [key: string]: unknown;
+    };
+
+    const useCase = container.resolve(SendRichMessageUseCase);
+    const result = await useCase.execute({
+      accountId: this.accountId(req),
+      deviceId,
+      phone,
+      idempotencyKey: this.idempotencyKey(req),
+      type,
+      payload,
+    });
+    return res.status(202).json({ ok: true, data: result });
+  }
+
+  // Idempotency-Key is OPTIONAL on the public surface — generate one when the
+  // caller omits it so every send still gets an idempotency guard.
+  private idempotencyKey(req: Request): string {
+    return req.header("idempotency-key")?.trim() || randomUUID();
   }
 }

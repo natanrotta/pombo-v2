@@ -37,12 +37,15 @@ const setup = (rateLimiter: ISendRateLimiter = mockSendRateLimiter()) => {
     idempotencyKey: string,
     toJid: string,
     expiresAt = future(),
+    rich?: { type: "image"; payload: unknown },
   ) =>
     outbox.create({
       deviceId: DEVICE,
       idempotencyKey,
       toJid,
-      text: `t-${idempotencyKey}`,
+      ...(rich
+        ? { type: rich.type, payload: rich.payload }
+        : { text: `t-${idempotencyKey}` }),
       expiresAt,
     });
   return { outbox, gateway, bus, sut, enqueue };
@@ -72,6 +75,27 @@ describe("DrainOutboxUseCase", () => {
       messageId: a.id,
       phone: "5511",
     });
+  });
+
+  it("drains a queued non-text row via the type-matched gateway method (AC-6)", async () => {
+    const { sut, gateway, enqueue } = setup();
+    await enqueue("img", "5511@s.whatsapp.net", future(), {
+      type: "image",
+      payload: { image: "https://ex.com/a.png" },
+    });
+
+    await sut.execute({ deviceId: DEVICE });
+
+    // Replayed as an image — never re-sent as text.
+    expect(gateway.sentTexts).toHaveLength(0);
+    expect(gateway.sentRich).toEqual([
+      {
+        deviceId: DEVICE,
+        jid: "5511@s.whatsapp.net",
+        type: "image",
+        payload: { image: "https://ex.com/a.png" },
+      },
+    ]);
   });
 
   it("stops draining the moment the device drops again", async () => {

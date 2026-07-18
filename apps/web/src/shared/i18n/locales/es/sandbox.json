@@ -12,10 +12,39 @@
     "phone": "Número de destino",
     "phonePlaceholder": "(11) 99999-9999",
     "text": "Mensaje",
-    "textPlaceholder": "Escribe el mensaje de prueba..."
+    "textPlaceholder": "Escribe el mensaje de prueba...",
+    "media": {
+      "image": "URL de la imagen",
+      "audio": "URL del audio",
+      "video": "URL del video",
+      "document": "URL del documento"
+    },
+    "mediaPlaceholder": "https://... o base64",
+    "mediaHelper": "Indica una URL pública o el contenido en base64.",
+    "fileName": "Nombre del archivo",
+    "fileNamePlaceholder": "documento.pdf",
+    "caption": "Leyenda",
+    "captionPlaceholder": "Leyenda opcional",
+    "pixKey": "Clave PIX",
+    "pixKeyPlaceholder": "clave@ejemplo.com",
+    "pixType": "Tipo de clave",
+    "listMessage": "Mensaje",
+    "listMessagePlaceholder": "Escribe el mensaje de la lista...",
+    "listTitle": "Título de la lista",
+    "listButtonLabel": "Texto del botón",
+    "options": "Opciones",
+    "optionTitle": "Título",
+    "optionId": "ID",
+    "optionDescription": "Descripción"
   },
   "type": {
-    "text": "Texto"
+    "text": "Texto",
+    "image": "Imagen",
+    "audio": "Audio",
+    "video": "Video",
+    "document": "Documento",
+    "pix": "Botón PIX",
+    "list": "Lista de opciones"
   },
   "recent": {
     "title": "Enviados recientemente",
@@ -31,11 +60,19 @@
   "errors": {
     "deviceRequired": "Selecciona un dispositivo.",
     "phoneInvalid": "Ingresa un número válido.",
-    "textRequired": "Escribe un mensaje."
+    "textRequired": "Escribe un mensaje.",
+    "mediaRequired": "Indica la URL o el base64 de la media.",
+    "pixKeyRequired": "Ingresa la clave PIX.",
+    "listMessageRequired": "Escribe el mensaje de la lista.",
+    "listTitleRequired": "Ingresa el título de la lista.",
+    "listButtonLabelRequired": "Ingresa el texto del botón.",
+    "optionsRequired": "Agrega al menos una opción con título e ID."
   },
   "actions": {
     "send": "Enviar",
-    "clear": "Limpiar"
+    "clear": "Limpiar",
+    "addOption": "Agregar opción",
+    "removeOption": "Quitar"
   },
   "result": {
     "title": "Resultado del envío",

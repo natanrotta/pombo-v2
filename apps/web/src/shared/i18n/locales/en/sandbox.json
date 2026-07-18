@@ -12,10 +12,39 @@
     "phone": "Recipient number",
     "phonePlaceholder": "(11) 99999-9999",
     "text": "Message",
-    "textPlaceholder": "Type the test message..."
+    "textPlaceholder": "Type the test message...",
+    "media": {
+      "image": "Image URL",
+      "audio": "Audio URL",
+      "video": "Video URL",
+      "document": "Document URL"
+    },
+    "mediaPlaceholder": "https://... or base64",
+    "mediaHelper": "Provide a public URL or the base64 content.",
+    "fileName": "File name",
+    "fileNamePlaceholder": "document.pdf",
+    "caption": "Caption",
+    "captionPlaceholder": "Optional caption",
+    "pixKey": "PIX key",
+    "pixKeyPlaceholder": "key@example.com",
+    "pixType": "Key type",
+    "listMessage": "Message",
+    "listMessagePlaceholder": "Type the list message...",
+    "listTitle": "List title",
+    "listButtonLabel": "Button label",
+    "options": "Options",
+    "optionTitle": "Title",
+    "optionId": "ID",
+    "optionDescription": "Description"
   },
   "type": {
-    "text": "Text"
+    "text": "Text",
+    "image": "Image",
+    "audio": "Audio",
+    "video": "Video",
+    "document": "Document",
+    "pix": "PIX button",
+    "list": "Option list"
   },
   "recent": {
     "title": "Recently sent",
@@ -31,11 +60,19 @@
   "errors": {
     "deviceRequired": "Select a device.",
     "phoneInvalid": "Enter a valid number.",
-    "textRequired": "Type a message."
+    "textRequired": "Type a message.",
+    "mediaRequired": "Provide the media URL or base64.",
+    "pixKeyRequired": "Enter the PIX key.",
+    "listMessageRequired": "Type the list message.",
+    "listTitleRequired": "Enter the list title.",
+    "listButtonLabelRequired": "Enter the button label.",
+    "optionsRequired": "Add at least one option with a title and an ID."
   },
   "actions": {
     "send": "Send",
-    "clear": "Clear"
+    "clear": "Clear",
+    "addOption": "Add option",
+    "removeOption": "Remove"
   },
   "result": {
     "title": "Send result",

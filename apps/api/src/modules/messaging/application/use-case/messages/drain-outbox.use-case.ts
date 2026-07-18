@@ -7,6 +7,7 @@ import { userJidToPhone } from "@modules/messaging/domain/value-object/wa-jid";
 import type { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
 import type { ILoggerProvider } from "@shared/provider/logger-provider.interface";
+import { dispatchOutboxSend } from "./outbox-send-dispatch";
 
 export interface DrainOutboxInput {
   deviceId: string;
@@ -125,10 +126,12 @@ export class DrainOutboxUseCase {
   ): Promise<SendOutcome> {
     let waMessageId: string;
     try {
-      ({ waMessageId } = await this.gateway.sendText(
+      // Dispatch by the row's type so a queued image is replayed as an image,
+      // never re-sent as text (same helper the live send path uses).
+      ({ waMessageId } = await dispatchOutboxSend(
+        this.gateway,
         deviceId,
-        message.toJid,
-        message.text,
+        message,
       ));
     } catch (error) {
       // Socket dropped mid-send → leave it queued for the next reconnect.

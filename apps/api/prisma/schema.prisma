@@ -42,6 +42,19 @@ enum message_status {
   FAILED
 }
 
+/// The content kind of an outbox message. `text` uses the `text` column; every
+/// other kind stores its structured body in `payload` (JSON). Default `text` so
+/// pre-existing rows and the text send path stay valid without a backfill.
+enum outbox_message_type {
+  text
+  image
+  audio
+  video
+  document
+  pix
+  list
+}
+
 // ============================================================
 // ACCOUNT (tenancy root — pombo)
 // ============================================================
@@ -235,18 +248,29 @@ model auth_key {
 /// resend and Baileys needs the original text. (2) idempotency — the DB unique
 /// (device_id, idempotency_key) is the real guard against a consumer-side
 /// timeout sending twice. Pruned by TTL (`expires_at`).
+///
+/// NOTE: the `type` XOR (`text`/`payload`) invariant — a `text` row carries
+/// `text` and no `payload`; every rich type carries `payload` and no `text` — is
+/// enforced by the CHECK constraint `outbox_message_text_xor_payload_chk` in the
+/// migration (Prisma does not model CHECK constraints). Do not drop it.
 model outbox_message {
-  id              String         @id @default(uuid())
+  id              String              @id @default(uuid())
   device_id       String
   idempotency_key String
   to_jid          String
-  text            String
-  wa_message_id   String?        @unique
-  status          message_status @default(PENDING)
+  type            outbox_message_type @default(text)
+  /// Nullable: only `text` messages populate this. Rich types (image, audio,
+  /// video, document, pix, list) store their body in `payload` instead.
+  text            String?
+  /// Structured body for non-text messages (the validated send payload). Null
+  /// for `text`. The drain reads it back to replay the original send.
+  payload         Json?
+  wa_message_id   String?             @unique
+  status          message_status      @default(PENDING)
   failure_reason  String?
   expires_at      DateTime
-  created_at      DateTime       @default(now())
-  updated_at      DateTime       @updatedAt
+  created_at      DateTime            @default(now())
+  updated_at      DateTime            @updatedAt
 
   device device @relation(fields: [device_id], references: [id], onDelete: Cascade)
 

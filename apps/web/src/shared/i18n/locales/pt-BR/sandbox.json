@@ -12,10 +12,39 @@
     "phone": "Número de destino",
     "phonePlaceholder": "(11) 99999-9999",
     "text": "Mensagem",
-    "textPlaceholder": "Digite a mensagem de teste..."
+    "textPlaceholder": "Digite a mensagem de teste...",
+    "media": {
+      "image": "URL da imagem",
+      "audio": "URL do áudio",
+      "video": "URL do vídeo",
+      "document": "URL do documento"
+    },
+    "mediaPlaceholder": "https://... ou base64",
+    "mediaHelper": "Informe uma URL pública ou o conteúdo em base64.",
+    "fileName": "Nome do arquivo",
+    "fileNamePlaceholder": "documento.pdf",
+    "caption": "Legenda",
+    "captionPlaceholder": "Legenda opcional",
+    "pixKey": "Chave PIX",
+    "pixKeyPlaceholder": "chave@exemplo.com",
+    "pixType": "Tipo da chave",
+    "listMessage": "Mensagem",
+    "listMessagePlaceholder": "Digite a mensagem da lista...",
+    "listTitle": "Título da lista",
+    "listButtonLabel": "Texto do botão",
+    "options": "Opções",
+    "optionTitle": "Título",
+    "optionId": "ID",
+    "optionDescription": "Descrição"
   },
   "type": {
-    "text": "Texto"
+    "text": "Texto",
+    "image": "Imagem",
+    "audio": "Áudio",
+    "video": "Vídeo",
+    "document": "Documento",
+    "pix": "Botão PIX",
+    "list": "Lista de opções"
   },
   "recent": {
     "title": "Recém enviados",
@@ -31,11 +60,19 @@
   "errors": {
     "deviceRequired": "Selecione um dispositivo.",
     "phoneInvalid": "Informe um número válido.",
-    "textRequired": "Digite uma mensagem."
+    "textRequired": "Digite uma mensagem.",
+    "mediaRequired": "Informe a URL ou o base64 da mídia.",
+    "pixKeyRequired": "Informe a chave PIX.",
+    "listMessageRequired": "Digite a mensagem da lista.",
+    "listTitleRequired": "Informe o título da lista.",
+    "listButtonLabelRequired": "Informe o texto do botão.",
+    "optionsRequired": "Adicione ao menos uma opção com título e ID."
   },
   "actions": {
     "send": "Enviar",
-    "clear": "Limpar"
+    "clear": "Limpar",
+    "addOption": "Adicionar opção",
+    "removeOption": "Remover"
   },
   "result": {
     "title": "Resultado do envio",

@@ -7,12 +7,25 @@ import type { WASocket } from "@whiskeysockets/baileys";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
 import type { ILoggerProvider } from "@shared/provider/logger-provider.interface";
 import type { DomainMessageStatus } from "@shared/provider/domain-event-bus.interface";
-import { SendTextResult } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
+import {
+  SendResult,
+  SendImagePayload,
+  SendAudioPayload,
+  SendVideoPayload,
+  SendDocumentPayload,
+  SendPixButtonPayload,
+  SendOptionListPayload,
+} from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import { ServiceUnavailableError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 import { makePrismaAuthState } from "./prisma-auth-state";
 import { baseSocketConfig } from "./socket-config";
 import { classifyDisconnect, computeReconnectDelay } from "./reconnect-policy";
+
+// The message-content shape `sock.sendMessage` accepts (Baileys'
+// AnyMessageContent), derived from the socket so we don't depend on the name
+// being re-exported by this Baileys version.
+type WAMessageContent = Parameters<WASocket["sendMessage"]>[1];
 
 export interface SessionManagerConfig {
   reconnectBaseDelayMs: number;
@@ -35,11 +48,37 @@ export interface SessionManager {
   isConnected(deviceId: string): boolean;
   getCurrentQr(deviceId: string): string | null;
   resolveJid(deviceId: string, phone: string): Promise<string | null>;
-  sendText(
+  sendText(deviceId: string, jid: string, text: string): Promise<SendResult>;
+  sendImage(
     deviceId: string,
     jid: string,
-    text: string,
-  ): Promise<SendTextResult>;
+    payload: SendImagePayload,
+  ): Promise<SendResult>;
+  sendAudio(
+    deviceId: string,
+    jid: string,
+    payload: SendAudioPayload,
+  ): Promise<SendResult>;
+  sendVideo(
+    deviceId: string,
+    jid: string,
+    payload: SendVideoPayload,
+  ): Promise<SendResult>;
+  sendDocument(
+    deviceId: string,
+    jid: string,
+    payload: SendDocumentPayload,
+  ): Promise<SendResult>;
+  sendPixButton(
+    deviceId: string,
+    jid: string,
+    payload: SendPixButtonPayload,
+  ): Promise<SendResult>;
+  sendOptionList(
+    deviceId: string,
+    jid: string,
+    payload: SendOptionListPayload,
+  ): Promise<SendResult>;
   closeAll(): void;
 }
 
@@ -77,6 +116,108 @@ const WA_VERSION_TTL_MS = 6 * 60 * 60 * 1000;
 // 515) before falling back to jittered backoff — a safety valve so a broken
 // session can't spin in a tight 0-delay reconnect loop.
 const MAX_IMMEDIATE_RECONNECTS = 5;
+
+// ── Rich send helpers ───────────────────────────────────────────────────────
+
+// The socket-readiness gate (openDevices, not just sockets: a socket mid-
+// handshake is in the map but not yet open) shared by every send method.
+const requireOpenSocket = (
+  sockets: Map<string, WASocket>,
+  openDevices: Set<string>,
+  deviceId: string,
+): WASocket => {
+  const sock = sockets.get(deviceId);
+  if (!sock || !openDevices.has(deviceId)) {
+    throw new ServiceUnavailableError(
+      "The device is not connected",
+      undefined,
+      ErrorCodes.DEVICE_OFFLINE,
+    );
+  }
+  return sock;
+};
+
+const extractWaMessageId = (
+  sent: Awaited<ReturnType<WASocket["sendMessage"]>>,
+): string => {
+  const waMessageId = sent?.key.id;
+  if (!waMessageId) {
+    throw new ServiceUnavailableError(
+      "The WhatsApp send produced no message id",
+      undefined,
+      ErrorCodes.DEVICE_OFFLINE,
+    );
+  }
+  return waMessageId;
+};
+
+// A media field is a URL or base64 (optionally a data URL). Baileys takes a
+// `{ url }` for remote media, or a Buffer for inline bytes.
+const HTTP_URL = /^https?:\/\//i;
+const toWaMedia = (value: string): { url: string } | Buffer => {
+  if (HTTP_URL.test(value)) return { url: value };
+  const base64 = value.includes(",")
+    ? value.slice(value.indexOf(",") + 1)
+    : value;
+  return Buffer.from(base64, "base64");
+};
+
+// PIX button + option list are WhatsApp interactive messages that Baileys types
+// loosely — the content is built here and cast at the seam. Correctness of the
+// wire shape depends on WhatsApp's evolving interactive-message support; the
+// gateway is the boundary where that risk is contained.
+//
+// WIRE-SHAPE RISK: both builders below are Baileys-version- and WhatsApp-
+// -evolution-sensitive. `buildPixButtonContent` uses the `nativeFlowMessage`
+// `review_and_pay` flow (WhatsApp Pay / PIX static code) — requires a Business
+// account with Pay enabled. `buildOptionListContent` uses the legacy list-
+// -message shape (`text`/`buttonText`/`sections`). Neither is covered by a
+// static type (hence the `as unknown as` cast) — verify on a real device when
+// bumping Baileys or if sends silently no-op on the recipient side.
+const buildPixButtonContent = (
+  payload: SendPixButtonPayload,
+): WAMessageContent =>
+  ({
+    interactiveMessage: {
+      nativeFlowMessage: {
+        buttons: [
+          {
+            name: "review_and_pay",
+            buttonParamsJson: JSON.stringify({
+              currency: "BRL",
+              payment_settings: [
+                {
+                  type: "pix_static_code",
+                  pix_static_code: {
+                    key: payload.pixKey,
+                    key_type: payload.type,
+                  },
+                },
+              ],
+            }),
+          },
+        ],
+      },
+    },
+  }) as unknown as WAMessageContent;
+
+const buildOptionListContent = (
+  payload: SendOptionListPayload,
+): WAMessageContent =>
+  ({
+    text: payload.message,
+    buttonText: payload.optionList.buttonLabel,
+    sections: [
+      {
+        title: payload.optionList.title,
+        rows: payload.optionList.options.map((option) => ({
+          title: option.title,
+          description: option.description,
+          rowId: option.id,
+        })),
+      },
+    ],
+  }) as unknown as WAMessageContent;
 
 // Owner of everything alive: the Map<deviceId, socket>. Translates the Baileys
 // `sock.ev` stream into DomainEvents on the bus and carries NO business rule
@@ -353,26 +494,59 @@ export const makeSessionManager = (
     },
 
     async sendText(deviceId, jid, text) {
-      const sock = sockets.get(deviceId);
-      // openDevices (not just sockets) is the readiness gate: a socket that is
-      // mid-handshake is in the map but not yet open.
-      if (!sock || !openDevices.has(deviceId)) {
-        throw new ServiceUnavailableError(
-          "The device is not connected",
-          undefined,
-          ErrorCodes.DEVICE_OFFLINE,
-        );
-      }
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
       const sent = await sock.sendMessage(jid, { text });
-      const waMessageId = sent?.key.id;
-      if (!waMessageId) {
-        throw new ServiceUnavailableError(
-          "The WhatsApp send produced no message id",
-          undefined,
-          ErrorCodes.DEVICE_OFFLINE,
-        );
-      }
-      return { waMessageId };
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendImage(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        image: toWaMedia(payload.image),
+        ...(payload.caption ? { caption: payload.caption } : {}),
+      });
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendAudio(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        audio: toWaMedia(payload.audio),
+        mimetype: "audio/mp4",
+        ptt: true,
+      });
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendVideo(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        video: toWaMedia(payload.video),
+        ...(payload.caption ? { caption: payload.caption } : {}),
+      });
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendDocument(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        document: toWaMedia(payload.document),
+        fileName: payload.fileName ?? "document",
+        ...(payload.caption ? { caption: payload.caption } : {}),
+      });
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendPixButton(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, buildPixButtonContent(payload));
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendOptionList(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, buildOptionListContent(payload));
+      return { waMessageId: extractWaMessageId(sent) };
     },
 
     // Graceful shutdown: close() every socket, NEVER logout() — logout wipes the

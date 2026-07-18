@@ -43,13 +43,13 @@ export const theme = extendTheme({
         color: "text.primary",
         fontSize: "sm",
         minH: "100vh",
-        // Dark mode keeps a single, very subtle brand wash to give the canvas
-        // some life without competing with content. The accent radial that
-        // existed before doubled the noise on a slate background, so it's
-        // dropped in dark mode and only kept (faintly) in light mode.
+        // A faint forest wash top-left + a soft emerald radial top-right give
+        // the light canvas some life. Dark mode drops the forest wash (it would
+        // just muddy the dark canvas) and keeps only a subtle emerald glow so
+        // the green identity carries through on both themes.
         backgroundImage: mode(
-          "radial-gradient(ellipse 60% 40% at 10% -10%, rgba(107, 101, 96, 0.05) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 90% 5%, rgba(30, 178, 138, 0.04) 0%, transparent 55%)",
-          "radial-gradient(ellipse 70% 50% at 12% -10%, rgba(195, 188, 181, 0.04) 0%, transparent 65%)"
+          "radial-gradient(ellipse 60% 40% at 10% -10%, rgba(6, 78, 59, 0.05) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 90% 5%, rgba(16, 185, 129, 0.07) 0%, transparent 55%)",
+          "radial-gradient(ellipse 70% 50% at 12% -10%, rgba(16, 185, 129, 0.06) 0%, transparent 65%)"
         )(props),
       },
       "*::placeholder": {

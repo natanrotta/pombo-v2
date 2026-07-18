@@ -1,20 +1,20 @@
 export const semanticTokens = {
   colors: {
     "bg.canvas": {
-      default: "#f6f4f1",
-      _dark: "#100f0e",
+      default: "#fafbfb",
+      _dark: "#0b0f0e",
     },
     "bg.surface": {
       default: "#ffffff",
-      _dark: "#1a1917",
+      _dark: "#121917",
     },
     "bg.elevated": {
       default: "#ffffff",
-      _dark: "#211f1c",
+      _dark: "#17201c",
     },
     "bg.sunken": {
-      default: "#efece8",
-      _dark: "#0c0b0a",
+      default: "#eef1f0",
+      _dark: "#080b0a",
     },
     "bg.muted": {
       default: "neutral.50",
@@ -30,40 +30,41 @@ export const semanticTokens = {
     },
     "bg.glass": {
       default: "rgba(255, 255, 255, 0.80)",
-      _dark: "rgba(26, 25, 23, 0.78)",
+      _dark: "rgba(18, 25, 23, 0.78)",
     },
     "bg.topbar": {
       default: "rgba(255, 255, 255, 0.92)",
-      _dark: "rgba(26, 25, 23, 0.88)",
+      _dark: "rgba(18, 25, 23, 0.88)",
     },
     "bg.brand.subtle": {
       default: "brand.50",
-      // Faint warm-graphite wash on the dark canvas (matches the grayscale brand).
-      _dark: "rgba(150, 142, 133, 0.14)",
+      // Faint emerald wash on the dark canvas.
+      _dark: "rgba(16, 185, 129, 0.14)",
     },
     "bg.brand.emphasis": {
       default: "brand.800",
       _dark: "brand.200",
     },
-    // Brand button states — monochrome CTA. Light mode reads near-black
-    // (brand.800/900) with white text; dark mode inverts to a light-gray
-    // pill (brand.200/100) with near-black text. Consumed by the Button
-    // "solid" variant via `text.onBrand`.
+    // Primary action ("solid" button) — the emerald. Light mode uses the
+    // button-safe deep emerald (600) with WHITE text; dark mode flips to a
+    // bright emerald (500) with near-black emerald-ink text, so the CTA pops on
+    // the dark canvas while staying legible in both modes. Hover/active deepen
+    // (light) or brighten (dark) for press feedback.
     "bg.brand.solid": {
-      default: "brand.800",
-      _dark: "brand.200",
+      default: "brand.600",
+      _dark: "brand.500",
     },
     "bg.brand.solid-hover": {
-      default: "brand.900",
-      _dark: "brand.100",
+      default: "brand.700",
+      _dark: "brand.400",
     },
     "bg.brand.solid-active": {
-      default: "brand.700",
-      _dark: "brand.300",
+      default: "brand.800",
+      _dark: "brand.600",
     },
     "bg.accent.subtle": {
       default: "accent.50",
-      _dark: "rgba(50, 200, 159, 0.14)",
+      _dark: "rgba(16, 185, 129, 0.14)",
     },
     "bg.overlay": {
       default: "blackAlpha.400",
@@ -71,74 +72,76 @@ export const semanticTokens = {
     },
 
     "text.primary": {
-      default: "#292524",
-      _dark: "#f1f0f3",
+      default: "#0f1a17",
+      _dark: "#ecf5f1",
     },
     "text.secondary": {
-      default: "#57534e",
-      _dark: "#a8a6b1",
+      default: "#47554f",
+      _dark: "#a5b2ac",
     },
     "text.muted": {
       default: "neutral.400",
-      // ≈ 4.6:1 contrast on bg.surface (#1a1917) — meets WCAG AA for body text
-      _dark: "#83828d",
+      // ≈ 4.5:1 contrast on bg.surface (#121917) — meets WCAG AA for body text
+      _dark: "#7e8b85",
     },
     "text.disabled": {
       default: "neutral.300",
-      _dark: "#48474f",
+      _dark: "#495049",
     },
     "text.inverse": {
       default: "#ffffff",
-      _dark: "#100f0e",
+      _dark: "#0b0f0e",
     },
+    // Links / brand text use the readable "deep emerald" (700 ≈ 5.5:1 on white);
+    // dark mode lifts to a bright emerald (300) on the dark canvas.
     "text.link": {
-      default: "brand.600",
+      default: "brand.700",
       _dark: "brand.300",
     },
     "text.brand": {
-      default: "brand.600",
+      default: "brand.700",
       _dark: "brand.300",
     },
     "text.accent": {
-      default: "accent.600",
+      default: "accent.700",
       _dark: "accent.300",
     },
-    // Text/icon color that sits ON the solid brand button. Light: white on
-    // the near-black CTA. Dark: near-black on the light-gray CTA pill.
+    // Text/icon color that sits ON the primary emerald button — white in light
+    // mode (on deep emerald), near-black emerald-ink in dark mode (on bright
+    // emerald). Both directions clear WCAG AA.
     "text.onBrand": {
       default: "#ffffff",
-      _dark: "#1a1817",
+      _dark: "#052e21",
     },
 
     "border.subtle": {
-      default: "rgba(41, 37, 36, 0.07)",
+      default: "rgba(15, 26, 23, 0.07)",
       _dark: "rgba(255, 255, 255, 0.06)",
     },
     "border.default": {
-      default: "rgba(41, 37, 36, 0.12)",
+      default: "rgba(15, 26, 23, 0.12)",
       _dark: "rgba(255, 255, 255, 0.11)",
     },
     "border.strong": {
-      default: "rgba(41, 37, 36, 0.20)",
+      default: "rgba(15, 26, 23, 0.20)",
       _dark: "rgba(255, 255, 255, 0.20)",
     },
     "border.brand": {
-      // brand.200 was too faint as a graphite outline on white — bump to
-      // brand.400 so a "brand" border is actually visible in light mode.
       default: "brand.400",
       _dark: "brand.500",
     },
-    // Accent (green) callout border. Pairs with `bg.accent.subtle`: the dark
-    // value is a translucent green from the same (50,200,159) family + 0.30
-    // alpha (mirrors `status.success.border`), so it reads as a soft outline
-    // over the dark surface instead of a muddy solid green.
+    // Emerald callout border. Pairs with `bg.accent.subtle`: the dark value is a
+    // translucent emerald (16,185,129 + 0.32 alpha) so it reads as a soft
+    // outline over the dark surface instead of a solid slab.
     "border.accent": {
-      default: "accent.200",
-      _dark: "rgba(50, 200, 159, 0.30)",
+      default: "accent.300",
+      _dark: "rgba(16, 185, 129, 0.32)",
     },
+    // Focus ring color — emerald, so every focused control carries the brand
+    // (paired with the `outline`/`input-focus` shadows below).
     "border.focus": {
-      default: "brand.400",
-      _dark: "brand.300",
+      default: "brand.500",
+      _dark: "brand.400",
     },
 
     "status.success.fg": { default: "green.600", _dark: "green.300" },
@@ -155,18 +158,19 @@ export const semanticTokens = {
     "status.error.bg": { default: "red.50", _dark: "rgba(239, 68, 68, 0.12)" },
     "status.error.border": { default: "red.200", _dark: "rgba(239, 68, 68, 0.30)" },
 
-    // Info maps to the warm grayscale brand family — a neutral graphite callout
-    // (the dark rgba is warm graphite, not the old blue).
-    "status.info.fg": { default: "brand.600", _dark: "brand.300" },
-    "status.info.bg": { default: "brand.50", _dark: "rgba(150, 142, 133, 0.14)" },
-    "status.info.border": { default: "brand.300", _dark: "rgba(150, 142, 133, 0.32)" },
+    // Info maps to BLUE (not the brand) — the brand is now green, so an
+    // emerald "info" would be indistinguishable from the green "success".
+    // Blue is the conventional information hue and keeps the two semantics apart.
+    "status.info.fg": { default: "blue.600", _dark: "blue.300" },
+    "status.info.bg": { default: "blue.50", _dark: "rgba(59, 130, 246, 0.12)" },
+    "status.info.border": { default: "blue.200", _dark: "rgba(59, 130, 246, 0.30)" },
 
-    "status.neutral.fg": { default: "neutral.600", _dark: "#a8a6b1" },
+    "status.neutral.fg": { default: "neutral.600", _dark: "#a5b2ac" },
     "status.neutral.bg": { default: "neutral.100", _dark: "rgba(255, 255, 255, 0.06)" },
     "status.neutral.border": { default: "neutral.200", _dark: "rgba(255, 255, 255, 0.12)" },
 
-    // Blue — a real blue accent (distinct from the graphite "info"), used for
-    // count/total emphasis (e.g. the Devices "Total" stat card).
+    // Blue — count/total emphasis (e.g. the Devices "Total" stat card). Shares
+    // the blue family with `status.info`; they never collide in the same view.
     "status.blue.fg": { default: "blue.600", _dark: "blue.300" },
     "status.blue.bg": { default: "blue.50", _dark: "rgba(59, 130, 246, 0.12)" },
     "status.blue.border": { default: "blue.200", _dark: "rgba(59, 130, 246, 0.30)" },
@@ -180,42 +184,40 @@ export const semanticTokens = {
     "accent.gold": { default: "#E0A500", _dark: "#FACC15" },
   },
   shadows: {
-    // Surface separation is carried by borders + a soft WARM-charcoal shadow
-    // (was cold slate). Cards rely on a 1px border + tiny shadow; only panels
-    // and overlays get a real, soft shadow.
+    // Surface separation is carried by borders + a soft green-ink shadow
+    // (rgba 13,26,22 ≈ the #0f1a17 emerald-ink text color). Cards rely on a 1px
+    // border + tiny shadow; only panels and overlays get a real, soft shadow.
     "shadow.card": {
-      default: "0px 1px 2px rgba(41, 37, 36, 0.06), 0px 4px 12px -2px rgba(41, 37, 36, 0.08)",
+      default: "0px 1px 2px rgba(13, 26, 22, 0.06), 0px 4px 12px -2px rgba(13, 26, 22, 0.08)",
       _dark: "0px 1px 0 rgba(0, 0, 0, 0.20)",
     },
     "shadow.cardHover": {
-      default: "0px 4px 8px rgba(41, 37, 36, 0.06), 0px 12px 28px -4px rgba(41, 37, 36, 0.12)",
+      default: "0px 4px 8px rgba(13, 26, 22, 0.06), 0px 12px 28px -4px rgba(13, 26, 22, 0.12)",
       _dark: "0px 0 0 1px rgba(255, 255, 255, 0.04), 0px 8px 24px -8px rgba(0, 0, 0, 0.55)",
     },
     "shadow.panel": {
-      default: "0px 8px 24px -4px rgba(41, 37, 36, 0.14), 0px 2px 6px rgba(41, 37, 36, 0.06)",
+      default: "0px 8px 24px -4px rgba(13, 26, 22, 0.14), 0px 2px 6px rgba(13, 26, 22, 0.06)",
       _dark: "0px 12px 32px -8px rgba(0, 0, 0, 0.55), 0px 2px 6px rgba(0, 0, 0, 0.35)",
     },
     "shadow.lg": {
-      default: "0px 16px 40px -8px rgba(41, 37, 36, 0.16), 0px 4px 12px rgba(41, 37, 36, 0.06)",
+      default: "0px 16px 40px -8px rgba(13, 26, 22, 0.16), 0px 4px 12px rgba(13, 26, 22, 0.06)",
       _dark: "0px 20px 48px -12px rgba(0, 0, 0, 0.60), 0px 4px 12px rgba(0, 0, 0, 0.35)",
     },
     "shadow.inner": {
-      default: "inset 0 2px 4px 0 rgba(41, 37, 36, 0.06)",
+      default: "inset 0 2px 4px 0 rgba(13, 26, 22, 0.06)",
       _dark: "inset 0 1px 2px 0 rgba(0, 0, 0, 0.30)",
     },
     // Focus-related shadows use bare keys (no `shadow.` prefix) so they
     // override Chakra's default focus lookup AND existing consumers like
-    // `boxShadow: "input-focus"` keep working without edits. Dark mode lifts
-    // alpha so the ring still reads on the dark canvas.
+    // `boxShadow: "input-focus"` keep working without edits. All focus rings
+    // carry the emerald (16,185,129); dark lifts alpha so it still reads.
     outline: {
-      // Warm-graphite focus ring (was cold graphite) — light uses a mid warm
-      // charcoal, dark lifts to a light warm-gray so the ring reads on canvas.
-      default: "0 0 0 3px rgba(107, 101, 96, 0.35)",
-      _dark: "0 0 0 3px rgba(195, 188, 181, 0.45)",
+      default: "0 0 0 3px rgba(16, 185, 129, 0.40)",
+      _dark: "0 0 0 3px rgba(16, 185, 129, 0.45)",
     },
     "input-focus": {
-      default: "0 0 0 3px rgba(107, 101, 96, 0.18)",
-      _dark: "0 0 0 3px rgba(195, 188, 181, 0.28)",
+      default: "0 0 0 3px rgba(16, 185, 129, 0.20)",
+      _dark: "0 0 0 3px rgba(16, 185, 129, 0.28)",
     },
     "input-error": {
       default: "0 0 0 3px rgba(245, 101, 101, 0.12)",
@@ -226,13 +228,13 @@ export const semanticTokens = {
       _dark: "0 0 0 3px rgba(252, 165, 165, 0.32)",
     },
     "brand-glow": {
-      // Warm-graphite glow to match the grayscale brand (was cold).
-      default: "0px 0px 0px 3px rgba(107, 101, 96, 0.20), 0px 4px 12px rgba(107, 101, 96, 0.15)",
-      _dark: "0px 0px 0px 3px rgba(195, 188, 181, 0.18), 0px 4px 12px rgba(150, 142, 133, 0.18)",
+      // Emerald glow to match the primary action.
+      default: "0px 0px 0px 3px rgba(16, 185, 129, 0.20), 0px 4px 12px rgba(16, 185, 129, 0.15)",
+      _dark: "0px 0px 0px 3px rgba(16, 185, 129, 0.18), 0px 4px 12px rgba(16, 185, 129, 0.20)",
     },
     "accent-glow": {
-      default: "0px 0px 0px 3px rgba(30, 178, 138, 0.20), 0px 4px 12px rgba(30, 178, 138, 0.15)",
-      _dark: "0px 0px 0px 3px rgba(93, 220, 182, 0.16), 0px 4px 12px rgba(50, 200, 159, 0.18)",
+      default: "0px 0px 0px 3px rgba(16, 185, 129, 0.20), 0px 4px 12px rgba(16, 185, 129, 0.15)",
+      _dark: "0px 0px 0px 3px rgba(16, 185, 129, 0.16), 0px 4px 12px rgba(16, 185, 129, 0.18)",
     },
   },
 };

@@ -17,6 +17,10 @@
   "type": {
     "text": "Text"
   },
+  "recent": {
+    "title": "Recently sent",
+    "remove": "Remove from suggestions"
+  },
   "status": {
     "PENDING": "Pending",
     "SERVER_ACK": "Sent",

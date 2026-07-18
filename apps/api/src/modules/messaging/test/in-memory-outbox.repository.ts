@@ -84,6 +84,21 @@ export class InMemoryOutboxRepository implements IOutboxRepository {
     return this.toEntity(row);
   }
 
+  async findQueued(deviceId: string, limit: number): Promise<OutboxMessage[]> {
+    const now = Date.now();
+    return [...this.rows.values()]
+      .filter(
+        (row) =>
+          row.deviceId === deviceId &&
+          row.status === "PENDING" &&
+          row.waMessageId === null &&
+          row.expiresAt.getTime() > now,
+      )
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .slice(0, limit)
+      .map((row) => this.toEntity(row));
+  }
+
   async setWaMessageId(id: string, waMessageId: string): Promise<void> {
     const row = this.rows.get(id);
     if (!row) return;

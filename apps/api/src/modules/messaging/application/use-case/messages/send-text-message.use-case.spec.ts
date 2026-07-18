@@ -8,11 +8,7 @@ import type {
   DomainEvent,
   IDomainEventBus,
 } from "@shared/provider/domain-event-bus.interface";
-import {
-  ConflictError,
-  NotFoundError,
-  ServiceUnavailableError,
-} from "@shared/error";
+import { ConflictError, NotFoundError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
 const ACCOUNT_A = "account-a";
@@ -124,21 +120,52 @@ describe("SendTextMessageUseCase", () => {
     ).rejects.toMatchObject({ code: ErrorCodes.DEVICE_NOT_FOUND });
   });
 
-  it("throws DEVICE_OFFLINE when the socket is not connected (no queue)", async () => {
-    const { sut, device, gateway } = await setup();
+  it("queues the message (202 PENDING, not 503) when the device is offline", async () => {
+    const { sut, device, gateway, outbox, bus } = await setup();
     gateway.setConnected(device.id, false);
 
-    const promise = sut.execute({
+    const out = await sut.execute({
+      accountId: ACCOUNT_A,
+      deviceId: device.id,
+      phone: "5548999999999",
+      text: "oi",
+      idempotencyKey: "k",
+    });
+
+    expect(out.status).toBe("PENDING");
+    // Queued, not sent: no gateway send, no message.sent, no waMessageId yet.
+    expect(gateway.sentTexts).toHaveLength(0);
+    expect(bus.published.filter((e) => e.type === "message.sent")).toHaveLength(
+      0,
+    );
+    const row = await outbox.findByIdempotencyKey(device.id, "k");
+    expect(row?.status).toBe("PENDING");
+    expect(row?.waMessageId).toBeNull();
+    // The constructed jid is stored so the drain can send it on reconnect.
+    expect(row?.toJid).toBe("5548999999999@s.whatsapp.net");
+  });
+
+  it("keeps the message queued (202, not FAILED) when the socket drops mid-send", async () => {
+    const { sut, device, gateway, outbox } = await setup();
+    // Passes the readiness check, but the send throws AND the device is now
+    // offline → treat as a blip and leave it queued for the drain.
+    gateway.sendText = async () => {
+      gateway.setConnected(device.id, false);
+      throw new Error("socket died mid-send");
+    };
+
+    const out = await sut.execute({
       accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548",
       text: "oi",
       idempotencyKey: "k",
     });
-    await expect(promise).rejects.toBeInstanceOf(ServiceUnavailableError);
-    await expect(promise).rejects.toMatchObject({
-      code: ErrorCodes.DEVICE_OFFLINE,
-    });
+
+    expect(out.status).toBe("PENDING");
+    expect((await outbox.findByIdempotencyKey(device.id, "k"))?.status).toBe(
+      "PENDING",
+    );
   });
 
   it("replays the original on same key + same text (idempotent)", async () => {
@@ -201,7 +228,7 @@ describe("SendTextMessageUseCase", () => {
     });
   });
 
-  it("still returns 202 PENDING + publishes message.sent when only the waMessageId stamp fails (message already sent)", async () => {
+  it("returns 202 + publishes message.sent and moves the row to SERVER_ACK (not PENDING) when only the waMessageId stamp fails", async () => {
     const { sut, device, outbox, bus } = await setup();
     outbox.setWaMessageId = async () => {
       throw new Error("stamp db down");
@@ -218,13 +245,15 @@ describe("SendTextMessageUseCase", () => {
     });
     expect(out.status).toBe("PENDING");
 
-    // message.sent fired; the row must NOT be FAILED (the message went out).
+    // message.sent fired; the row must NOT be FAILED (it went out) and must NOT
+    // stay PENDING (the reconnect drain would re-send it) → SERVER_ACK.
     expect(bus.published.filter((e) => e.type === "message.sent")).toHaveLength(
       1,
     );
-    expect((await outbox.findByIdempotencyKey(device.id, "k"))?.status).toBe(
-      "PENDING",
-    );
+    const row = await outbox.findByIdempotencyKey(device.id, "k");
+    expect(row?.status).toBe("SERVER_ACK");
+    // and therefore excluded from the drain queue (no double-send).
+    expect(await outbox.findQueued(device.id, 100)).toHaveLength(0);
   });
 
   it("marks the outbox FAILED and re-throws when the send fails", async () => {

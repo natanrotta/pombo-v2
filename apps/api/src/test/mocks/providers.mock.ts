@@ -130,6 +130,8 @@ export function mockAppConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     RECONNECT_MAX_DELAY_MS: 300000,
     OUTBOX_TTL_HOURS: 24,
     OUTBOX_PRUNE_INTERVAL_MS: 3600000,
+    // 0 in tests so the drain loop doesn't actually wait between sends.
+    OUTBOX_DRAIN_DELAY_MS: 0,
     WEBHOOK_TIMEOUT_MS: 5000,
     WEBHOOK_MAX_ATTEMPTS: 4,
     WEBHOOK_RETRY_BASE_DELAY_MS: 1000,

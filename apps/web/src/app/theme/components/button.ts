@@ -16,17 +16,18 @@ export const Button = defineStyleConfig({
     solid: {
       bg: "bg.brand.solid",
       color: "text.onBrand",
-      // Neutral graphite shadow to match the grayscale brand (was a blue glow).
-      boxShadow: "0 1px 2px rgba(20, 22, 25, 0.24)",
+      // Emerald-tinted shadow to match the green brand (mirrors the colored
+      // shadow the `danger` variant uses for red).
+      boxShadow: "0 1px 2px rgba(4, 120, 87, 0.28)",
       _hover: {
         bg: "bg.brand.solid-hover",
         transform: "translateY(-1px)",
-        boxShadow: "0 4px 12px rgba(20, 22, 25, 0.32)",
+        boxShadow: "0 4px 12px rgba(4, 120, 87, 0.36)",
       },
       _active: {
         bg: "bg.brand.solid-active",
         transform: "translateY(0)",
-        boxShadow: "0 1px 2px rgba(20, 22, 25, 0.24)",
+        boxShadow: "0 1px 2px rgba(4, 120, 87, 0.28)",
       },
     },
     subtle: {

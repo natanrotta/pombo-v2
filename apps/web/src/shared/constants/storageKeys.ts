@@ -7,4 +7,8 @@ export const STORAGE_KEYS = {
    *  requests — see httpClient. The real session never uses this; it lives in
    *  the httpOnly access cookie. */
   emailVerifyToken: "@pombo-web:email-verify-token",
+  /** Recently used Sandbox recipient numbers (raw digits, most-recent first),
+   *  surfaced as suggestions when the recipient input is focused. Convenience
+   *  only — cleared safely at any time, never contains sensitive data. */
+  sandboxRecentRecipients: "@pombo-web:sandbox-recent-recipients",
 } as const;

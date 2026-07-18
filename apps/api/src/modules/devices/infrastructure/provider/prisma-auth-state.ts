@@ -1,10 +1,28 @@
-import { initAuthCreds, BufferJSON, proto } from "@whiskeysockets/baileys";
+import * as Baileys from "@whiskeysockets/baileys";
 import type {
   AuthenticationCreds,
   AuthenticationState,
   SignalDataTypeMap,
 } from "@whiskeysockets/baileys";
+import { Prisma } from "@generated/prisma/client";
 import { prisma } from "@core/database/prisma/prisma-client";
+
+const { initAuthCreds, BufferJSON, proto } = Baileys;
+// makeCacheableSignalKeyStore exists at runtime but the package barrel's
+// `export *` silently drops it from the published types (no name collision, and
+// a CJS deep-import of the ESM file is disallowed) — reach it via the namespace
+// with a typed cast. The full runtime signature is
+// `(store, logger?, cache?)`; the optional args are kept so a future caller can
+// pass a logger without re-opening the cast.
+const makeCacheableSignalKeyStore = (
+  Baileys as unknown as {
+    makeCacheableSignalKeyStore: (
+      store: AuthenticationState["keys"],
+      logger?: unknown,
+      cache?: unknown,
+    ) => AuthenticationState["keys"];
+  }
+).makeCacheableSignalKeyStore;
 
 // The custom AuthenticationState over Prisma. This and session-manager.ts are
 // the only places allowed to import Baileys types. Serialization goes through
@@ -15,6 +33,17 @@ import { prisma } from "@core/database/prisma/prisma-client";
 // every message. Persisting it here is what makes deploy a non-event (no
 // re-pair). The `auth_key.value` column is Json — we store the BufferJSON
 // string so the exact bytes round-trip.
+//
+// Two production hardenings sit on top of the raw Postgres store:
+//  - `keys.set` writes the whole batch in ONE transaction, so a crash mid-batch
+//    can never persist a PARTIAL Signal state — the corruption that surfaces as
+//    `badSession` and forces a re-pair.
+//  - the key store is wrapped in `makeCacheableSignalKeyStore` (an in-memory
+//    read-through, write-through cache). Safe because the advisory lock makes
+//    this the single writer: every mutation goes through the cache, so it is
+//    never stale, and Postgres stays the durable source of truth (read on a
+//    cold miss / restart). It just spares the DB the constant per-key reads
+//    Baileys issues while decrypting.
 
 export interface PrismaAuthState {
   state: AuthenticationState;
@@ -33,19 +62,23 @@ export const makePrismaAuthState = async (
       : null;
   };
 
-  const write = async (key: string, value: unknown): Promise<void> => {
+  // The individual write/delete as a Prisma operation (NOT awaited) so a batch
+  // can be handed to `$transaction` and committed atomically.
+  const upsertOp = (
+    key: string,
+    value: unknown,
+  ): Prisma.PrismaPromise<unknown> => {
     const serialized = JSON.stringify(value, BufferJSON.replacer);
-    await prisma.auth_key.upsert({
+    return prisma.auth_key.upsert({
       where: { device_id_key: { device_id: deviceId, key } },
       create: { device_id: deviceId, key, value: serialized },
       update: { value: serialized },
     });
   };
 
-  const remove = async (key: string): Promise<void> => {
-    // deleteMany (not delete) so a missing row is a no-op, never a P2025 throw.
-    await prisma.auth_key.deleteMany({ where: { device_id: deviceId, key } });
-  };
+  // deleteMany (not delete) so a missing row is a no-op, never a P2025 throw.
+  const deleteOp = (key: string): Prisma.PrismaPromise<unknown> =>
+    prisma.auth_key.deleteMany({ where: { device_id: deviceId, key } });
 
   const creds: AuthenticationCreds =
     (await read<AuthenticationCreds>("creds")) ?? initAuthCreds();
@@ -74,29 +107,34 @@ export const makePrismaAuthState = async (
       return result;
     },
     set: async (data: Record<string, Record<string, unknown> | undefined>) => {
-      const tasks: Promise<void>[] = [];
+      const ops: Prisma.PrismaPromise<unknown>[] = [];
       for (const type of Object.keys(data) as (keyof SignalDataTypeMap)[]) {
         const category = data[type];
         if (!category) continue;
         for (const id of Object.keys(category)) {
           const value = category[id];
-          tasks.push(
-            value ? write(`${type}-${id}`, value) : remove(`${type}-${id}`),
-          );
+          const key = `${type}-${id}`;
+          ops.push(value ? upsertOp(key, value) : deleteOp(key));
         }
       }
-      await Promise.all(tasks);
+      // One transaction → the whole Signal-state batch persists all-or-nothing.
+      // A crash mid-batch can no longer leave a partial (corrupt) state that
+      // forces a re-pair (badSession).
+      if (ops.length > 0) await prisma.$transaction(ops);
     },
   };
 
   return {
-    state: { creds, keys },
+    // Wrap the Postgres store in an in-memory cache: reads hit memory first (the
+    // hot path Baileys walks while decrypting), only misses touch Postgres, and
+    // every write updates both. Single-writer (advisory lock) → never stale.
+    state: { creds, keys: makeCacheableSignalKeyStore(keys) },
     // Baileys mutates `creds` in place and emits `creds.update`; saveCreds
     // persists the SAME captured reference. The session adapter wires
     //   sock.ev.on('creds.update', saveCreds)
     // — otherwise creds change in memory and never persist (silent re-pair).
     saveCreds: async () => {
-      await write("creds", creds);
+      await upsertOp("creds", creds);
     },
   };
 };

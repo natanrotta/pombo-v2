@@ -1,49 +1,47 @@
+// Emerald ramp — the single brand color of the platform. Anchored on #10B981
+// (the accent identity) with #059669 as the button-safe "deep" emerald. 50 =
+// lightest, 900 = near-black forest. A messaging-gateway green that fits the
+// Pombo mascot and the "communication" domain (WhatsApp lineage), tuned for
+// contrast: white text sits on 600+, and 700 is the readable "green text".
+const emerald = {
+  50: "#ecfdf5",
+  100: "#d1fae5",
+  200: "#a7f3d0",
+  300: "#6ee7b7",
+  400: "#34d399",
+  500: "#10b981", // Emerald — the accent identity color
+  600: "#059669", // Deep emerald — the primary button fill (light mode)
+  700: "#047857",
+  800: "#065f46",
+  900: "#064e3b",
+};
+
 export const colors = {
-  // Pombo brand — a WARM graphite/charcoal grayscale (taupe undertone) for a
-  // monochrome developer-tool aesthetic that reads cozy, not cold. 50 =
-  // lightest, 900 = near-black. Primary actions read as near-black warm charcoal
-  // in light mode and light warm-gray in dark mode.
-  brand: {
-    50: "#f7f6f5",
-    100: "#eeecea",
-    200: "#ddd8d4",
-    300: "#c3bcb5",
-    400: "#948c84",
-    500: "#6b6560",
-    600: "#524d49",
-    700: "#3f3a37",
-    800: "#292524",
-    900: "#1a1817",
-  },
-  accent: {
-    50: "#f0fdf9",
-    100: "#ccf7e8",
-    200: "#95ecd0",
-    300: "#5ddcb6",
-    400: "#32c89f",
-    500: "#1eb28a",
-    600: "#178f6f",
-    700: "#13745c",
-    800: "#145c4a",
-    900: "#124b3d",
-  },
-  // Warm stone/taupe neutrals (was cool blue-slate) — the main lever that kills
-  // the "cold, melancholic gray" feeling across text, borders and surfaces.
+  // `brand` and `accent` intentionally share ONE emerald ramp. The platform has
+  // a single, confident green identity — `brand.*` carries the strong usages
+  // (primary button, links, active nav) and `accent.*` the soft highlights
+  // (subtle washes, stat cards); keeping them the same hue is what makes the UI
+  // feel cohesive ("orna") instead of two-toned.
+  brand: emerald,
+  accent: emerald,
+  // Faintly green-slate neutrals — a desaturated cool gray with a whisper of
+  // emerald so surfaces, text and borders read as part of the same family
+  // instead of a flat gray next to the green.
   neutral: {
-    50: "#faf9f8",
-    100: "#f4f2f0",
-    200: "#e7e4e0",
-    300: "#d6d1cb",
-    400: "#a8a29b",
-    500: "#78716c",
-    600: "#57534e",
-    700: "#44403c",
-    800: "#292524",
-    900: "#1c1917",
+    50: "#f5f7f6",
+    100: "#e9edeb",
+    200: "#d6deda",
+    300: "#bcc7c1",
+    400: "#8f9c96",
+    500: "#647069",
+    600: "#4a564f",
+    700: "#39433d",
+    800: "#262f2a",
+    900: "#171d1a",
   },
   surface: {
     DEFAULT: "#ffffff",
-    subtle: "#f7f5f3",
-    muted: "#efece9",
+    subtle: "#f5f7f6",
+    muted: "#eef1f0",
   },
 };

@@ -1,18 +1,21 @@
 import { SendTextMessageUseCase } from "./send-text-message.use-case";
+import { DrainOutboxUseCase } from "./drain-outbox.use-case";
 import { InMemoryDevicesRepository } from "@modules/devices/test/in-memory-devices.repository";
 import { InMemoryOutboxRepository } from "@modules/messaging/test/in-memory-outbox.repository";
 import { FakeWhatsAppGateway } from "@modules/devices/test/fake-whatsapp.gateway";
-import { mockAppConfig } from "@test/mocks";
+import { TokenBucketSendRateLimiter } from "@modules/messaging/infrastructure/provider/token-bucket-send-rate-limiter";
+import type { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
+import {
+  mockAppConfig,
+  mockLoggerProvider,
+  mockSendRateLimiter,
+} from "@test/mocks";
 import { Device } from "@modules/devices/domain/entity/device.entity";
 import type {
   DomainEvent,
   IDomainEventBus,
 } from "@shared/provider/domain-event-bus.interface";
-import {
-  ConflictError,
-  NotFoundError,
-  ServiceUnavailableError,
-} from "@shared/error";
+import { ConflictError, NotFoundError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
 const ACCOUNT_A = "account-a";
@@ -26,7 +29,9 @@ class RecordingBus implements IDomainEventBus {
   subscribe(): void {}
 }
 
-const setup = async () => {
+// Default: a rate limiter with a high ceiling so it never throttles unless a
+// test passes its own (low-capacity) limiter to exercise the queue path.
+const setup = async (rateLimiter: ISendRateLimiter = mockSendRateLimiter()) => {
   const devices = new InMemoryDevicesRepository();
   const outbox = new InMemoryOutboxRepository();
   const gateway = new FakeWhatsAppGateway();
@@ -38,8 +43,32 @@ const setup = async () => {
     webhookSecret: "s",
   });
   gateway.setConnected(device.id, true);
-  const sut = new SendTextMessageUseCase(devices, outbox, gateway, config, bus);
-  return { devices, outbox, gateway, device, bus, sut };
+  const drainOutbox = new DrainOutboxUseCase(
+    outbox,
+    gateway,
+    bus,
+    rateLimiter,
+    mockLoggerProvider(),
+  );
+  const sut = new SendTextMessageUseCase(
+    devices,
+    outbox,
+    gateway,
+    config,
+    bus,
+    rateLimiter,
+    drainOutbox,
+  );
+  return {
+    devices,
+    outbox,
+    gateway,
+    device,
+    bus,
+    sut,
+    rateLimiter,
+    drainOutbox,
+  };
 };
 
 describe("SendTextMessageUseCase", () => {
@@ -124,21 +153,86 @@ describe("SendTextMessageUseCase", () => {
     ).rejects.toMatchObject({ code: ErrorCodes.DEVICE_NOT_FOUND });
   });
 
-  it("throws DEVICE_OFFLINE when the socket is not connected (no queue)", async () => {
-    const { sut, device, gateway } = await setup();
+  it("queues the message (202 PENDING, not 503) when the device is offline", async () => {
+    const { sut, device, gateway, outbox, bus } = await setup();
     gateway.setConnected(device.id, false);
 
-    const promise = sut.execute({
+    const out = await sut.execute({
+      accountId: ACCOUNT_A,
+      deviceId: device.id,
+      phone: "5548999999999",
+      text: "oi",
+      idempotencyKey: "k",
+    });
+
+    expect(out.status).toBe("PENDING");
+    // Queued, not sent: no gateway send, no message.sent, no waMessageId yet.
+    expect(gateway.sentTexts).toHaveLength(0);
+    expect(bus.published.filter((e) => e.type === "message.sent")).toHaveLength(
+      0,
+    );
+    const row = await outbox.findByIdempotencyKey(device.id, "k");
+    expect(row?.status).toBe("PENDING");
+    expect(row?.waMessageId).toBeNull();
+    // The constructed jid is stored so the drain can send it on reconnect.
+    expect(row?.toJid).toBe("5548999999999@s.whatsapp.net");
+  });
+
+  it("keeps the message queued (202, not FAILED) when the socket drops mid-send", async () => {
+    const { sut, device, gateway, outbox } = await setup();
+    // Passes the readiness check, but the send throws AND the device is now
+    // offline → treat as a blip and leave it queued for the drain.
+    gateway.sendText = async () => {
+      gateway.setConnected(device.id, false);
+      throw new Error("socket died mid-send");
+    };
+
+    const out = await sut.execute({
       accountId: ACCOUNT_A,
       deviceId: device.id,
       phone: "5548",
       text: "oi",
       idempotencyKey: "k",
     });
-    await expect(promise).rejects.toBeInstanceOf(ServiceUnavailableError);
-    await expect(promise).rejects.toMatchObject({
-      code: ErrorCodes.DEVICE_OFFLINE,
+
+    expect(out.status).toBe("PENDING");
+    expect((await outbox.findByIdempotencyKey(device.id, "k"))?.status).toBe(
+      "PENDING",
+    );
+  });
+
+  it("queues (202) and does NOT send now when the per-device rate limit is exhausted", async () => {
+    // Budget of exactly 1: the first send consumes it, the second is queued.
+    const limiter = new TokenBucketSendRateLimiter(1, 60000);
+    const { sut, gateway, outbox, device, drainOutbox } = await setup(limiter);
+    // Don't spin a real drain in the fire-and-forget kick — just record it.
+    const drainCalls: string[] = [];
+    drainOutbox.execute = async ({ deviceId }) => {
+      drainCalls.push(deviceId);
+    };
+
+    await sut.execute({
+      accountId: ACCOUNT_A,
+      deviceId: device.id,
+      phone: "5548",
+      text: "um",
+      idempotencyKey: "k1",
     });
+    expect(gateway.sentTexts).toHaveLength(1); // had a token → sent
+
+    const out = await sut.execute({
+      accountId: ACCOUNT_A,
+      deviceId: device.id,
+      phone: "5548",
+      text: "dois",
+      idempotencyKey: "k2",
+    });
+    expect(out.status).toBe("PENDING");
+    expect(gateway.sentTexts).toHaveLength(1); // no token → NOT sent
+    const row = await outbox.findByIdempotencyKey(device.id, "k2");
+    expect(row?.status).toBe("PENDING");
+    expect(row?.waMessageId).toBeNull();
+    expect(drainCalls).toEqual([device.id]); // drain was kicked
   });
 
   it("replays the original on same key + same text (idempotent)", async () => {
@@ -201,7 +295,7 @@ describe("SendTextMessageUseCase", () => {
     });
   });
 
-  it("still returns 202 PENDING + publishes message.sent when only the waMessageId stamp fails (message already sent)", async () => {
+  it("returns 202 + publishes message.sent and moves the row to SERVER_ACK (not PENDING) when only the waMessageId stamp fails", async () => {
     const { sut, device, outbox, bus } = await setup();
     outbox.setWaMessageId = async () => {
       throw new Error("stamp db down");
@@ -218,13 +312,15 @@ describe("SendTextMessageUseCase", () => {
     });
     expect(out.status).toBe("PENDING");
 
-    // message.sent fired; the row must NOT be FAILED (the message went out).
+    // message.sent fired; the row must NOT be FAILED (it went out) and must NOT
+    // stay PENDING (the reconnect drain would re-send it) → SERVER_ACK.
     expect(bus.published.filter((e) => e.type === "message.sent")).toHaveLength(
       1,
     );
-    expect((await outbox.findByIdempotencyKey(device.id, "k"))?.status).toBe(
-      "PENDING",
-    );
+    const row = await outbox.findByIdempotencyKey(device.id, "k");
+    expect(row?.status).toBe("SERVER_ACK");
+    // and therefore excluded from the drain queue (no double-send).
+    expect(await outbox.findQueued(device.id, 100)).toHaveLength(0);
   });
 
   it("marks the outbox FAILED and re-throws when the send fails", async () => {

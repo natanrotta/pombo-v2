@@ -7,7 +7,6 @@ import { PageHeader } from "@/shared/components/ui/PageHeader";
 import { SectionCard } from "@/shared/components/ui/SectionCard";
 import { EmptyState } from "@/shared/components/ui/EmptyState";
 import { ListPageSkeleton } from "@/shared/components/skeletons/ListPageSkeleton";
-import { FormField } from "@/shared/components/forms/FormField";
 import { SelectField } from "@/shared/components/forms/SelectField";
 import { TextAreaField } from "@/shared/components/forms/TextAreaField";
 import { useFormState } from "@/shared/hooks/useFormState";
@@ -19,6 +18,8 @@ import {
   useSendMessage,
   useMessageStatus,
 } from "@/modules/messaging/presentation/hooks/useSendMessage";
+import { useRecentRecipients } from "@/modules/messaging/presentation/hooks/useRecentRecipients";
+import { RecipientNumberField } from "@/modules/messaging/presentation/components/RecipientNumberField";
 import { SandboxResult } from "@/modules/messaging/presentation/components/SandboxResult";
 import type {
   SendMessageResult,
@@ -39,6 +40,7 @@ export function SandboxPage() {
 
   const { data: devices = [], isLoading } = useDevicesList();
   const sendMessage = useSendMessage();
+  const { recents, addRecipient, removeRecipient } = useRecentRecipients();
 
   const connectedDevices = useMemo(
     () => devices.filter((d) => d.status === "CONNECTED"),
@@ -115,11 +117,13 @@ export function SandboxPage() {
         },
       });
       setResult(res);
+      // Cache the recipient so it's suggested next time the Sandbox is reopened.
+      addRecipient(form.formData.phone);
       showSuccess(t("success"));
     } catch {
       // Error surfaced by the mutation's onError toast.
     }
-  }, [form, sendMessage, showSuccess, t]);
+  }, [form, sendMessage, addRecipient, showSuccess, t]);
 
   const handleReset = useCallback(() => {
     reset({
@@ -170,13 +174,16 @@ export function SandboxPage() {
                 />
               </SimpleGrid>
 
-              <FormField
+              <RecipientNumberField
                 label={t("fields.phone")}
                 placeholder={t("fields.phonePlaceholder")}
                 value={form.formData.phone}
                 onChange={(v) => setField("phone", maskPhoneBr(v))}
                 error={form.errors.phone ? t("errors.phoneInvalid") : undefined}
                 inputMode="tel"
+                recents={recents}
+                onSelectRecent={(digits) => setField("phone", maskPhoneBr(digits))}
+                onRemoveRecent={removeRecipient}
               />
 
               <TextAreaField

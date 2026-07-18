@@ -7,6 +7,7 @@ import { ILoggerProvider } from "@shared/provider/logger-provider.interface";
 import { IMailProvider } from "@shared/provider/mail-provider.interface";
 import { IDatabaseStatusProvider } from "@shared/provider/database-status-provider.interface";
 import { INodeExporterMetricsProvider } from "@shared/provider/node-exporter-metrics-provider.interface";
+import { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
 import { AppConfig } from "@shared/provider/app-config.interface";
 
 type MockOf<T> = {
@@ -114,6 +115,15 @@ export function mockMailProvider(): MockOf<IMailProvider> {
   };
 }
 
+/** Always-allow send rate limiter — use in use-case tests that don't exercise
+ *  throttling (real throttling is tested in the token-bucket spec). */
+export function mockSendRateLimiter(): MockOf<ISendRateLimiter> {
+  return {
+    tryConsume: vi.fn().mockReturnValue(true),
+    msUntilNextToken: vi.fn().mockReturnValue(0),
+  };
+}
+
 /**
  * Plain-value AppConfig for constructing SUTs that inject the config port.
  * Defaults mirror the dev env defaults; override per-test as needed.
@@ -130,6 +140,10 @@ export function mockAppConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     RECONNECT_MAX_DELAY_MS: 300000,
     OUTBOX_TTL_HOURS: 24,
     OUTBOX_PRUNE_INTERVAL_MS: 3600000,
+    // High ceiling in tests so the rate limiter never gets in the way unless a
+    // test overrides it to exercise throttling.
+    SEND_RATE_MAX: 1000,
+    SEND_RATE_WINDOW_MS: 60000,
     WEBHOOK_TIMEOUT_MS: 5000,
     WEBHOOK_MAX_ATTEMPTS: 4,
     WEBHOOK_RETRY_BASE_DELAY_MS: 1000,

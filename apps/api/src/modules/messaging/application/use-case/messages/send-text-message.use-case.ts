@@ -6,13 +6,12 @@ import { IOutboxRepository } from "@modules/messaging/domain/repository/outbox-r
 import { type MessageStatus } from "@modules/messaging/domain/value-object/message-status";
 import { AppConfig } from "@shared/provider/app-config.interface";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
-import {
-  ConflictError,
-  NotFoundError,
-  ServiceUnavailableError,
-} from "@shared/error";
+import type { ISendRateLimiter } from "@modules/messaging/domain/provider/send-rate-limiter.interface";
+import { ConflictError, NotFoundError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 import { SendTextInput } from "@modules/messaging/application/dto/message.dto";
+import { buildUserJid } from "@modules/messaging/domain/value-object/wa-jid";
+import { DrainOutboxUseCase } from "./drain-outbox.use-case";
 
 export interface SendTextOutput {
   messageId: string;
@@ -20,9 +19,13 @@ export interface SendTextOutput {
 }
 
 /**
- * The core send path. `202` means accepted + socket alive — NOT delivered (no
- * queue). The outbox row is written BEFORE the send so getMessage can answer a
- * resend. Idempotency is the DB unique's job, with a code fast-path for the
+ * The core send path. `202` means accepted — NOT delivered. The message goes
+ * out immediately only if the device is online AND under its per-device send
+ * budget; otherwise (offline, socket drops mid-send, or over the rate limit)
+ * the row is left QUEUED and the drain sends it later — offline waits for
+ * `session.connected`, over-budget is kicked to the drain now. Still a 202
+ * either way. The outbox row is written BEFORE the send so getMessage can answer
+ * a resend. Idempotency is the DB unique's job, with a code fast-path for the
  * common sequential replay.
  */
 @injectable()
@@ -38,6 +41,10 @@ export class SendTextMessageUseCase {
     private readonly config: AppConfig,
     @inject(DI_TOKENS.DomainEventBus)
     private readonly bus: IDomainEventBus,
+    @inject(DI_TOKENS.SendRateLimiter)
+    private readonly rateLimiter: ISendRateLimiter,
+    @inject(DrainOutboxUseCase)
+    private readonly drainOutbox: DrainOutboxUseCase,
   ) {}
 
   async execute(input: SendTextInput): Promise<SendTextOutput> {
@@ -52,14 +59,6 @@ export class SendTextMessageUseCase {
         ErrorCodes.DEVICE_NOT_FOUND,
       );
     }
-    if (!this.gateway.isConnected(device.id)) {
-      throw new ServiceUnavailableError(
-        "The device is not connected",
-        undefined,
-        ErrorCodes.DEVICE_OFFLINE,
-      );
-    }
-
     const existing = await this.outboxRepository.findByIdempotencyKey(
       device.id,
       input.idempotencyKey,
@@ -77,13 +76,23 @@ export class SendTextMessageUseCase {
       return { messageId: existing.id, status: "PENDING" };
     }
 
-    const jid = await this.gateway.resolveJid(device.id, input.phone);
-    if (!jid) {
-      throw new NotFoundError(
-        "This number is not on WhatsApp",
-        undefined,
-        ErrorCodes.NUMBER_NOT_ON_WHATSAPP,
-      );
+    // Online: resolve + validate the JID via WhatsApp (immediate "not on
+    // WhatsApp" feedback). Offline: construct it and defer that check to the
+    // drain — enqueue now, send when the device reconnects.
+    const online = this.gateway.isConnected(device.id);
+    let jid: string;
+    if (online) {
+      const resolved = await this.gateway.resolveJid(device.id, input.phone);
+      if (!resolved) {
+        throw new NotFoundError(
+          "This number is not on WhatsApp",
+          undefined,
+          ErrorCodes.NUMBER_NOT_ON_WHATSAPP,
+        );
+      }
+      jid = resolved;
+    } else {
+      jid = buildUserJid(input.phone);
     }
 
     const expiresAt = new Date(
@@ -116,6 +125,21 @@ export class SendTextMessageUseCase {
       throw error;
     }
 
+    // Offline → the row is queued; the drain sends it on reconnect. 202 now.
+    if (!online) {
+      return { messageId: message.id, status: "PENDING" };
+    }
+
+    // Over the per-device send budget → queue it (don't send now) and kick the
+    // drain, which paces itself on the same rate limiter and sends it once the
+    // budget frees. Single-flight, so this joins a running drain or starts one.
+    if (!this.rateLimiter.tryConsume(device.id)) {
+      // fire-and-forget; the drain has its own try/finally and never throws, but
+      // .catch keeps the contract explicit against future changes.
+      void this.drainOutbox.execute({ deviceId: device.id }).catch(() => {});
+      return { messageId: message.id, status: "PENDING" };
+    }
+
     let waMessageId: string;
     try {
       ({ waMessageId } = await this.gateway.sendText(
@@ -124,10 +148,16 @@ export class SendTextMessageUseCase {
         input.text,
       ));
     } catch (error) {
-      // The socket died between the isConnected check and the send, or Baileys
-      // rejected it — the message did NOT go out. Mark FAILED so the consumer
-      // sees it via GET. Best-effort: if marking FAILED also fails, surface the
-      // ORIGINAL send error.
+      // The socket dropped between the readiness check and the send: keep the
+      // row QUEUED (unsent) so the drain resends it on reconnect — a blip must
+      // not fail the send. A real send error (still connected) is terminal →
+      // FAILED so the consumer sees it via GET. (Narrow race: if the socket
+      // drops and reconnects between the throw and this check, a non-delivered
+      // message is marked FAILED instead of queued — vanishingly rare, and the
+      // consumer can retry.)
+      if (!this.gateway.isConnected(device.id)) {
+        return { messageId: message.id, status: "PENDING" };
+      }
       try {
         await this.outboxRepository.updateStatus(
           message.id,
@@ -150,14 +180,19 @@ export class SendTextMessageUseCase {
       messageId: message.id,
       phone: input.phone,
     });
-    // Stamp the waMessageId (bookkeeping for a getMessage resend). Best-effort:
-    // the message already delivered, so a stamp failure must NOT turn the
-    // caller's 202 into a 500 — swallow it. The row stays PENDING (truthful);
-    // only a future resend lookup for this waMessageId degrades.
+    // Stamp the waMessageId (bookkeeping for a getMessage resend). The message
+    // already delivered, so a stamp failure must NOT turn the caller's 202 into
+    // a 500. It also must NOT leave the row PENDING with no waMessageId — the
+    // reconnect drain would re-send it. Move it to SERVER_ACK (truthful: the
+    // gateway accepted it) so it's out of the queue. Best-effort throughout.
     try {
       await this.outboxRepository.setWaMessageId(message.id, waMessageId);
     } catch {
-      // swallow — the send already succeeded; never fail the caller on the stamp
+      await this.outboxRepository
+        .updateStatus(message.id, "SERVER_ACK")
+        .catch(() => {
+          // swallow — the send already succeeded; never fail the caller here
+        });
     }
     return { messageId: message.id, status: "PENDING" };
   }

@@ -1,5 +1,4 @@
 import makeWASocket, {
-  DisconnectReason,
   fetchLatestBaileysVersion,
   jidDecode,
   proto,
@@ -13,6 +12,7 @@ import { ServiceUnavailableError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 import { makePrismaAuthState } from "./prisma-auth-state";
 import { baseSocketConfig } from "./socket-config";
+import { classifyDisconnect, computeReconnectDelay } from "./reconnect-policy";
 
 export interface SessionManagerConfig {
   reconnectBaseDelayMs: number;
@@ -68,6 +68,16 @@ const mapMessageStatus = (
   }
 };
 
+// How long the cached WhatsApp Web version is trusted before a refresh. A
+// long-lived process must not pin an increasingly stale version that WhatsApp
+// eventually rejects.
+const WA_VERSION_TTL_MS = 6 * 60 * 60 * 1000;
+
+// Max consecutive 0-delay reconnects for `restartRequired` (the post-pairing
+// 515) before falling back to jittered backoff — a safety valve so a broken
+// session can't spin in a tight 0-delay reconnect loop.
+const MAX_IMMEDIATE_RECONNECTS = 5;
+
 // Owner of everything alive: the Map<deviceId, socket>. Translates the Baileys
 // `sock.ev` stream into DomainEvents on the bus and carries NO business rule
 // (that lives in the handle-session-* use cases). This file, socket-config.ts,
@@ -78,21 +88,42 @@ export const makeSessionManager = (
   const sockets = new Map<string, WASocket>();
   const openDevices = new Set<string>();
   const pending = new Set<string>();
+  // Consecutive failed reconnect attempts per device — drives the backoff.
+  // Reset to 0 on a successful `open` so a device that stabilizes recovers its
+  // FAST reconnect: a burst of early flaps must not pin it at the 5-min cap
+  // forever. Lives here (not in the socket closure) precisely so `open` can
+  // clear it across socket generations.
+  const reconnectAttempts = new Map<string, number>();
   // Last QR string emitted per device, for the GET /devices/:id/qr poll. Set on
   // a `qr` update, cleared once the socket opens / closes / logs out.
   const lastQr = new Map<string, string>();
   let shuttingDown = false;
 
+  // The WhatsApp Web version, refreshed on a TTL (WA_VERSION_TTL_MS). Re-fetch
+  // periodically, but fall back to the cached value if a refresh fails — a
+  // network blip must not break an otherwise-fine reconnect.
   let cachedVersion:
     | Awaited<ReturnType<typeof fetchLatestBaileysVersion>>["version"]
     | undefined;
+  let cachedVersionAt = 0;
   const resolveVersion = async (): Promise<typeof cachedVersion> => {
-    if (!cachedVersion)
-      cachedVersion = (await fetchLatestBaileysVersion()).version;
+    const now = Date.now();
+    if (!cachedVersion || now - cachedVersionAt > WA_VERSION_TTL_MS) {
+      try {
+        cachedVersion = (await fetchLatestBaileysVersion()).version;
+        cachedVersionAt = now;
+      } catch (error) {
+        if (!cachedVersion) throw error; // the first fetch must succeed
+        deps.logger.warn(
+          { error },
+          "failed to refresh WhatsApp version; using cached",
+        );
+      }
+    }
     return cachedVersion;
   };
 
-  const openSocket = async (deviceId: string, attempt = 0): Promise<void> => {
+  const openSocket = async (deviceId: string): Promise<void> => {
     // Reserve the slot SYNCHRONOUSLY, before any await. Otherwise two concurrent
     // opens both pass the `sockets.has` check and create a socket on the SAME
     // authState — two sockets, one Signal key store → corruption. Also bail if
@@ -162,6 +193,7 @@ export const makeSessionManager = (
           if (connection === "open") {
             openDevices.add(deviceId);
             lastQr.delete(deviceId);
+            reconnectAttempts.delete(deviceId); // stable again → reset backoff
             const identifier = sock.user?.id
               ? (jidDecode(sock.user.id)?.user ?? "")
               : "";
@@ -179,47 +211,112 @@ export const makeSessionManager = (
 
             if (shuttingDown) return;
 
-            if (
-              closeStatusCode(lastDisconnect?.error) ===
-              DisconnectReason.loggedOut
-            ) {
+            const statusCode = closeStatusCode(lastDisconnect?.error);
+            const decision = classifyDisconnect(statusCode);
+            const attempt = reconnectAttempts.get(deviceId) ?? 0;
+
+            // The one record of WHY a device dropped — the raw material for a
+            // "top causes of disconnection" report (until Onda 2 persists it).
+            deps.logger.warn(
+              {
+                deviceId,
+                statusCode,
+                reason: decision.reason,
+                attempt,
+                action: decision.action,
+              },
+              "whatsapp session closed",
+            );
+
+            // Pairing is gone (user unlinked / WhatsApp forced) → re-pair via
+            // QR, never reconnect.
+            if (decision.action === "logged-out") {
+              reconnectAttempts.delete(deviceId);
               deps.bus.publish({ type: "session.logged_out", deviceId });
               return;
             }
 
-            if (attempt === 0) {
-              deps.bus.publish({
-                type: "session.disconnected",
-                deviceId,
-                reason: "connection closed",
-              });
+            // Every non-logout drop marks the device disconnected, carrying the
+            // real reason. The webhook side debounces flaps and the DB update is
+            // idempotent, so publishing on each close is safe and yields honest
+            // status + observability.
+            deps.bus.publish({
+              type: "session.disconnected",
+              deviceId,
+              reason: decision.reason,
+            });
+
+            // Banned / protocol-mismatch → reconnecting just hammers a dead
+            // number. Stop; leave it DISCONNECTED with the reason logged.
+            if (decision.action === "stop") {
+              reconnectAttempts.delete(deviceId);
+              return;
             }
-            const delay = Math.min(
-              deps.config.reconnectBaseDelayMs * 2 ** attempt,
-              deps.config.reconnectMaxDelayMs,
-            );
+
+            // `restartRequired` (the post-pairing 515) reopens immediately —
+            // but only for the first few consecutive tries. If it keeps firing
+            // without ever reaching `open`, fall back to backoff so a broken
+            // session can't spin in a tight 0-delay loop. A successful open
+            // resets `attempt`, so the normal one-shot 515 never pays a delay.
+            const immediate =
+              decision.action === "reconnect-immediate" &&
+              attempt < MAX_IMMEDIATE_RECONNECTS;
+            const delay = immediate
+              ? 0
+              : computeReconnectDelay({
+                  attempt,
+                  baseMs: deps.config.reconnectBaseDelayMs,
+                  maxMs: deps.config.reconnectMaxDelayMs,
+                  random: Math.random(),
+                });
+            reconnectAttempts.set(deviceId, attempt + 1);
             // unref so a pending reconnect timer never keeps the event loop
             // alive during graceful shutdown (closeAll() sets shuttingDown, so
             // if it does fire, openSocket returns immediately). Without this the
             // process would wait up to RECONNECT_MAX_DELAY_MS to exit on SIGTERM.
-            setTimeout(
-              () => void openSocket(deviceId, attempt + 1),
-              delay,
-            ).unref();
+            setTimeout(() => void openSocket(deviceId), delay).unref();
           }
         },
       );
+    } catch (error) {
+      // Setup failed BEFORE the socket went live — a DB/authState error or a
+      // cold version fetch (network down at boot), both awaited before the
+      // socket is created/tracked. Don't orphan the device: log it and schedule
+      // a backoff retry so it self-heals when the dependency recovers. (Without
+      // this, a boot rehydration would surface as an unhandled rejection with
+      // no reopen.)
+      if (!shuttingDown) {
+        const attempt = reconnectAttempts.get(deviceId) ?? 0;
+        deps.logger.error(
+          { deviceId, error, attempt },
+          "failed to open WhatsApp socket; scheduling retry",
+        );
+        const delay = computeReconnectDelay({
+          attempt,
+          baseMs: deps.config.reconnectBaseDelayMs,
+          maxMs: deps.config.reconnectMaxDelayMs,
+          random: Math.random(),
+        });
+        reconnectAttempts.set(deviceId, attempt + 1);
+        setTimeout(() => void openSocket(deviceId), delay).unref();
+      }
     } finally {
       pending.delete(deviceId);
     }
   };
 
   return {
-    connect: (deviceId) => openSocket(deviceId),
+    // Explicit (re)connect: clear any stale backoff so a manual connect starts
+    // fresh from attempt 0.
+    connect: (deviceId) => {
+      reconnectAttempts.delete(deviceId);
+      return openSocket(deviceId);
+    },
 
     async disconnect(deviceId) {
       openDevices.delete(deviceId);
       lastQr.delete(deviceId);
+      reconnectAttempts.delete(deviceId);
       const sock = sockets.get(deviceId);
       sockets.delete(deviceId);
       sock?.end(undefined); // close, not logout
@@ -228,6 +325,7 @@ export const makeSessionManager = (
     async logout(deviceId) {
       openDevices.delete(deviceId);
       lastQr.delete(deviceId);
+      reconnectAttempts.delete(deviceId);
       const sock = sockets.get(deviceId);
       sockets.delete(deviceId);
       // Unpair. The in-process state above is already cleared, so a Baileys
@@ -285,6 +383,7 @@ export const makeSessionManager = (
       sockets.clear();
       openDevices.clear();
       lastQr.clear();
+      reconnectAttempts.clear();
     },
   };
 };

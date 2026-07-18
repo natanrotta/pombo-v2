@@ -15,14 +15,15 @@ const router = Router();
 // version actually went live ("unknown" when built outside the CI).
 const apiVersion = container.resolve<string>(DI_TOKENS.ApiVersion);
 
-// Unauthenticated health probe. With WHATSAPP_ENABLED=false the API reports
-// healthy without touching WhatsApp; when enabled it aggregates the registered
-// devices (503 if any is not CONNECTED).
+// Unauthenticated health probe. Reflects PROCESS health: 200 whenever the API
+// is serving. The WhatsApp gateway block (when enabled) reports how many
+// devices are connected as INFORMATION — a disconnected device does NOT flip
+// this to 503, so a transient drop can't trigger a restart → mass reconnect.
+// Container liveness is the separate always-200 `/healthz`.
 router.get("/health", async (_req, res) => {
   const gateway = await getGatewayHealth();
-  const status = gateway?.status === "degraded" ? 503 : 200;
-  return res.status(status).json({
-    ok: status === 200,
+  return res.status(200).json({
+    ok: true,
     version: apiVersion,
     uptimeSeconds: Math.round(process.uptime()),
     ...(gateway ? { gateway } : {}),

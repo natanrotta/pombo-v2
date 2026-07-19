@@ -20,7 +20,7 @@ describe("buildPostmanCollection", () => {
     expect(vars).toHaveProperty("phone", "");
   });
 
-  it("includes list-devices and all 7 send endpoints", () => {
+  it("includes list-devices and all 5 send endpoints", () => {
     const requests = collection.item.flatMap((folder) =>
       (folder.item ?? []).map((entry) => ({
         name: entry.name,
@@ -36,8 +36,6 @@ describe("buildPostmanCollection", () => {
       "send-audio",
       "send-video",
       "send-document",
-      "send-pix",
-      "send-list",
     ]) {
       expect(paths).toContain(`devices/{{deviceId}}/${type}`);
     }

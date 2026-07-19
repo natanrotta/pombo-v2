@@ -24,27 +24,14 @@
     "fileName": "File name",
     "fileNamePlaceholder": "document.pdf",
     "caption": "Caption",
-    "captionPlaceholder": "Optional caption",
-    "pixKey": "PIX key",
-    "pixKeyPlaceholder": "key@example.com",
-    "pixType": "Key type",
-    "listMessage": "Message",
-    "listMessagePlaceholder": "Type the list message...",
-    "listTitle": "List title",
-    "listButtonLabel": "Button label",
-    "options": "Options",
-    "optionTitle": "Title",
-    "optionId": "ID",
-    "optionDescription": "Description"
+    "captionPlaceholder": "Optional caption"
   },
   "type": {
     "text": "Text",
     "image": "Image",
     "audio": "Audio",
     "video": "Video",
-    "document": "Document",
-    "pix": "PIX button",
-    "list": "Option list"
+    "document": "Document"
   },
   "recent": {
     "title": "Recently sent",
@@ -61,18 +48,11 @@
     "deviceRequired": "Select a device.",
     "phoneInvalid": "Enter a valid number.",
     "textRequired": "Type a message.",
-    "mediaRequired": "Provide the media URL or base64.",
-    "pixKeyRequired": "Enter the PIX key.",
-    "listMessageRequired": "Type the list message.",
-    "listTitleRequired": "Enter the list title.",
-    "listButtonLabelRequired": "Enter the button label.",
-    "optionsRequired": "Add at least one option with a title and an ID."
+    "mediaRequired": "Provide the media URL or base64."
   },
   "actions": {
     "send": "Send",
-    "clear": "Clear",
-    "addOption": "Add option",
-    "removeOption": "Remove"
+    "clear": "Clear"
   },
   "result": {
     "title": "Send result",

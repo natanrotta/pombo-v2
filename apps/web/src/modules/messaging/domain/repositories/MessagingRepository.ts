@@ -4,8 +4,6 @@ import type {
   SendAudioInput,
   SendVideoInput,
   SendDocumentInput,
-  SendPixInput,
-  SendListInput,
   SendMessageResult,
   MessageStatusResult,
 } from "@/modules/messaging/domain/entities/Message";
@@ -28,7 +26,5 @@ export interface MessagingRepository {
     deviceId: string,
     input: SendDocumentInput,
   ): Promise<SendMessageResult>;
-  sendPix(deviceId: string, input: SendPixInput): Promise<SendMessageResult>;
-  sendList(deviceId: string, input: SendListInput): Promise<SendMessageResult>;
   getStatus(messageId: string): Promise<MessageStatusResult>;
 }

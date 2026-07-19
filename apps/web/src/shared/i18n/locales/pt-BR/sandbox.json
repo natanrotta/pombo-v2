@@ -24,27 +24,14 @@
     "fileName": "Nome do arquivo",
     "fileNamePlaceholder": "documento.pdf",
     "caption": "Legenda",
-    "captionPlaceholder": "Legenda opcional",
-    "pixKey": "Chave PIX",
-    "pixKeyPlaceholder": "chave@exemplo.com",
-    "pixType": "Tipo da chave",
-    "listMessage": "Mensagem",
-    "listMessagePlaceholder": "Digite a mensagem da lista...",
-    "listTitle": "Título da lista",
-    "listButtonLabel": "Texto do botão",
-    "options": "Opções",
-    "optionTitle": "Título",
-    "optionId": "ID",
-    "optionDescription": "Descrição"
+    "captionPlaceholder": "Legenda opcional"
   },
   "type": {
     "text": "Texto",
     "image": "Imagem",
     "audio": "Áudio",
     "video": "Vídeo",
-    "document": "Documento",
-    "pix": "Botão PIX",
-    "list": "Lista de opções"
+    "document": "Documento"
   },
   "recent": {
     "title": "Recém enviados",
@@ -61,18 +48,11 @@
     "deviceRequired": "Selecione um dispositivo.",
     "phoneInvalid": "Informe um número válido.",
     "textRequired": "Digite uma mensagem.",
-    "mediaRequired": "Informe a URL ou o base64 da mídia.",
-    "pixKeyRequired": "Informe a chave PIX.",
-    "listMessageRequired": "Digite a mensagem da lista.",
-    "listTitleRequired": "Informe o título da lista.",
-    "listButtonLabelRequired": "Informe o texto do botão.",
-    "optionsRequired": "Adicione ao menos uma opção com título e ID."
+    "mediaRequired": "Informe a URL ou o base64 da mídia."
   },
   "actions": {
     "send": "Enviar",
-    "clear": "Limpar",
-    "addOption": "Adicionar opção",
-    "removeOption": "Remover"
+    "clear": "Limpar"
   },
   "result": {
     "title": "Resultado do envio",

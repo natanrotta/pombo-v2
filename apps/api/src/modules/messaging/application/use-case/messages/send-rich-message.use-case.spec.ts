@@ -106,18 +106,6 @@ describe("SendRichMessageUseCase", () => {
     ["audio", { audio: "https://ex.com/a.ogg" }],
     ["video", { video: "https://ex.com/a.mp4", caption: "c" }],
     ["document", { document: "https://ex.com/a.pdf", fileName: "a.pdf" }],
-    ["pix", { pixKey: "chave@ex.com", type: "EMAIL" }],
-    [
-      "list",
-      {
-        message: "escolha",
-        optionList: {
-          title: "t",
-          buttonLabel: "ver",
-          options: [{ title: "o1", id: "1" }],
-        },
-      },
-    ],
   ] as const)(
     "dispatches %s to the matching gateway method",
     async (type, payload) => {

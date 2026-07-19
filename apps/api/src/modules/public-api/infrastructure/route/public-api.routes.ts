@@ -10,8 +10,6 @@ import {
   SendAudioPublicDTOSchema,
   SendVideoPublicDTOSchema,
   SendDocumentPublicDTOSchema,
-  SendPixButtonPublicDTOSchema,
-  SendOptionListPublicDTOSchema,
   PublicDeviceIdParamSchema,
 } from "@modules/public-api/application/dto/public-message.dto";
 
@@ -70,22 +68,6 @@ publicApiRoutes.post(
     body: SendDocumentPublicDTOSchema,
   }),
   asyncHandler(publicApiController.sendDocument),
-);
-publicApiRoutes.post(
-  "/devices/:deviceId/send-pix",
-  validateRequest({
-    params: PublicDeviceIdParamSchema,
-    body: SendPixButtonPublicDTOSchema,
-  }),
-  asyncHandler(publicApiController.sendPix),
-);
-publicApiRoutes.post(
-  "/devices/:deviceId/send-list",
-  validateRequest({
-    params: PublicDeviceIdParamSchema,
-    body: SendOptionListPublicDTOSchema,
-  }),
-  asyncHandler(publicApiController.sendList),
 );
 
 export { publicApiRoutes };

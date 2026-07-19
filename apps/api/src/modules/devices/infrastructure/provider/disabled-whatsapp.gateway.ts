@@ -72,14 +72,6 @@ export class DisabledWhatsAppGateway implements IWhatsAppGateway {
     throw this.disabled();
   }
 
-  async sendPixButton(): Promise<SendResult> {
-    throw this.disabled();
-  }
-
-  async sendOptionList(): Promise<SendResult> {
-    throw this.disabled();
-  }
-
   private disabled(): ServiceUnavailableError {
     return new ServiceUnavailableError(
       "The WhatsApp integration is disabled in this environment",

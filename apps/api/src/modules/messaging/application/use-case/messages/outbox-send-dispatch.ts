@@ -5,8 +5,6 @@ import {
   SendAudioPayload,
   SendVideoPayload,
   SendDocumentPayload,
-  SendPixButtonPayload,
-  SendOptionListPayload,
 } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import { OutboxMessage } from "@modules/messaging/domain/entity/outbox-message.entity";
 import { InternalError } from "@shared/error";
@@ -50,18 +48,6 @@ export function dispatchOutboxSend(
         deviceId,
         toJid,
         payload as SendDocumentPayload,
-      );
-    case "pix":
-      return gateway.sendPixButton(
-        deviceId,
-        toJid,
-        payload as SendPixButtonPayload,
-      );
-    case "list":
-      return gateway.sendOptionList(
-        deviceId,
-        toJid,
-        payload as SendOptionListPayload,
       );
   }
 }

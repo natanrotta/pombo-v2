@@ -127,17 +127,6 @@ describe("PublicApiController", () => {
     ["audio", { audio: "https://ex.com/a.ogg" }],
     ["video", { video: "https://ex.com/a.mp4" }],
     ["document", { document: "https://ex.com/a.pdf" }],
-    [
-      "list",
-      {
-        message: "escolha",
-        optionList: {
-          title: "t",
-          buttonLabel: "ver",
-          options: [{ title: "o", id: "1" }],
-        },
-      },
-    ],
   ] as const)(
     "send%s reuses the rich use case with the matching type → 202",
     async (label, body) => {
@@ -149,7 +138,6 @@ describe("PublicApiController", () => {
         audio: controller.sendAudio,
         video: controller.sendVideo,
         document: controller.sendDocument,
-        list: controller.sendList,
       };
 
       await handlers[label](req, res);
@@ -166,16 +154,15 @@ describe("PublicApiController", () => {
     },
   );
 
-  it("sendPix generates an Idempotency-Key when the header is absent", async () => {
+  it("sendImage generates an Idempotency-Key when the header is absent", async () => {
     mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
     const { req, res } = mockReqRes({ params: { deviceId: "d1" } });
     req.body = {
       phone: "5548999999999",
-      pixKey: "chave@ex.com",
-      type: "EMAIL",
+      image: "https://ex.com/a.png",
     };
 
-    await controller.sendPix(req, res);
+    await controller.sendImage(req, res);
 
     const call = mockExecute.mock.calls[0]![0] as {
       idempotencyKey: string;
@@ -183,8 +170,8 @@ describe("PublicApiController", () => {
       payload: unknown;
     };
     expect(call.idempotencyKey.length).toBeGreaterThan(0);
-    expect(call.type).toBe("pix");
-    expect(call.payload).toEqual({ pixKey: "chave@ex.com", type: "EMAIL" });
+    expect(call.type).toBe("image");
+    expect(call.payload).toEqual({ image: "https://ex.com/a.png" });
   });
 
   it("fails closed with API_TOKEN_MISSING when apiAuth is absent", async () => {

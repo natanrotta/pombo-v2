@@ -4,24 +4,9 @@ import {
   SendAudioDTOSchema,
   SendVideoDTOSchema,
   SendDocumentDTOSchema,
-  SendPixButtonDTOSchema,
-  SendOptionListDTOSchema,
   SendMessageParamSchema,
   MessageIdParamSchema,
 } from "./message.dto";
-
-const listBody = (optionCount: number) => ({
-  phone: "5548999999999",
-  message: "escolha",
-  optionList: {
-    title: "t",
-    buttonLabel: "ver",
-    options: Array.from({ length: optionCount }, (_, i) => ({
-      title: `o${i}`,
-      id: `${i}`,
-    })),
-  },
-});
 
 describe("message DTOs", () => {
   describe("SendMessageDTOSchema", () => {
@@ -94,39 +79,6 @@ describe("message DTOs", () => {
         document: "https://ex.com/a.pdf",
       });
       expect(parsed.fileName).toBeUndefined();
-    });
-
-    it("SendPixButtonDTOSchema accepts a valid key type", () => {
-      const parsed = SendPixButtonDTOSchema.parse({
-        phone: "5548999999999",
-        pixKey: "chave@ex.com",
-        type: "EMAIL",
-      });
-      expect(parsed.type).toBe("EMAIL");
-    });
-
-    it("SendPixButtonDTOSchema rejects an out-of-enum type (AC-3)", () => {
-      expect(() =>
-        SendPixButtonDTOSchema.parse({
-          phone: "5548999999999",
-          pixKey: "x",
-          type: "RANDOM",
-        }),
-      ).toThrow();
-    });
-
-    it("SendOptionListDTOSchema accepts 1–10 options", () => {
-      expect(
-        SendOptionListDTOSchema.parse(listBody(1)).optionList.options,
-      ).toHaveLength(1);
-      expect(
-        SendOptionListDTOSchema.parse(listBody(10)).optionList.options,
-      ).toHaveLength(10);
-    });
-
-    it("SendOptionListDTOSchema rejects 0 or >10 options (AC-4)", () => {
-      expect(() => SendOptionListDTOSchema.parse(listBody(0))).toThrow();
-      expect(() => SendOptionListDTOSchema.parse(listBody(11))).toThrow();
     });
   });
 

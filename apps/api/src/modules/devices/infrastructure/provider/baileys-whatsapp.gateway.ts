@@ -7,8 +7,6 @@ import {
   SendAudioPayload,
   SendVideoPayload,
   SendDocumentPayload,
-  SendPixButtonPayload,
-  SendOptionListPayload,
 } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
 import type { ILoggerProvider } from "@shared/provider/logger-provider.interface";
@@ -145,24 +143,6 @@ export class BaileysWhatsAppGateway implements IWhatsAppGateway {
   ): Promise<SendResult> {
     const manager = await this.getManager();
     return manager.sendDocument(deviceId, jid, payload);
-  }
-
-  async sendPixButton(
-    deviceId: string,
-    jid: string,
-    payload: SendPixButtonPayload,
-  ): Promise<SendResult> {
-    const manager = await this.getManager();
-    return manager.sendPixButton(deviceId, jid, payload);
-  }
-
-  async sendOptionList(
-    deviceId: string,
-    jid: string,
-    payload: SendOptionListPayload,
-  ): Promise<SendResult> {
-    const manager = await this.getManager();
-    return manager.sendOptionList(deviceId, jid, payload);
   }
 
   /** Composition-root helper: close all sockets on graceful shutdown. No-op if

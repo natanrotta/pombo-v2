@@ -4,8 +4,6 @@ import {
   audioBody,
   videoBody,
   documentBody,
-  pixButtonBody,
-  optionListBody,
 } from "@modules/messaging/application/dto/message.dto";
 
 // E.164: an optional leading +, a non-zero first digit, 8–15 digits total.
@@ -27,14 +25,6 @@ export const SendImagePublicDTOSchema = z.object({ phone, ...imageBody });
 export const SendAudioPublicDTOSchema = z.object({ phone, ...audioBody });
 export const SendVideoPublicDTOSchema = z.object({ phone, ...videoBody });
 export const SendDocumentPublicDTOSchema = z.object({ phone, ...documentBody });
-export const SendPixButtonPublicDTOSchema = z.object({
-  phone,
-  ...pixButtonBody,
-});
-export const SendOptionListPublicDTOSchema = z.object({
-  phone,
-  ...optionListBody,
-});
 
 export const PublicDeviceIdParamSchema = z.object({
   deviceId: z.string().uuid("Invalid device ID format"),

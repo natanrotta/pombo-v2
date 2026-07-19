@@ -6,8 +6,6 @@ import type {
   SendAudioInput,
   SendVideoInput,
   SendDocumentInput,
-  SendPixInput,
-  SendListInput,
   SendMessageResult,
   MessageStatusResult,
 } from "@/modules/messaging/domain/entities/Message";
@@ -55,14 +53,6 @@ export class HttpMessagingRepository implements MessagingRepository {
     input: SendDocumentInput,
   ): Promise<SendMessageResult> {
     return this.send(`/devices/${deviceId}/messages/document`, input);
-  }
-
-  sendPix(deviceId: string, input: SendPixInput): Promise<SendMessageResult> {
-    return this.send(`/devices/${deviceId}/messages/pix`, input);
-  }
-
-  sendList(deviceId: string, input: SendListInput): Promise<SendMessageResult> {
-    return this.send(`/devices/${deviceId}/messages/list`, input);
   }
 
   getStatus(messageId: string): Promise<MessageStatusResult> {

@@ -24,27 +24,14 @@
     "fileName": "Nombre del archivo",
     "fileNamePlaceholder": "documento.pdf",
     "caption": "Leyenda",
-    "captionPlaceholder": "Leyenda opcional",
-    "pixKey": "Clave PIX",
-    "pixKeyPlaceholder": "clave@ejemplo.com",
-    "pixType": "Tipo de clave",
-    "listMessage": "Mensaje",
-    "listMessagePlaceholder": "Escribe el mensaje de la lista...",
-    "listTitle": "Título de la lista",
-    "listButtonLabel": "Texto del botón",
-    "options": "Opciones",
-    "optionTitle": "Título",
-    "optionId": "ID",
-    "optionDescription": "Descripción"
+    "captionPlaceholder": "Leyenda opcional"
   },
   "type": {
     "text": "Texto",
     "image": "Imagen",
     "audio": "Audio",
     "video": "Video",
-    "document": "Documento",
-    "pix": "Botón PIX",
-    "list": "Lista de opciones"
+    "document": "Documento"
   },
   "recent": {
     "title": "Enviados recientemente",
@@ -61,18 +48,11 @@
     "deviceRequired": "Selecciona un dispositivo.",
     "phoneInvalid": "Ingresa un número válido.",
     "textRequired": "Escribe un mensaje.",
-    "mediaRequired": "Indica la URL o el base64 de la media.",
-    "pixKeyRequired": "Ingresa la clave PIX.",
-    "listMessageRequired": "Escribe el mensaje de la lista.",
-    "listTitleRequired": "Ingresa el título de la lista.",
-    "listButtonLabelRequired": "Ingresa el texto del botón.",
-    "optionsRequired": "Agrega al menos una opción con título e ID."
+    "mediaRequired": "Indica la URL o el base64 de la media."
   },
   "actions": {
     "send": "Enviar",
-    "clear": "Limpiar",
-    "addOption": "Agregar opción",
-    "removeOption": "Quitar"
+    "clear": "Limpiar"
   },
   "result": {
     "title": "Resultado del envío",

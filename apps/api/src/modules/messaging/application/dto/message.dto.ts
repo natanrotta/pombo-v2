@@ -1,8 +1,4 @@
 import { z } from "zod";
-import {
-  PIX_KEY_TYPES,
-  type PixKeyType,
-} from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import { type RichMessageType } from "@modules/messaging/domain/value-object/message-type";
 
 export const SendMessageDTOSchema = z.object({
@@ -22,7 +18,7 @@ export type SendMessageDTO = z.infer<typeof SendMessageDTOSchema>;
 export type SendMessageParam = z.infer<typeof SendMessageParamSchema>;
 export type MessageIdParam = z.infer<typeof MessageIdParamSchema>;
 
-// ── Rich send DTOs (image / audio / video / document / pix / list) ───────────
+// ── Rich send DTOs (image / audio / video / document) ────────────────────────
 // Media fields are strings — a URL or base64 (the gateway resolves either), so
 // they are validated as non-empty, not as URLs. Shared payload shapes below are
 // reused by the public API DTOs (only the phone rule differs there).
@@ -38,34 +34,11 @@ export const documentBody = {
   fileName: nonEmpty.optional(),
   caption: nonEmpty.optional(),
 };
-export const pixButtonBody = {
-  pixKey: nonEmpty,
-  type: z.enum(PIX_KEY_TYPES as [PixKeyType, ...PixKeyType[]]),
-};
-export const optionListBody = {
-  message: nonEmpty,
-  optionList: z.object({
-    title: nonEmpty,
-    buttonLabel: nonEmpty,
-    options: z
-      .array(
-        z.object({
-          title: nonEmpty,
-          description: nonEmpty.optional(),
-          id: nonEmpty,
-        }),
-      )
-      .min(1)
-      .max(10),
-  }),
-};
 
 export const SendImageDTOSchema = z.object({ phone, ...imageBody });
 export const SendAudioDTOSchema = z.object({ phone, ...audioBody });
 export const SendVideoDTOSchema = z.object({ phone, ...videoBody });
 export const SendDocumentDTOSchema = z.object({ phone, ...documentBody });
-export const SendPixButtonDTOSchema = z.object({ phone, ...pixButtonBody });
-export const SendOptionListDTOSchema = z.object({ phone, ...optionListBody });
 
 /** Input carried into the send use case. `accountId` (tenant scope) + device id
  *  + idempotency key are added by the controller from `req.auth`, the route and

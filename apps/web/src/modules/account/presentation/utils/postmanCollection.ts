@@ -138,23 +138,6 @@ export function buildPostmanCollection(baseUrl: string): PostmanCollection {
             fileName: "document.pdf",
             caption: "Optional caption",
           }),
-          post("Send PIX button", "send-pix", {
-            phone: "{{phone}}",
-            pixKey: "your-pix-key@example.com",
-            type: "EMAIL",
-          }),
-          post("Send option list", "send-list", {
-            phone: "{{phone}}",
-            message: "Pick an option",
-            optionList: {
-              title: "Options",
-              buttonLabel: "View options",
-              options: [
-                { title: "Option 1", description: "First option", id: "1" },
-                { title: "Option 2", description: "Second option", id: "2" },
-              ],
-            },
-          }),
         ],
       },
     ],

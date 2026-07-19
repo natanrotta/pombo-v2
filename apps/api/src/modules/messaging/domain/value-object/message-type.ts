@@ -4,8 +4,7 @@
  * kind stores its validated body in `payload` (JSON) and is dispatched to the
  * matching gateway method by `dispatchOutboxSend`.
  */
-export type MessageType =
-  "text" | "image" | "audio" | "video" | "document" | "pix" | "list";
+export type MessageType = "text" | "image" | "audio" | "video" | "document";
 
 /** Every non-text kind — the ones carried by `SendRichMessageUseCase`. */
 export const RICH_MESSAGE_TYPES = [
@@ -13,8 +12,6 @@ export const RICH_MESSAGE_TYPES = [
   "audio",
   "video",
   "document",
-  "pix",
-  "list",
 ] as const;
 
 export type RichMessageType = (typeof RICH_MESSAGE_TYPES)[number];

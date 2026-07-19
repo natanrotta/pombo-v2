@@ -11,7 +11,7 @@ CREATE TYPE "device_status" AS ENUM ('DISCONNECTED', 'CONNECTING', 'QR_PENDING',
 CREATE TYPE "message_status" AS ENUM ('PENDING', 'SERVER_ACK', 'DELIVERY_ACK', 'READ', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "outbox_message_type" AS ENUM ('text', 'image', 'audio', 'video', 'document', 'pix', 'list');
+CREATE TYPE "outbox_message_type" AS ENUM ('text', 'image', 'audio', 'video', 'document');
 
 -- CreateTable
 CREATE TABLE "account" (

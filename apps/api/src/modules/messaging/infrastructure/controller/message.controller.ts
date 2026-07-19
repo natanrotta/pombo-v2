@@ -10,10 +10,9 @@ import { BadRequestError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
 /**
- * Messaging endpoints (send text / image / audio / video / document / PIX button
- * / option list, and poll a message's status). All sit behind the JWT auth
- * middleware — see `message.routes.ts`. `202` = accepted + socket alive, NOT
- * delivered.
+ * Messaging endpoints (send text / image / audio / video / document, and poll a
+ * message's status). All sit behind the JWT auth middleware — see
+ * `message.routes.ts`. `202` = accepted + socket alive, NOT delivered.
  */
 export class MessageController {
   async send(req: Request, res: Response): Promise<Response> {
@@ -39,10 +38,6 @@ export class MessageController {
     this.sendRich(req, res, "video");
   sendDocument = (req: Request, res: Response): Promise<Response> =>
     this.sendRich(req, res, "document");
-  sendPix = (req: Request, res: Response): Promise<Response> =>
-    this.sendRich(req, res, "pix");
-  sendList = (req: Request, res: Response): Promise<Response> =>
-    this.sendRich(req, res, "list");
 
   /** Shared rich-send path — the body was validated by the route's per-type Zod
    *  schema, so `phone` + the type-specific payload are already well-formed. */

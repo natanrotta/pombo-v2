@@ -95,29 +95,6 @@ describe("MessageController", () => {
     });
   });
 
-  it("sendList forwards the option list payload with the list type", async () => {
-    mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
-    const { req, res } = mockReqRes({ params: { id: "d1" } });
-    req.__setHeader("Idempotency-Key", "key-1");
-    const optionList = {
-      title: "t",
-      buttonLabel: "ver",
-      options: [{ title: "o", id: "1" }],
-    };
-    req.body = { phone: "5548", message: "escolha", optionList };
-
-    await controller.sendList(req, res);
-
-    expect(mockExecute).toHaveBeenCalledWith({
-      accountId: "acc-1",
-      deviceId: "d1",
-      phone: "5548",
-      idempotencyKey: "key-1",
-      type: "list",
-      payload: { message: "escolha", optionList },
-    });
-  });
-
   it.each([
     ["audio", { audio: "https://ex.com/a.ogg" }],
     ["video", { video: "https://ex.com/a.mp4" }],
@@ -148,25 +125,6 @@ describe("MessageController", () => {
       expect(status).toHaveBeenCalledWith(202);
     },
   );
-
-  it("sendPix forwards the pix payload with the pix type", async () => {
-    mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
-    const { req, res, status } = mockReqRes({ params: { id: "d1" } });
-    req.__setHeader("Idempotency-Key", "key-1");
-    req.body = { phone: "5548", pixKey: "chave@ex.com", type: "EMAIL" };
-
-    await controller.sendPix(req, res);
-
-    expect(mockExecute).toHaveBeenCalledWith({
-      accountId: "acc-1",
-      deviceId: "d1",
-      phone: "5548",
-      idempotencyKey: "key-1",
-      type: "pix",
-      payload: { pixKey: "chave@ex.com", type: "EMAIL" },
-    });
-    expect(status).toHaveBeenCalledWith(202);
-  });
 
   it("sendImage throws BadRequest when the Idempotency-Key header is missing", async () => {
     const { req, res } = mockReqRes({ params: { id: "d1" } });

@@ -12,8 +12,6 @@ import {
   SendAudioDTOSchema,
   SendVideoDTOSchema,
   SendDocumentDTOSchema,
-  SendPixButtonDTOSchema,
-  SendOptionListDTOSchema,
   SendMessageParamSchema,
   MessageIdParamSchema,
 } from "@modules/messaging/application/dto/message.dto";
@@ -59,22 +57,6 @@ messageRoutes.post(
     body: SendDocumentDTOSchema,
   }),
   asyncHandler(messageController.sendDocument),
-);
-messageRoutes.post(
-  "/devices/:id/messages/pix",
-  validateRequest({
-    params: SendMessageParamSchema,
-    body: SendPixButtonDTOSchema,
-  }),
-  asyncHandler(messageController.sendPix),
-);
-messageRoutes.post(
-  "/devices/:id/messages/list",
-  validateRequest({
-    params: SendMessageParamSchema,
-    body: SendOptionListDTOSchema,
-  }),
-  asyncHandler(messageController.sendList),
 );
 
 messageRoutes.get(

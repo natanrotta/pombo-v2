@@ -8,8 +8,6 @@ import type {
   SendAudioInput,
   SendVideoInput,
   SendDocumentInput,
-  SendPixInput,
-  SendListInput,
   MessageStatus,
 } from "@/modules/messaging/domain/entities/Message";
 
@@ -19,9 +17,7 @@ export type SendMessageArgs =
   | { deviceId: string; type: "image"; input: SendImageInput }
   | { deviceId: string; type: "audio"; input: SendAudioInput }
   | { deviceId: string; type: "video"; input: SendVideoInput }
-  | { deviceId: string; type: "document"; input: SendDocumentInput }
-  | { deviceId: string; type: "pix"; input: SendPixInput }
-  | { deviceId: string; type: "list"; input: SendListInput };
+  | { deviceId: string; type: "document"; input: SendDocumentInput };
 
 /**
  * Fire-and-report send used by the Sandbox. Dispatches to the matching
@@ -44,10 +40,6 @@ export function useSendMessage() {
           return repo.sendVideo(args.deviceId, args.input);
         case "document":
           return repo.sendDocument(args.deviceId, args.input);
-        case "pix":
-          return repo.sendPix(args.deviceId, args.input);
-        case "list":
-          return repo.sendList(args.deviceId, args.input);
       }
     },
     onError: (error) => handleError(error),

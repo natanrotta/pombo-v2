@@ -3,8 +3,6 @@ import {
   SendImagePublicDTOSchema,
   SendAudioPublicDTOSchema,
   SendVideoPublicDTOSchema,
-  SendPixButtonPublicDTOSchema,
-  SendOptionListPublicDTOSchema,
   PublicDeviceIdParamSchema,
 } from "./public-message.dto";
 
@@ -87,33 +85,6 @@ describe("public message DTOs", () => {
       ).toBe("https://ex.com/a.mp4");
       expect(() =>
         SendVideoPublicDTOSchema.parse({ phone: "5548999999999" }),
-      ).toThrow();
-    });
-
-    it("SendPixButtonPublicDTOSchema rejects an out-of-enum key type", () => {
-      expect(() =>
-        SendPixButtonPublicDTOSchema.parse({
-          phone: "5548999999999",
-          pixKey: "x",
-          type: "RANDOM",
-        }),
-      ).toThrow();
-    });
-
-    it("SendOptionListPublicDTOSchema rejects >10 options", () => {
-      expect(() =>
-        SendOptionListPublicDTOSchema.parse({
-          phone: "5548999999999",
-          message: "m",
-          optionList: {
-            title: "t",
-            buttonLabel: "ver",
-            options: Array.from({ length: 11 }, (_, i) => ({
-              title: `o${i}`,
-              id: `${i}`,
-            })),
-          },
-        }),
       ).toThrow();
     });
   });

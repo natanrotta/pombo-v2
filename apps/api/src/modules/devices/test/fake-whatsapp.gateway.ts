@@ -5,8 +5,6 @@ import {
   SendAudioPayload,
   SendVideoPayload,
   SendDocumentPayload,
-  SendPixButtonPayload,
-  SendOptionListPayload,
 } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import { type RichMessageType } from "@modules/messaging/domain/value-object/message-type";
 
@@ -127,22 +125,6 @@ export class FakeWhatsAppGateway implements IWhatsAppGateway {
     payload: SendDocumentPayload,
   ): Promise<SendResult> {
     return this.recordRich(deviceId, jid, "document", payload);
-  }
-
-  async sendPixButton(
-    deviceId: string,
-    jid: string,
-    payload: SendPixButtonPayload,
-  ): Promise<SendResult> {
-    return this.recordRich(deviceId, jid, "pix", payload);
-  }
-
-  async sendOptionList(
-    deviceId: string,
-    jid: string,
-    payload: SendOptionListPayload,
-  ): Promise<SendResult> {
-    return this.recordRich(deviceId, jid, "list", payload);
   }
 
   private recordRich(

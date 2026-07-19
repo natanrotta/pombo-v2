@@ -14,17 +14,6 @@ export type SendTextResult = SendResult;
 
 // ── Rich send payloads (URL or base64 strings for media) ────────────────────
 
-/** PIX key kinds accepted by the PIX-button send (Z-API parity). `EVP` is the
- *  random key. */
-export type PixKeyType = "CPF" | "CNPJ" | "PHONE" | "EMAIL" | "EVP";
-export const PIX_KEY_TYPES: readonly PixKeyType[] = [
-  "CPF",
-  "CNPJ",
-  "PHONE",
-  "EMAIL",
-  "EVP",
-];
-
 export interface SendImagePayload {
   /** Image URL or base64 (optionally a data URL). */
   image: string;
@@ -45,28 +34,6 @@ export interface SendDocumentPayload {
   document: string;
   fileName?: string;
   caption?: string;
-}
-
-export interface SendPixButtonPayload {
-  pixKey: string;
-  type: PixKeyType;
-}
-
-export interface OptionListItem {
-  title: string;
-  description?: string;
-  id: string;
-}
-
-export interface OptionList {
-  title: string;
-  buttonLabel: string;
-  options: OptionListItem[];
-}
-
-export interface SendOptionListPayload {
-  message: string;
-  optionList: OptionList;
 }
 
 export interface IWhatsAppGateway {
@@ -99,16 +66,6 @@ export interface IWhatsAppGateway {
     deviceId: string,
     jid: string,
     payload: SendDocumentPayload,
-  ): Promise<SendResult>;
-  sendPixButton(
-    deviceId: string,
-    jid: string,
-    payload: SendPixButtonPayload,
-  ): Promise<SendResult>;
-  sendOptionList(
-    deviceId: string,
-    jid: string,
-    payload: SendOptionListPayload,
   ): Promise<SendResult>;
   /** True when the gateway is live (WHATSAPP_ENABLED). The disabled impl
    *  returns false so use cases can short-circuit with WA_GATEWAY_DISABLED. */

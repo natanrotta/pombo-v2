@@ -66,10 +66,6 @@ export class PublicApiController {
     this.sendRich(req, res, "video");
   sendDocument = (req: Request, res: Response): Promise<Response> =>
     this.sendRich(req, res, "document");
-  sendPix = (req: Request, res: Response): Promise<Response> =>
-    this.sendRich(req, res, "pix");
-  sendList = (req: Request, res: Response): Promise<Response> =>
-    this.sendRich(req, res, "list");
 
   /** Shared rich-send path — reuses the internal `SendRichMessageUseCase`, same
    *  as `sendText`. The body was validated by the route's per-type Zod schema. */

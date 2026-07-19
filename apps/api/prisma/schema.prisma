@@ -51,8 +51,6 @@ enum outbox_message_type {
   audio
   video
   document
-  pix
-  list
 }
 
 // ============================================================
@@ -260,7 +258,7 @@ model outbox_message {
   to_jid          String
   type            outbox_message_type @default(text)
   /// Nullable: only `text` messages populate this. Rich types (image, audio,
-  /// video, document, pix, list) store their body in `payload` instead.
+  /// video, document) store their body in `payload` instead.
   text            String?
   /// Structured body for non-text messages (the validated send payload). Null
   /// for `text`. The drain reads it back to replay the original send.

@@ -40,8 +40,8 @@ function stableStringify(value: unknown): string {
 }
 
 /**
- * The rich (non-text) send path: image, audio, video, document, PIX button and
- * option list. Byte-for-byte the same outbox contract as `SendTextMessageUseCase`
+ * The rich (non-text) send path: image, audio, video and document.
+ * Byte-for-byte the same outbox contract as `SendTextMessageUseCase`
  * — write the row BEFORE the send, 202 = accepted (offline → queued for the
  * reconnect drain; over-budget → queued + drain kicked), idempotency guarded by
  * the DB unique with a code fast-path for the sequential replay. The only

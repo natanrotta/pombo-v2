@@ -5,7 +5,7 @@ describe("renderPasswordResetEmail", () => {
     userName: "Dra. Marina",
     resetUrl: "https://app.pombo.com/reset/TOKEN123",
     ttlMinutes: 30,
-    logoUrl: "https://app.pombo.com/pombo-icon.png",
+    logoUrl: "https://app.pombo.com/pombo-icon.svg",
   };
 
   describe("locale resolution", () => {
@@ -67,9 +67,7 @@ describe("renderPasswordResetEmail", () => {
 
     it("renders the Pombo logo image with the absolute URL", () => {
       const { html } = renderPasswordResetEmail(baseVars);
-      expect(html).toContain(
-        'src="https://app.pombo.com/pombo-icon.png"',
-      );
+      expect(html).toContain('src="https://app.pombo.com/pombo-icon.svg"');
       expect(html).toContain('alt="Pombo"');
     });
   });

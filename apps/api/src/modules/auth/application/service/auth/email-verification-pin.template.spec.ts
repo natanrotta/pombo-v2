@@ -5,7 +5,7 @@ describe("renderEmailVerificationPinEmail", () => {
     userName: "João",
     pin: "482913",
     ttlMinutes: 10,
-    logoUrl: "http://localhost:3000/pombo-icon.png",
+    logoUrl: "http://localhost:3000/pombo-icon.svg",
   };
 
   describe("locale resolution", () => {
@@ -67,9 +67,7 @@ describe("renderEmailVerificationPinEmail", () => {
 
     it("renders the Pombo logo image with the absolute URL", () => {
       const { html } = renderEmailVerificationPinEmail(baseVars);
-      expect(html).toContain(
-        'src="http://localhost:3000/pombo-icon.png"',
-      );
+      expect(html).toContain('src="http://localhost:3000/pombo-icon.svg"');
       expect(html).toContain('alt="Pombo"');
     });
   });

@@ -12,7 +12,7 @@
  *   7. Stop the API.
  *   8. Tear the stack down again.
  *
- * Dev backend on :3333/:5432/:6379 is never touched — you can run this while
+ * Dev backend on :4444/:5432/:6379 is never touched — you can run this while
  * `yarn start` is up.
  *
  * Flags

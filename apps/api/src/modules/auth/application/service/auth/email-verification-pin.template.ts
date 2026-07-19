@@ -18,7 +18,7 @@ export interface EmailVerificationPinVars {
   pin: string;
   /** PIN TTL in minutes — surfaced in the copy so users know the window. */
   ttlMinutes: number;
-  /** Absolute URL to the Pombo logo (e.g. `${FRONTEND_URL}/pombo-icon.png`).
+  /** Absolute URL to the Pombo logo (e.g. `${FRONTEND_URL}/pombo-icon.svg`).
    *  Must be absolute — e-mail clients can't resolve app-relative paths. */
   logoUrl: string;
   /** Defaults to pt-BR when omitted or unknown. */

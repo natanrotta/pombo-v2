@@ -12,8 +12,8 @@ Authoritative source for Playwright end-to-end tests in this project. Specialist
 |---|---|---|
 | Runner | `@playwright/test` v1.58+ | `apps/web/playwright.config.ts` |
 | App under test | React 18 + Chakra UI 2.8 + React Router v6 + TanStack Query v5 | `apps/web/src/` |
-| Web dev server | Vite on `:3000` (proxies `/api` → `:3333`) | `apps/web/vite.config.ts` |
-| API | Express + Prisma on `:3333` (real backend, no mocks) | `apps/api/src/main.ts` |
+| Web dev server | Vite on `:4000` (proxies `/api` → `:4444`) | `apps/web/vite.config.ts` |
+| API | Express + Prisma on `:4444` (real backend, no mocks) | `apps/api/src/main.ts` |
 | Database | Postgres seeded with the demo user (`felipe@pombo.dev` is the E2E test user) | `apps/api/prisma/seed.ts` |
 | Auth | JWT in `localStorage`, persisted via `storageState` | `apps/web/e2e/global.setup.ts` |
 | API client (test) | `fetch`-based, authenticated as the seed user | `apps/web/e2e/fixtures/api-client.ts` |
@@ -29,15 +29,15 @@ Authoritative source for Playwright end-to-end tests in this project. Specialist
 The E2E suite is **fire-and-forget**: a single command brings up an
 ephemeral stack (Postgres + Redis + API), runs the tests, and tears it all
 down at the end. The dev backend (`yarn start`) is never touched — you can
-keep developing on `:3000`/`:3333` while the E2E suite runs in parallel on
+keep developing on `:4000`/`:4444` while the E2E suite runs in parallel on
 `:3001`/`:3334`.
 
 ```
                     Dev (yarn start)        E2E (yarn test:e2e)
 Postgres            :5432                   :5433  (tmpfs / RAM, destroyed at end)
 Redis               :6379                   :6380  (destroyed at end)
-API                 :3333                   :3334  (spawned per run)
-Web                 :3000                   :3001  (Vite proxies /api → :3334)
+API                 :4444                   :3334  (spawned per run)
+Web                 :4000                   :3001  (Vite proxies /api → :3334)
 ```
 
 ### One command for the full cycle

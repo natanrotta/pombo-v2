@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 220" width="1024" height="939" role="img" aria-label="Passarinho">
+  <defs>
+    <linearGradient id="a_body" x1="0.2" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#37c974"></stop>
+      <stop offset="1" stop-color="#1b944e"></stop>
+    </linearGradient>
+    <radialGradient id="a_belly" cx="0.4" cy="0.38" r="0.75">
+      <stop offset="0" stop-color="#9fe6b7"></stop>
+      <stop offset="1" stop-color="#9fe6b7" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id="a_beak" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb443"></stop>
+      <stop offset="1" stop-color="#ea7f1c"></stop>
+    </linearGradient>
+  </defs>
+  <path d="M58 158 L18 202 L74 180 Z" fill="#178040"></path>
+  <ellipse cx="110" cy="128" rx="76" ry="66" fill="url(#a_body)"></ellipse>
+  <circle cx="162" cy="82" r="44" fill="url(#a_body)"></circle>
+  <ellipse cx="80" cy="150" rx="42" ry="46" fill="url(#a_belly)"></ellipse>
+  <path d="M150 100 q46 4 44 64 q-34 26 -78 6 q-10 -54 34 -70 Z" fill="#127238" opacity="0.5"></path>
+  <path d="M199 76 L236 90 L199 104 Z" fill="url(#a_beak)"></path>
+  <circle cx="174" cy="72" r="16" fill="#ffffff"></circle>
+  <circle cx="178" cy="73" r="7.5" fill="#123a22"></circle>
+  <circle cx="175" cy="69" r="2.6" fill="#ffffff"></circle>
+  <rect x="96" y="190" width="6" height="20" rx="3" fill="#e8862a"></rect>
+  <rect x="122" y="190" width="6" height="20" rx="3" fill="#e8862a"></rect>
+</svg>

@@ -3,6 +3,7 @@ import { Avatar, Flex, IconButton, Image, Text } from "@chakra-ui/react";
 import { FiMenu } from "@/shared/components/icons";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/modules/auth";
+import pomboIcon from "@assets/pombo-icon.svg";
 
 interface MobileHeaderProps {
   onOpenSidebar: () => void;
@@ -39,7 +40,7 @@ export const MobileHeader = memo(function MobileHeader({ onOpenSidebar }: Mobile
         />
         <Flex align="center" gap={2}>
           <Image
-            src="/pombo-icon.png"
+            src={pomboIcon}
             alt="Pombo"
             w={7}
             h={7}

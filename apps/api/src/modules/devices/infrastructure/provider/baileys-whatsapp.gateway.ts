@@ -2,7 +2,13 @@ import { inject, injectable } from "tsyringe";
 import { DI_TOKENS } from "@core/container/tokens";
 import {
   IWhatsAppGateway,
-  SendTextResult,
+  SendResult,
+  SendImagePayload,
+  SendAudioPayload,
+  SendVideoPayload,
+  SendDocumentPayload,
+  SendPixButtonPayload,
+  SendOptionListPayload,
 } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
 import type { ILoggerProvider } from "@shared/provider/logger-provider.interface";
@@ -100,9 +106,63 @@ export class BaileysWhatsAppGateway implements IWhatsAppGateway {
     deviceId: string,
     jid: string,
     text: string,
-  ): Promise<SendTextResult> {
+  ): Promise<SendResult> {
     const manager = await this.getManager();
     return manager.sendText(deviceId, jid, text);
+  }
+
+  async sendImage(
+    deviceId: string,
+    jid: string,
+    payload: SendImagePayload,
+  ): Promise<SendResult> {
+    const manager = await this.getManager();
+    return manager.sendImage(deviceId, jid, payload);
+  }
+
+  async sendAudio(
+    deviceId: string,
+    jid: string,
+    payload: SendAudioPayload,
+  ): Promise<SendResult> {
+    const manager = await this.getManager();
+    return manager.sendAudio(deviceId, jid, payload);
+  }
+
+  async sendVideo(
+    deviceId: string,
+    jid: string,
+    payload: SendVideoPayload,
+  ): Promise<SendResult> {
+    const manager = await this.getManager();
+    return manager.sendVideo(deviceId, jid, payload);
+  }
+
+  async sendDocument(
+    deviceId: string,
+    jid: string,
+    payload: SendDocumentPayload,
+  ): Promise<SendResult> {
+    const manager = await this.getManager();
+    return manager.sendDocument(deviceId, jid, payload);
+  }
+
+  async sendPixButton(
+    deviceId: string,
+    jid: string,
+    payload: SendPixButtonPayload,
+  ): Promise<SendResult> {
+    const manager = await this.getManager();
+    return manager.sendPixButton(deviceId, jid, payload);
+  }
+
+  async sendOptionList(
+    deviceId: string,
+    jid: string,
+    payload: SendOptionListPayload,
+  ): Promise<SendResult> {
+    const manager = await this.getManager();
+    return manager.sendOptionList(deviceId, jid, payload);
   }
 
   /** Composition-root helper: close all sockets on graceful shutdown. No-op if

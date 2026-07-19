@@ -5,6 +5,7 @@ import {
   CreateOutboxData,
 } from "@modules/messaging/domain/repository/outbox-repository.interface";
 import { type MessageStatus } from "@modules/messaging/domain/value-object/message-status";
+import { type MessageType } from "@modules/messaging/domain/value-object/message-type";
 import { ConflictError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
@@ -13,7 +14,9 @@ interface Row {
   deviceId: string;
   idempotencyKey: string;
   toJid: string;
-  text: string;
+  type: MessageType;
+  text: string | null;
+  payload: unknown | null;
   waMessageId: string | null;
   status: MessageStatus;
   failureReason: string | null;
@@ -72,7 +75,9 @@ export class InMemoryOutboxRepository implements IOutboxRepository {
       deviceId: data.deviceId,
       idempotencyKey: data.idempotencyKey,
       toJid: data.toJid,
-      text: data.text,
+      type: data.type ?? "text",
+      text: data.text ?? null,
+      payload: data.payload ?? null,
       waMessageId: null,
       status: "PENDING",
       failureReason: null,

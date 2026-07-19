@@ -1,11 +1,17 @@
 import { OutboxMessage } from "../entity/outbox-message.entity";
 import { type MessageStatus } from "../value-object/message-status";
+import { type MessageType } from "../value-object/message-type";
 
 export interface CreateOutboxData {
   deviceId: string;
   idempotencyKey: string;
   toJid: string;
-  text: string;
+  /** Defaults to `text` when omitted — keeps the text send path unchanged. */
+  type?: MessageType;
+  /** Set for `text` messages. */
+  text?: string | null;
+  /** Set for rich (non-text) messages — the validated send body. */
+  payload?: unknown | null;
   expiresAt: Date;
 }
 

@@ -1,7 +1,14 @@
 import {
   IWhatsAppGateway,
-  SendTextResult,
+  SendResult,
+  SendImagePayload,
+  SendAudioPayload,
+  SendVideoPayload,
+  SendDocumentPayload,
+  SendPixButtonPayload,
+  SendOptionListPayload,
 } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
+import { type RichMessageType } from "@modules/messaging/domain/value-object/message-type";
 
 /**
  * In-memory WhatsApp gateway for specs — no real socket. Records calls and lets
@@ -13,6 +20,15 @@ export class FakeWhatsAppGateway implements IWhatsAppGateway {
   public connectCalls: string[] = [];
   public logoutCalls: string[] = [];
   public sentTexts: { deviceId: string; jid: string; text: string }[] = [];
+  /** Every rich (non-text) send, in order — assert the dispatched `type`. */
+  public sentRich: {
+    deviceId: string;
+    jid: string;
+    type: RichMessageType;
+    payload: unknown;
+  }[] = [];
+  /** Set a type to force its send to throw (drives the FAILED-path specs). */
+  public failTypes = new Set<RichMessageType | "text">();
 
   private connected = new Set<string>();
   private jidByPhone = new Map<string, string | null>();
@@ -75,8 +91,72 @@ export class FakeWhatsAppGateway implements IWhatsAppGateway {
     deviceId: string,
     jid: string,
     text: string,
-  ): Promise<SendTextResult> {
+  ): Promise<SendResult> {
+    if (this.failTypes.has("text")) throw new Error("send failed");
     this.sentTexts.push({ deviceId, jid, text });
+    return this.nextResult();
+  }
+
+  async sendImage(
+    deviceId: string,
+    jid: string,
+    payload: SendImagePayload,
+  ): Promise<SendResult> {
+    return this.recordRich(deviceId, jid, "image", payload);
+  }
+
+  async sendAudio(
+    deviceId: string,
+    jid: string,
+    payload: SendAudioPayload,
+  ): Promise<SendResult> {
+    return this.recordRich(deviceId, jid, "audio", payload);
+  }
+
+  async sendVideo(
+    deviceId: string,
+    jid: string,
+    payload: SendVideoPayload,
+  ): Promise<SendResult> {
+    return this.recordRich(deviceId, jid, "video", payload);
+  }
+
+  async sendDocument(
+    deviceId: string,
+    jid: string,
+    payload: SendDocumentPayload,
+  ): Promise<SendResult> {
+    return this.recordRich(deviceId, jid, "document", payload);
+  }
+
+  async sendPixButton(
+    deviceId: string,
+    jid: string,
+    payload: SendPixButtonPayload,
+  ): Promise<SendResult> {
+    return this.recordRich(deviceId, jid, "pix", payload);
+  }
+
+  async sendOptionList(
+    deviceId: string,
+    jid: string,
+    payload: SendOptionListPayload,
+  ): Promise<SendResult> {
+    return this.recordRich(deviceId, jid, "list", payload);
+  }
+
+  private recordRich(
+    deviceId: string,
+    jid: string,
+    type: RichMessageType,
+    payload: unknown,
+  ): SendResult {
+    if (this.failTypes.has(type)) throw new Error("send failed");
+    this.sentRich.push({ deviceId, jid, type, payload });
+    return this.nextResult();
+  }
+
+  private nextResult(): SendResult {
     this.nextWaMessageId += 1;
     return { waMessageId: `wa-${this.nextWaMessageId}` };
   }

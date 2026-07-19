@@ -10,7 +10,12 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { FiAlertTriangle, FiRefreshCw, FiShield } from "@/shared/components/icons";
+import {
+  FiAlertTriangle,
+  FiDownload,
+  FiRefreshCw,
+  FiShield,
+} from "@/shared/components/icons";
 import { AppModal } from "@/shared/components/ui/AppModal";
 import { SectionCard } from "@/shared/components/ui/SectionCard";
 import { EmptyState } from "@/shared/components/ui/EmptyState";
@@ -21,10 +26,23 @@ import { SectionCardSkeleton } from "@/shared/components/skeletons/SectionCardSk
 import { FormField } from "@/shared/components/forms/FormField";
 import { useNotify } from "@/shared/hooks/useNotify";
 import { formatDateTime, formatShortDate } from "@/shared/utils/date";
+import { downloadJson } from "@/shared/utils/download";
+import { buildPostmanCollection } from "@/modules/account/presentation/utils/postmanCollection";
 import {
   useApiToken,
   useGenerateApiToken,
 } from "@/modules/account/presentation/hooks/useApiToken";
+
+/** Absolute base of the public API (`…/api/v1`) for the Postman collection's
+ *  `{{baseUrl}}` default. `VITE_API_URL` may be relative (`/api`) — resolve it
+ *  against the current origin so the exported file targets this deployment. */
+function resolvePublicApiBaseUrl(): string {
+  const apiBase = import.meta.env.VITE_API_URL || "/api";
+  const absolute = apiBase.startsWith("http")
+    ? apiBase
+    : `${window.location.origin}${apiBase}`;
+  return `${absolute.replace(/\/$/, "")}/v1`;
+}
 
 export function ApiTokenTab() {
   const { t } = useTranslation("settings");
@@ -46,6 +64,12 @@ export function ApiTokenTab() {
       // Error surfaced by the mutation's onError toast.
     }
   }, [generate, regenerateConfirm, showSuccess, t]);
+
+  const handleDownloadCollection = useCallback(() => {
+    const collection = buildPostmanCollection(resolvePublicApiBaseUrl());
+    downloadJson("pombo-api.postman_collection.json", collection);
+    showSuccess(t("apiToken.collection.success"));
+  }, [showSuccess, t]);
 
   return (
     <Flex direction="column" gap={5}>
@@ -125,6 +149,31 @@ export function ApiTokenTab() {
             value={t("apiToken.usage.codeExample")}
             ariaLabel={t("apiToken.usage.copy")}
           />
+        </Flex>
+
+        <Flex
+          direction={{ base: "column", sm: "row" }}
+          align={{ base: "stretch", sm: "center" }}
+          justify="space-between"
+          gap={3}
+          mt={4}
+          pt={4}
+          borderTopWidth="1px"
+          borderColor="border.subtle"
+        >
+          <Text fontSize="xs" color="text.secondary">
+            {t("apiToken.collection.description")}
+          </Text>
+          <Button
+            variant="outline"
+            colorScheme="brand"
+            size="sm"
+            leftIcon={<Icon as={FiDownload} />}
+            onClick={handleDownloadCollection}
+            flexShrink={0}
+          >
+            {t("apiToken.collection.button")}
+          </Button>
         </Flex>
       </SectionCard>
 

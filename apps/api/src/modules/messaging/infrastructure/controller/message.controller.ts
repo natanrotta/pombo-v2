@@ -2,27 +2,23 @@ import { Request, Response } from "express";
 import { container } from "tsyringe";
 import {
   SendTextMessageUseCase,
+  SendRichMessageUseCase,
   GetMessageStatusUseCase,
 } from "@modules/messaging/application/use-case/messages";
+import { type RichMessageType } from "@modules/messaging/domain/value-object/message-type";
 import { BadRequestError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 
 /**
- * Messaging endpoints (send a text, poll a message's status). Both sit behind
- * the JWT auth middleware — see `message.routes.ts`. `202` = accepted + socket
- * alive, NOT delivered.
+ * Messaging endpoints (send text / image / audio / video / document / PIX button
+ * / option list, and poll a message's status). All sit behind the JWT auth
+ * middleware — see `message.routes.ts`. `202` = accepted + socket alive, NOT
+ * delivered.
  */
 export class MessageController {
   async send(req: Request, res: Response): Promise<Response> {
     const { id } = req.params as { id: string };
-    const idempotencyKey = req.header("idempotency-key");
-    if (!idempotencyKey || idempotencyKey.trim().length === 0) {
-      throw new BadRequestError(
-        "The Idempotency-Key header is required",
-        undefined,
-        ErrorCodes.BAD_REQUEST,
-      );
-    }
+    const idempotencyKey = this.requireIdempotencyKey(req);
 
     const useCase = container.resolve(SendTextMessageUseCase);
     const result = await useCase.execute({
@@ -33,6 +29,57 @@ export class MessageController {
       idempotencyKey,
     });
     return res.status(202).json({ ok: true, data: result });
+  }
+
+  sendImage = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "image");
+  sendAudio = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "audio");
+  sendVideo = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "video");
+  sendDocument = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "document");
+  sendPix = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "pix");
+  sendList = (req: Request, res: Response): Promise<Response> =>
+    this.sendRich(req, res, "list");
+
+  /** Shared rich-send path — the body was validated by the route's per-type Zod
+   *  schema, so `phone` + the type-specific payload are already well-formed. */
+  private async sendRich(
+    req: Request,
+    res: Response,
+    type: RichMessageType,
+  ): Promise<Response> {
+    const { id } = req.params as { id: string };
+    const idempotencyKey = this.requireIdempotencyKey(req);
+    const { phone, ...payload } = req.body as {
+      phone: string;
+      [key: string]: unknown;
+    };
+
+    const useCase = container.resolve(SendRichMessageUseCase);
+    const result = await useCase.execute({
+      accountId: req.auth.accountId,
+      deviceId: id,
+      phone,
+      idempotencyKey,
+      type,
+      payload,
+    });
+    return res.status(202).json({ ok: true, data: result });
+  }
+
+  private requireIdempotencyKey(req: Request): string {
+    const idempotencyKey = req.header("idempotency-key");
+    if (!idempotencyKey || idempotencyKey.trim().length === 0) {
+      throw new BadRequestError(
+        "The Idempotency-Key header is required",
+        undefined,
+        ErrorCodes.BAD_REQUEST,
+      );
+    }
+    return idempotencyKey;
   }
 
   async getStatus(req: Request, res: Response): Promise<Response> {

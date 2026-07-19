@@ -12,10 +12,26 @@
     "phone": "Número de destino",
     "phonePlaceholder": "(11) 99999-9999",
     "text": "Mensaje",
-    "textPlaceholder": "Escribe el mensaje de prueba..."
+    "textPlaceholder": "Escribe el mensaje de prueba...",
+    "media": {
+      "image": "URL de la imagen",
+      "audio": "URL del audio",
+      "video": "URL del video",
+      "document": "URL del documento"
+    },
+    "mediaPlaceholder": "https://... o base64",
+    "mediaHelper": "Indica una URL pública o el contenido en base64.",
+    "fileName": "Nombre del archivo",
+    "fileNamePlaceholder": "documento.pdf",
+    "caption": "Leyenda",
+    "captionPlaceholder": "Leyenda opcional"
   },
   "type": {
-    "text": "Texto"
+    "text": "Texto",
+    "image": "Imagen",
+    "audio": "Audio",
+    "video": "Video",
+    "document": "Documento"
   },
   "recent": {
     "title": "Enviados recientemente",
@@ -31,7 +47,8 @@
   "errors": {
     "deviceRequired": "Selecciona un dispositivo.",
     "phoneInvalid": "Ingresa un número válido.",
-    "textRequired": "Escribe un mensaje."
+    "textRequired": "Escribe un mensaje.",
+    "mediaRequired": "Indica la URL o el base64 de la media."
   },
   "actions": {
     "send": "Enviar",

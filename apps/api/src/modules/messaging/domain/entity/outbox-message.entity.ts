@@ -1,12 +1,19 @@
 import { type MessageStatus } from "../value-object/message-status";
+import { type MessageType } from "../value-object/message-type";
 
 export interface OutboxMessageProps {
   id: string;
   deviceId: string;
   idempotencyKey: string;
   toJid: string;
-  /** Needed for getMessage (a resend asks Baileys for the original text). */
-  text: string;
+  /** The content kind. `text` uses `text`; every rich kind uses `payload`. */
+  type: MessageType;
+  /** Set only for `text` messages (getMessage asks Baileys for the original
+   *  text on a resend). Null for rich types. */
+  text: string | null;
+  /** The validated send body for rich (non-text) messages; null for `text`.
+   *  The drain reads it back to replay the original send. */
+  payload: unknown | null;
   waMessageId: string | null;
   status: MessageStatus;
   failureReason: string | null;
@@ -38,8 +45,16 @@ export class OutboxMessage {
     return this.props.toJid;
   }
 
-  get text(): string {
+  get type(): MessageType {
+    return this.props.type;
+  }
+
+  get text(): string | null {
     return this.props.text;
+  }
+
+  get payload(): unknown | null {
+    return this.props.payload;
   }
 
   get waMessageId(): string | null {

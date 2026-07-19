@@ -5,8 +5,35 @@
  * `FakeWhatsAppGateway` (in `test/`) backs the specs. This is what makes 100%
  * of the use cases testable with no real socket.
  */
-export interface SendTextResult {
+export interface SendResult {
   waMessageId: string;
+}
+
+/** Kept as an alias so existing `sendText` call sites don't churn. */
+export type SendTextResult = SendResult;
+
+// ── Rich send payloads (URL or base64 strings for media) ────────────────────
+
+export interface SendImagePayload {
+  /** Image URL or base64 (optionally a data URL). */
+  image: string;
+  caption?: string;
+}
+
+export interface SendAudioPayload {
+  /** Audio URL or base64 — sent as a voice message. */
+  audio: string;
+}
+
+export interface SendVideoPayload {
+  video: string;
+  caption?: string;
+}
+
+export interface SendDocumentPayload {
+  document: string;
+  fileName?: string;
+  caption?: string;
 }
 
 export interface IWhatsAppGateway {
@@ -19,11 +46,27 @@ export interface IWhatsAppGateway {
    *  contract — read from the in-process session cache. */
   getCurrentQr(deviceId: string): string | null;
   resolveJid(deviceId: string, phone: string): Promise<string | null>;
-  sendText(
+  sendText(deviceId: string, jid: string, text: string): Promise<SendResult>;
+  sendImage(
     deviceId: string,
     jid: string,
-    text: string,
-  ): Promise<SendTextResult>;
+    payload: SendImagePayload,
+  ): Promise<SendResult>;
+  sendAudio(
+    deviceId: string,
+    jid: string,
+    payload: SendAudioPayload,
+  ): Promise<SendResult>;
+  sendVideo(
+    deviceId: string,
+    jid: string,
+    payload: SendVideoPayload,
+  ): Promise<SendResult>;
+  sendDocument(
+    deviceId: string,
+    jid: string,
+    payload: SendDocumentPayload,
+  ): Promise<SendResult>;
   /** True when the gateway is live (WHATSAPP_ENABLED). The disabled impl
    *  returns false so use cases can short-circuit with WA_GATEWAY_DISABLED. */
   isEnabled(): boolean;

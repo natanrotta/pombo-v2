@@ -1,10 +1,34 @@
-/** Only text sends exist in this version (spec §4). Kept as a union so the
- *  sandbox type selector has a real contract to grow into. */
-export type MessageType = "text";
+/** The message kinds the Sandbox can send. Mirrors the backend
+ *  `outbox_message_type` enum. */
+export type MessageType = "text" | "image" | "audio" | "video" | "document";
 
 export interface SendTextInput {
   phone: string;
   text: string;
+}
+
+export interface SendImageInput {
+  phone: string;
+  image: string;
+  caption?: string;
+}
+
+export interface SendAudioInput {
+  phone: string;
+  audio: string;
+}
+
+export interface SendVideoInput {
+  phone: string;
+  video: string;
+  caption?: string;
+}
+
+export interface SendDocumentInput {
+  phone: string;
+  document: string;
+  fileName?: string;
+  caption?: string;
 }
 
 /** The delivery lifecycle of a message, mirroring the backend
@@ -16,8 +40,8 @@ export type MessageStatus =
   | "READ"
   | "FAILED";
 
-/** Mirrors the backend `POST /devices/:id/messages` 202 body. `202` means
- *  accepted + socket alive, NOT delivered. */
+/** Mirrors the backend send 202 body. `202` means accepted + socket alive, NOT
+ *  delivered. */
 export interface SendMessageResult {
   messageId: string;
   status: MessageStatus;

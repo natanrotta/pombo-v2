@@ -4,24 +4,44 @@ import { queryKeys } from "@/core/query/queryKeys";
 import { useErrorHandler } from "@/core/query/useErrorHandler";
 import type {
   SendTextInput,
+  SendImageInput,
+  SendAudioInput,
+  SendVideoInput,
+  SendDocumentInput,
   MessageStatus,
 } from "@/modules/messaging/domain/entities/Message";
 
-interface SendTextArgs {
-  deviceId: string;
-  input: SendTextInput;
-}
+/** Discriminated by `type` so `input` narrows to the matching payload. */
+export type SendMessageArgs =
+  | { deviceId: string; type: "text"; input: SendTextInput }
+  | { deviceId: string; type: "image"; input: SendImageInput }
+  | { deviceId: string; type: "audio"; input: SendAudioInput }
+  | { deviceId: string; type: "video"; input: SendVideoInput }
+  | { deviceId: string; type: "document"; input: SendDocumentInput };
 
 /**
- * Fire-and-report send used by the Sandbox. There is nothing to invalidate —
- * the sandbox holds the result only in memory (spec §6). Errors surface via the
- * shared error toast.
+ * Fire-and-report send used by the Sandbox. Dispatches to the matching
+ * repository method by `type`. There is nothing to invalidate — the sandbox
+ * holds the result only in memory. Errors surface via the shared error toast.
  */
 export function useSendMessage() {
   const { handleError } = useErrorHandler();
   return useMutation({
-    mutationFn: ({ deviceId, input }: SendTextArgs) =>
-      repositories.messaging.sendText(deviceId, input),
+    mutationFn: (args: SendMessageArgs) => {
+      const repo = repositories.messaging;
+      switch (args.type) {
+        case "text":
+          return repo.sendText(args.deviceId, args.input);
+        case "image":
+          return repo.sendImage(args.deviceId, args.input);
+        case "audio":
+          return repo.sendAudio(args.deviceId, args.input);
+        case "video":
+          return repo.sendVideo(args.deviceId, args.input);
+        case "document":
+          return repo.sendDocument(args.deviceId, args.input);
+      }
+    },
     onError: (error) => handleError(error),
   });
 }

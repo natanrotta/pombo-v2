@@ -104,7 +104,7 @@ If any auditor finding is Critical or High, dispatch the subagent again with `Mo
 
 ## Step 4 — Smoke run (when feasible)
 
-If the dev server is already up on `:3000`, run the new specs once:
+If the dev server is already up on `:4000`, run the new specs once:
 
 ```bash
 cd apps/web && npx playwright test e2e/tests/<module>/ --reporter=line --workers=1

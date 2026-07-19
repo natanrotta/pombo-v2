@@ -6,6 +6,10 @@ import { apiTokenAuthMiddleware } from "../middleware/api-token-auth.middleware"
 import { apiTokenRateLimit } from "../middleware/api-token-rate-limit.middleware";
 import {
   SendTextPublicDTOSchema,
+  SendImagePublicDTOSchema,
+  SendAudioPublicDTOSchema,
+  SendVideoPublicDTOSchema,
+  SendDocumentPublicDTOSchema,
   PublicDeviceIdParamSchema,
 } from "@modules/public-api/application/dto/public-message.dto";
 
@@ -31,6 +35,39 @@ publicApiRoutes.post(
     body: SendTextPublicDTOSchema,
   }),
   asyncHandler(publicApiController.sendText.bind(publicApiController)),
+);
+
+publicApiRoutes.post(
+  "/devices/:deviceId/send-image",
+  validateRequest({
+    params: PublicDeviceIdParamSchema,
+    body: SendImagePublicDTOSchema,
+  }),
+  asyncHandler(publicApiController.sendImage),
+);
+publicApiRoutes.post(
+  "/devices/:deviceId/send-audio",
+  validateRequest({
+    params: PublicDeviceIdParamSchema,
+    body: SendAudioPublicDTOSchema,
+  }),
+  asyncHandler(publicApiController.sendAudio),
+);
+publicApiRoutes.post(
+  "/devices/:deviceId/send-video",
+  validateRequest({
+    params: PublicDeviceIdParamSchema,
+    body: SendVideoPublicDTOSchema,
+  }),
+  asyncHandler(publicApiController.sendVideo),
+);
+publicApiRoutes.post(
+  "/devices/:deviceId/send-document",
+  validateRequest({
+    params: PublicDeviceIdParamSchema,
+    body: SendDocumentPublicDTOSchema,
+  }),
+  asyncHandler(publicApiController.sendDocument),
 );
 
 export { publicApiRoutes };

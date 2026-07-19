@@ -72,7 +72,7 @@ export class RequestPasswordResetUseCase {
       userName: user.name,
       resetUrl,
       ttlMinutes: this.config.PASSWORD_RESET_TOKEN_TTL_MINUTES,
-      logoUrl: `${frontendBaseUrl}/pombo-icon.png`,
+      logoUrl: `${frontendBaseUrl}/pombo-icon.svg`,
       locale: user.language,
     });
 

@@ -31,6 +31,7 @@ import { GoogleSignInButton } from "@/modules/auth/presentation/components/Googl
 import { LanguageSelector } from "@/shared/components/ui/LanguageSelector";
 import { buildRegisterSchema, type RegisterFormValues } from "@/modules/auth/domain/schemas";
 import { TRANSITION_PAGE_SWAP, TRANSITION_SLOW } from "@/shared/constants/animation";
+import pomboIcon from "@assets/pombo-icon.svg";
 
 const MotionBox = motion(Box);
 const MotionImage = motion(Image);
@@ -106,7 +107,7 @@ export function RegisterPage() {
     >
       <Stack spacing={7} position="relative" maxW="440px" w="full">
         <MotionImage
-          src="/pombo-icon.png"
+          src={pomboIcon}
           alt={tc("platform.name")}
           w={24}
           h={24}
@@ -154,7 +155,7 @@ export function RegisterPage() {
       position="relative"
     >
       <Image
-        src="/pombo-icon.png"
+        src={pomboIcon}
         alt={tc("platform.name")}
         w={16}
         h={16}

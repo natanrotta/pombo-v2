@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "user_status" AS ENUM ('ACTIVE', 'PENDING');
 
@@ -6,6 +9,9 @@ CREATE TYPE "device_status" AS ENUM ('DISCONNECTED', 'CONNECTING', 'QR_PENDING',
 
 -- CreateEnum
 CREATE TYPE "message_status" AS ENUM ('PENDING', 'SERVER_ACK', 'DELIVERY_ACK', 'READ', 'FAILED');
+
+-- CreateEnum
+CREATE TYPE "outbox_message_type" AS ENUM ('text', 'image', 'audio', 'video', 'document');
 
 -- CreateTable
 CREATE TABLE "account" (
@@ -115,7 +121,9 @@ CREATE TABLE "outbox_message" (
     "device_id" TEXT NOT NULL,
     "idempotency_key" TEXT NOT NULL,
     "to_jid" TEXT NOT NULL,
-    "text" TEXT NOT NULL,
+    "type" "outbox_message_type" NOT NULL DEFAULT 'text',
+    "text" TEXT,
+    "payload" JSONB,
     "wa_message_id" TEXT,
     "status" "message_status" NOT NULL DEFAULT 'PENDING',
     "failure_reason" TEXT,
@@ -194,3 +202,12 @@ ALTER TABLE "auth_key" ADD CONSTRAINT "auth_key_device_id_fkey" FOREIGN KEY ("de
 
 -- AddForeignKey
 ALTER TABLE "outbox_message" ADD CONSTRAINT "outbox_message_device_id_fkey" FOREIGN KEY ("device_id") REFERENCES "device"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Polymorphic-column invariant (not modeled in schema.prisma): a `text` message
+-- carries `text` and no `payload`; every rich type carries `payload` and no
+-- `text`. Structural backstop so a bad write path can't queue a corrupt row.
+ALTER TABLE "outbox_message" ADD CONSTRAINT "outbox_message_text_xor_payload_chk" CHECK (
+  ("type" = 'text' AND "text" IS NOT NULL AND "payload" IS NULL)
+  OR ("type" <> 'text' AND "payload" IS NOT NULL AND "text" IS NULL)
+);
+

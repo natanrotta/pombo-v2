@@ -37,7 +37,7 @@ services:
       dockerfile: apps/api/Dockerfile
     container_name: pombo-api
     ports:
-      - "3343:3343"
+      - "4444:4444"
     depends_on:
       db:
         condition: service_healthy

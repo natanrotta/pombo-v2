@@ -5,6 +5,7 @@ import {
   CreateOutboxData,
 } from "@modules/messaging/domain/repository/outbox-repository.interface";
 import { type MessageStatus } from "@modules/messaging/domain/value-object/message-status";
+import { type MessageType } from "@modules/messaging/domain/value-object/message-type";
 import { prisma } from "@core/database/prisma/prisma-client";
 import { mapPrismaError } from "@core/database/prisma/prisma-error-mapper";
 import { Prisma } from "@generated/prisma/client";
@@ -20,7 +21,9 @@ export class PrismaOutboxRepository implements IOutboxRepository {
       deviceId: row.device_id,
       idempotencyKey: row.idempotency_key,
       toJid: row.to_jid,
+      type: row.type as MessageType,
       text: row.text,
+      payload: row.payload as unknown,
       waMessageId: row.wa_message_id,
       status: row.status as MessageStatus,
       failureReason: row.failure_reason,
@@ -83,7 +86,12 @@ export class PrismaOutboxRepository implements IOutboxRepository {
           device_id: data.deviceId,
           idempotency_key: data.idempotencyKey,
           to_jid: data.toJid,
-          text: data.text,
+          type: data.type ?? "text",
+          text: data.text ?? null,
+          payload:
+            data.payload == null
+              ? Prisma.DbNull
+              : (data.payload as Prisma.InputJsonValue),
           expires_at: data.expiresAt,
         },
       });

@@ -48,7 +48,7 @@ export default defineConfig({
   webServer: {
     // Vite reads VITE_PORT + VITE_API_PROXY_TARGET to serve the E2E web on
     // :3001 proxying to the E2E API on :3334 — fully isolated from any dev
-    // server you might have running on :3000/:3333. Isolation includes the dep
+    // server you might have running on :4000/:4444. Isolation includes the dep
     // cache: vite.config.ts switches this instance to node_modules/.vite-e2e,
     // so its fresh optimizer run never clobbers the dev server's .vite/deps.
     command: `VITE_PORT=${E2E_WEB_PORT} VITE_API_PROXY_TARGET=${E2E_API_PROXY_TARGET} yarn dev`,

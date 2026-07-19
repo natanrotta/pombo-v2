@@ -48,6 +48,7 @@ import { LanguageSelector } from "@/shared/components/ui/LanguageSelector";
 import { ColorModeToggle } from "@/shared/components/ui/ColorModeToggle";
 import { buildSignInSchema, type SignInFormValues } from "@/modules/auth/domain/schemas";
 import { TRANSITION_PAGE_SWAP, TRANSITION_SLOW } from "@/shared/constants/animation";
+import pomboIcon from "@assets/pombo-icon.svg";
 
 const MotionBox = motion(Box);
 const MotionImage = motion(Image);
@@ -107,7 +108,7 @@ export function SignInPage() {
     >
       <Stack spacing={7} position="relative" maxW="440px" w="full">
         <MotionImage
-          src="/pombo-icon.png"
+          src={pomboIcon}
           alt={tc("platform.name")}
           w={24}
           h={24}
@@ -155,7 +156,7 @@ export function SignInPage() {
       position="relative"
     >
       <Image
-        src="/pombo-icon.png"
+        src={pomboIcon}
         alt={tc("platform.name")}
         w={16}
         h={16}

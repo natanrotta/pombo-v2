@@ -8,6 +8,10 @@ import {
 } from "@core/http/middlewares";
 import {
   SendMessageDTOSchema,
+  SendImageDTOSchema,
+  SendAudioDTOSchema,
+  SendVideoDTOSchema,
+  SendDocumentDTOSchema,
   SendMessageParamSchema,
   MessageIdParamSchema,
 } from "@modules/messaging/application/dto/message.dto";
@@ -27,6 +31,32 @@ messageRoutes.post(
     body: SendMessageDTOSchema,
   }),
   asyncHandler(messageController.send.bind(messageController)),
+);
+
+// Rich sends — one route per type, each with its own body schema. Same params +
+// Idempotency-Key contract as the text send above.
+messageRoutes.post(
+  "/devices/:id/messages/image",
+  validateRequest({ params: SendMessageParamSchema, body: SendImageDTOSchema }),
+  asyncHandler(messageController.sendImage),
+);
+messageRoutes.post(
+  "/devices/:id/messages/audio",
+  validateRequest({ params: SendMessageParamSchema, body: SendAudioDTOSchema }),
+  asyncHandler(messageController.sendAudio),
+);
+messageRoutes.post(
+  "/devices/:id/messages/video",
+  validateRequest({ params: SendMessageParamSchema, body: SendVideoDTOSchema }),
+  asyncHandler(messageController.sendVideo),
+);
+messageRoutes.post(
+  "/devices/:id/messages/document",
+  validateRequest({
+    params: SendMessageParamSchema,
+    body: SendDocumentDTOSchema,
+  }),
+  asyncHandler(messageController.sendDocument),
 );
 
 messageRoutes.get(

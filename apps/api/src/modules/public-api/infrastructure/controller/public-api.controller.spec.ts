@@ -104,6 +104,76 @@ describe("PublicApiController", () => {
     expect(call.idempotencyKey.length).toBeGreaterThan(0);
   });
 
+  it("sendImage forwards the image payload with the image type and returns 202", async () => {
+    mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
+    const { req, res, status } = mockReqRes({ params: { deviceId: "d1" } });
+    req.__setHeader("Idempotency-Key", "key-1");
+    req.body = { phone: "5548999999999", image: "https://ex.com/a.png" };
+
+    await controller.sendImage(req, res);
+
+    expect(mockExecute).toHaveBeenCalledWith({
+      accountId: "acc-1",
+      deviceId: "d1",
+      phone: "5548999999999",
+      idempotencyKey: "key-1",
+      type: "image",
+      payload: { image: "https://ex.com/a.png" },
+    });
+    expect(status).toHaveBeenCalledWith(202);
+  });
+
+  it.each([
+    ["audio", { audio: "https://ex.com/a.ogg" }],
+    ["video", { video: "https://ex.com/a.mp4" }],
+    ["document", { document: "https://ex.com/a.pdf" }],
+  ] as const)(
+    "send%s reuses the rich use case with the matching type → 202",
+    async (label, body) => {
+      mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
+      const { req, res, status } = mockReqRes({ params: { deviceId: "d1" } });
+      req.__setHeader("Idempotency-Key", "key-1");
+      req.body = { phone: "5548999999999", ...body };
+      const handlers = {
+        audio: controller.sendAudio,
+        video: controller.sendVideo,
+        document: controller.sendDocument,
+      };
+
+      await handlers[label](req, res);
+
+      expect(mockExecute).toHaveBeenCalledWith({
+        accountId: "acc-1",
+        deviceId: "d1",
+        phone: "5548999999999",
+        idempotencyKey: "key-1",
+        type: label,
+        payload: body,
+      });
+      expect(status).toHaveBeenCalledWith(202);
+    },
+  );
+
+  it("sendImage generates an Idempotency-Key when the header is absent", async () => {
+    mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
+    const { req, res } = mockReqRes({ params: { deviceId: "d1" } });
+    req.body = {
+      phone: "5548999999999",
+      image: "https://ex.com/a.png",
+    };
+
+    await controller.sendImage(req, res);
+
+    const call = mockExecute.mock.calls[0]![0] as {
+      idempotencyKey: string;
+      type: string;
+      payload: unknown;
+    };
+    expect(call.idempotencyKey.length).toBeGreaterThan(0);
+    expect(call.type).toBe("image");
+    expect(call.payload).toEqual({ image: "https://ex.com/a.png" });
+  });
+
   it("fails closed with API_TOKEN_MISSING when apiAuth is absent", async () => {
     const { req, res } = mockReqRes({
       apiAuth: undefined,

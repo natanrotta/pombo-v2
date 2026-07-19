@@ -1,5 +1,8 @@
 import {
   SendTextPublicDTOSchema,
+  SendImagePublicDTOSchema,
+  SendAudioPublicDTOSchema,
+  SendVideoPublicDTOSchema,
   PublicDeviceIdParamSchema,
 } from "./public-message.dto";
 
@@ -38,6 +41,50 @@ describe("public message DTOs", () => {
           phone: "5548999999999",
           message: "x".repeat(4097),
         }),
+      ).toThrow();
+    });
+  });
+
+  describe("rich public DTOs", () => {
+    it("SendImagePublicDTOSchema enforces E.164 phone and requires image", () => {
+      expect(
+        SendImagePublicDTOSchema.parse({
+          phone: "5548999999999",
+          image: "https://ex.com/a.png",
+        }).image,
+      ).toBe("https://ex.com/a.png");
+      expect(() =>
+        SendImagePublicDTOSchema.parse({ phone: "abc", image: "x" }),
+      ).toThrow();
+      expect(() =>
+        SendImagePublicDTOSchema.parse({ phone: "5548999999999" }),
+      ).toThrow();
+    });
+
+    it("SendAudioPublicDTOSchema requires audio and enforces E.164 phone", () => {
+      expect(
+        SendAudioPublicDTOSchema.parse({
+          phone: "5548999999999",
+          audio: "https://ex.com/a.ogg",
+        }).audio,
+      ).toBe("https://ex.com/a.ogg");
+      expect(() =>
+        SendAudioPublicDTOSchema.parse({ phone: "5548999999999" }),
+      ).toThrow();
+      expect(() =>
+        SendAudioPublicDTOSchema.parse({ phone: "abc", audio: "x" }),
+      ).toThrow();
+    });
+
+    it("SendVideoPublicDTOSchema requires video", () => {
+      expect(
+        SendVideoPublicDTOSchema.parse({
+          phone: "5548999999999",
+          video: "https://ex.com/a.mp4",
+        }).video,
+      ).toBe("https://ex.com/a.mp4");
+      expect(() =>
+        SendVideoPublicDTOSchema.parse({ phone: "5548999999999" }),
       ).toThrow();
     });
   });

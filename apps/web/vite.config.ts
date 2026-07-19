@@ -8,11 +8,11 @@ const enableHttps = process.env.VITE_HTTPS === "true";
 // `VITE_PORT` + `VITE_API_PROXY_TARGET` let the Playwright webServer (see
 // playwright.config.ts, orchestrated by `scripts/e2e-run.ts`) spin a second
 // Vite on port 3001 proxying to the E2E API on :3334 — without disturbing the
-// dev pair already running on :3000/:3343. `VITE_API_PROXY_TARGET` doubles as
+// dev pair already running on :4000/:4444. `VITE_API_PROXY_TARGET` doubles as
 // the "this is the E2E instance" signal below.
 const isE2eInstance = Boolean(process.env.VITE_API_PROXY_TARGET);
-const vitePort = Number(process.env.VITE_PORT ?? 3000);
-const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? "http://localhost:3343";
+const vitePort = Number(process.env.VITE_PORT ?? 4000);
+const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? "http://localhost:4444";
 
 // Build-time version stamp surfaced in the sidebar (see src/shared/appVersion.ts).
 // Resolution order: explicit VITE_APP_VERSION → Cloudflare Pages' CF_PAGES_COMMIT_SHA
@@ -73,7 +73,7 @@ export default defineConfig(({ command }) => ({
   },
   // The E2E Vite must NOT share the dev server's dep cache: its fresh optimizer
   // run (Playwright uses `reuseExistingServer: false`) swaps
-  // node_modules/.vite/deps under the live :3000 server, stranding open tabs on
+  // node_modules/.vite/deps under the live :4000 server, stranding open tabs on
   // chunk files that no longer exist. Same-name isolation keeps both healthy.
   ...(isE2eInstance ? { cacheDir: "node_modules/.vite-e2e" } : {}),
   server: {
@@ -99,6 +99,7 @@ export default defineConfig(({ command }) => ({
       "@/core": fileURLToPath(new URL("./src/core", import.meta.url)),
       "@/shared": fileURLToPath(new URL("./src/shared", import.meta.url)),
       "@/modules": fileURLToPath(new URL("./src/modules", import.meta.url)),
+      "@assets": fileURLToPath(new URL("./assets", import.meta.url)),
     },
   },
   // shared-types ships as CommonJS via `__exportStar(require(...))` chains;

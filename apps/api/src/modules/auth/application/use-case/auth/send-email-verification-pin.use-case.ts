@@ -107,7 +107,7 @@ export class SendEmailVerificationPinUseCase {
       userName: user.name,
       pin,
       ttlMinutes: this.config.EMAIL_VERIFICATION_PIN_TTL_MINUTES,
-      logoUrl: `${this.config.FRONTEND_URL.replace(/\/$/, "")}/pombo-icon.png`,
+      logoUrl: `${this.config.FRONTEND_URL.replace(/\/$/, "")}/pombo-icon.svg`,
       locale: user.language,
     });
 

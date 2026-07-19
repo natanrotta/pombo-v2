@@ -31,6 +31,7 @@ import { AppVersion } from "@/shared/components/layout/AppVersion";
 import { useAuth } from "@/modules/auth";
 import { ROUTE_PATHS } from "@/app/router/RoutePaths";
 import { useSidebar } from "@/shared/contexts/useSidebar";
+import pomboIcon from "@assets/pombo-icon.svg";
 
 interface SidebarNavProps {
   forceExpanded?: boolean;
@@ -63,7 +64,7 @@ export function SidebarNav({ forceExpanded, onNavigate }: SidebarNavProps) {
       {/* Logo */}
       <Flex align="center" gap={3} px={1} justify={isCollapsed ? "center" : "flex-start"}>
         <Image
-          src="/pombo-icon.png"
+          src={pomboIcon}
           alt={t("platform.name", "Pombo")}
           w={9}
           h={9}

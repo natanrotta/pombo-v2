@@ -72,6 +72,70 @@ describe("MessageController", () => {
     expect(mockExecute).not.toHaveBeenCalled();
   });
 
+  it("sendImage maps body→input (payload = body minus phone) with the image type → 202", async () => {
+    mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
+    const { req, res, status, json } = mockReqRes({ params: { id: "d1" } });
+    req.__setHeader("Idempotency-Key", "key-1");
+    req.body = { phone: "5548", image: "https://ex.com/a.png", caption: "hi" };
+
+    await controller.sendImage(req, res);
+
+    expect(mockExecute).toHaveBeenCalledWith({
+      accountId: "acc-1",
+      deviceId: "d1",
+      phone: "5548",
+      idempotencyKey: "key-1",
+      type: "image",
+      payload: { image: "https://ex.com/a.png", caption: "hi" },
+    });
+    expect(status).toHaveBeenCalledWith(202);
+    expect(json).toHaveBeenCalledWith({
+      ok: true,
+      data: { messageId: "m1", status: "PENDING" },
+    });
+  });
+
+  it.each([
+    ["audio", { audio: "https://ex.com/a.ogg" }],
+    ["video", { video: "https://ex.com/a.mp4" }],
+    ["document", { document: "https://ex.com/a.pdf", fileName: "a.pdf" }],
+  ] as const)(
+    "send%s maps body→input with the matching type → 202",
+    async (label, body) => {
+      mockExecute.mockResolvedValue({ messageId: "m1", status: "PENDING" });
+      const { req, res, status } = mockReqRes({ params: { id: "d1" } });
+      req.__setHeader("Idempotency-Key", "key-1");
+      req.body = { phone: "5548", ...body };
+      const handlers = {
+        audio: controller.sendAudio,
+        video: controller.sendVideo,
+        document: controller.sendDocument,
+      };
+
+      await handlers[label](req, res);
+
+      expect(mockExecute).toHaveBeenCalledWith({
+        accountId: "acc-1",
+        deviceId: "d1",
+        phone: "5548",
+        idempotencyKey: "key-1",
+        type: label,
+        payload: body,
+      });
+      expect(status).toHaveBeenCalledWith(202);
+    },
+  );
+
+  it("sendImage throws BadRequest when the Idempotency-Key header is missing", async () => {
+    const { req, res } = mockReqRes({ params: { id: "d1" } });
+    req.body = { phone: "5548", image: "https://ex.com/a.png" };
+
+    await expect(controller.sendImage(req, res)).rejects.toBeInstanceOf(
+      BadRequestError,
+    );
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
   it("getStatus passes the id → 200", async () => {
     mockExecute.mockResolvedValue({ messageId: "m1", status: "READ" });
     const { req, res, status } = mockReqRes({ params: { id: "m1" } });

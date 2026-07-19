@@ -7,7 +7,13 @@ import type { WASocket } from "@whiskeysockets/baileys";
 import type { IDomainEventBus } from "@shared/provider/domain-event-bus.interface";
 import type { ILoggerProvider } from "@shared/provider/logger-provider.interface";
 import type { DomainMessageStatus } from "@shared/provider/domain-event-bus.interface";
-import { SendTextResult } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
+import {
+  SendResult,
+  SendImagePayload,
+  SendAudioPayload,
+  SendVideoPayload,
+  SendDocumentPayload,
+} from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import { ServiceUnavailableError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
 import { makePrismaAuthState } from "./prisma-auth-state";
@@ -35,11 +41,27 @@ export interface SessionManager {
   isConnected(deviceId: string): boolean;
   getCurrentQr(deviceId: string): string | null;
   resolveJid(deviceId: string, phone: string): Promise<string | null>;
-  sendText(
+  sendText(deviceId: string, jid: string, text: string): Promise<SendResult>;
+  sendImage(
     deviceId: string,
     jid: string,
-    text: string,
-  ): Promise<SendTextResult>;
+    payload: SendImagePayload,
+  ): Promise<SendResult>;
+  sendAudio(
+    deviceId: string,
+    jid: string,
+    payload: SendAudioPayload,
+  ): Promise<SendResult>;
+  sendVideo(
+    deviceId: string,
+    jid: string,
+    payload: SendVideoPayload,
+  ): Promise<SendResult>;
+  sendDocument(
+    deviceId: string,
+    jid: string,
+    payload: SendDocumentPayload,
+  ): Promise<SendResult>;
   closeAll(): void;
 }
 
@@ -77,6 +99,51 @@ const WA_VERSION_TTL_MS = 6 * 60 * 60 * 1000;
 // 515) before falling back to jittered backoff — a safety valve so a broken
 // session can't spin in a tight 0-delay reconnect loop.
 const MAX_IMMEDIATE_RECONNECTS = 5;
+
+// ── Rich send helpers ───────────────────────────────────────────────────────
+
+// The socket-readiness gate (openDevices, not just sockets: a socket mid-
+// handshake is in the map but not yet open) shared by every send method.
+const requireOpenSocket = (
+  sockets: Map<string, WASocket>,
+  openDevices: Set<string>,
+  deviceId: string,
+): WASocket => {
+  const sock = sockets.get(deviceId);
+  if (!sock || !openDevices.has(deviceId)) {
+    throw new ServiceUnavailableError(
+      "The device is not connected",
+      undefined,
+      ErrorCodes.DEVICE_OFFLINE,
+    );
+  }
+  return sock;
+};
+
+const extractWaMessageId = (
+  sent: Awaited<ReturnType<WASocket["sendMessage"]>>,
+): string => {
+  const waMessageId = sent?.key.id;
+  if (!waMessageId) {
+    throw new ServiceUnavailableError(
+      "The WhatsApp send produced no message id",
+      undefined,
+      ErrorCodes.DEVICE_OFFLINE,
+    );
+  }
+  return waMessageId;
+};
+
+// A media field is a URL or base64 (optionally a data URL). Baileys takes a
+// `{ url }` for remote media, or a Buffer for inline bytes.
+const HTTP_URL = /^https?:\/\//i;
+const toWaMedia = (value: string): { url: string } | Buffer => {
+  if (HTTP_URL.test(value)) return { url: value };
+  const base64 = value.includes(",")
+    ? value.slice(value.indexOf(",") + 1)
+    : value;
+  return Buffer.from(base64, "base64");
+};
 
 // Owner of everything alive: the Map<deviceId, socket>. Translates the Baileys
 // `sock.ev` stream into DomainEvents on the bus and carries NO business rule
@@ -353,26 +420,47 @@ export const makeSessionManager = (
     },
 
     async sendText(deviceId, jid, text) {
-      const sock = sockets.get(deviceId);
-      // openDevices (not just sockets) is the readiness gate: a socket that is
-      // mid-handshake is in the map but not yet open.
-      if (!sock || !openDevices.has(deviceId)) {
-        throw new ServiceUnavailableError(
-          "The device is not connected",
-          undefined,
-          ErrorCodes.DEVICE_OFFLINE,
-        );
-      }
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
       const sent = await sock.sendMessage(jid, { text });
-      const waMessageId = sent?.key.id;
-      if (!waMessageId) {
-        throw new ServiceUnavailableError(
-          "The WhatsApp send produced no message id",
-          undefined,
-          ErrorCodes.DEVICE_OFFLINE,
-        );
-      }
-      return { waMessageId };
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendImage(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        image: toWaMedia(payload.image),
+        ...(payload.caption ? { caption: payload.caption } : {}),
+      });
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendAudio(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        audio: toWaMedia(payload.audio),
+        mimetype: "audio/mp4",
+        ptt: true,
+      });
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendVideo(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        video: toWaMedia(payload.video),
+        ...(payload.caption ? { caption: payload.caption } : {}),
+      });
+      return { waMessageId: extractWaMessageId(sent) };
+    },
+
+    async sendDocument(deviceId, jid, payload) {
+      const sock = requireOpenSocket(sockets, openDevices, deviceId);
+      const sent = await sock.sendMessage(jid, {
+        document: toWaMedia(payload.document),
+        fileName: payload.fileName ?? "document",
+        ...(payload.caption ? { caption: payload.caption } : {}),
+      });
+      return { waMessageId: extractWaMessageId(sent) };
     },
 
     // Graceful shutdown: close() every socket, NEVER logout() — logout wipes the

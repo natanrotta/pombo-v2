@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import {
   IWhatsAppGateway,
-  SendTextResult,
+  SendResult,
 } from "@modules/devices/domain/provider/whatsapp-gateway.interface";
 import { ConflictError, ServiceUnavailableError } from "@shared/error";
 import { ErrorCodes } from "@shared/error/error-codes";
@@ -49,15 +49,31 @@ export class DisabledWhatsAppGateway implements IWhatsAppGateway {
   }
 
   async resolveJid(): Promise<string | null> {
-    throw new ServiceUnavailableError(
-      "The WhatsApp integration is disabled in this environment",
-      undefined,
-      ErrorCodes.WA_GATEWAY_DISABLED,
-    );
+    throw this.disabled();
   }
 
-  async sendText(): Promise<SendTextResult> {
-    throw new ServiceUnavailableError(
+  async sendText(): Promise<SendResult> {
+    throw this.disabled();
+  }
+
+  async sendImage(): Promise<SendResult> {
+    throw this.disabled();
+  }
+
+  async sendAudio(): Promise<SendResult> {
+    throw this.disabled();
+  }
+
+  async sendVideo(): Promise<SendResult> {
+    throw this.disabled();
+  }
+
+  async sendDocument(): Promise<SendResult> {
+    throw this.disabled();
+  }
+
+  private disabled(): ServiceUnavailableError {
+    return new ServiceUnavailableError(
       "The WhatsApp integration is disabled in this environment",
       undefined,
       ErrorCodes.WA_GATEWAY_DISABLED,
